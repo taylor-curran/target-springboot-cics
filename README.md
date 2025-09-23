@@ -69,8 +69,9 @@ java-migration/
 
 ### **Quick Start**
 ```bash
-# Clone and navigate to project
-cd java-migration
+# Clone the repository
+git clone https://github.com/taylor-curran/target-springboot-cics.git
+cd target-springboot-cics
 
 # Build the application
 mvn clean compile
@@ -84,23 +85,23 @@ mvn spring-boot:run
 
 ### **Application Access**
 - **Base URL**: http://localhost:8085
-- **Health Check**: http://localhost:8085/status
-- **API Documentation**: http://localhost:8085/swagger-ui.html
+- **Health Check**: http://localhost:8085/api/status
+- **API Documentation**: http://localhost:8085/swagger-ui/index.html
 
 ## 🔗 API Endpoints
 
 ### **COBOL Program Endpoints**
 ```bash
 # Company Information (GETCOMPY migration)
-GET /api/company-name
-Response: {"companyName": "CBSA", "timestamp": "2024-01-01T12:00:00"}
+GET /api/utility/company-name
+Response: {"companyName": "CICS Bank Sample Application"}
 
 # Sort Code Information (GETSCODE migration)  
-GET /api/sort-code
-Response: {"sortCode": "123456", "timestamp": "2024-01-01T12:00:00"}
+GET /api/utility/sortcode
+Response: {"sortCode": "987654"}
 
 # System Status
-GET /status
+GET /api/status
 Response: {"status": "UP", "database": "connected", "tables": {...}}
 ```
 
