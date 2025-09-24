@@ -82,14 +82,13 @@ CREATE INDEX IF NOT EXISTS idx_transaction_date_amount ON bank_transaction(trans
 -- Index to speed up logically_deleted flag searches
 CREATE INDEX IF NOT EXISTS idx_transaction_deleted ON bank_transaction(logically_deleted);
 
--- Index for transfer transactions
-CREATE INDEX IF NOT EXISTS idx_transaction_transfer ON bank_transaction(target_sort_code, target_account_number) 
-    WHERE target_sort_code IS NOT NULL;
+-- Index for transfer transactions (H2 compatible - without WHERE clause)
+CREATE INDEX IF NOT EXISTS idx_transaction_transfer ON bank_transaction(target_sort_code, target_account_number);
 
 -- Application error table - migrated from COBOL ABNDPROC program
 -- Stores application errors and exceptions for centralized monitoring
 CREATE TABLE IF NOT EXISTS application_error (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     timestamp TEXT NOT NULL,
     application_id TEXT,
     transaction_id TEXT,
