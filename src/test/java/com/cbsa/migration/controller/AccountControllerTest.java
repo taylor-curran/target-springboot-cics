@@ -319,4 +319,43 @@ class AccountControllerTest {
             .andExpect(jsonPath("$[1].accountNumber", is("12345679")))
             .andExpect(jsonPath("$[1].accountType", is("SAVINGS")));
     }
+
+    @Test
+    void testGetAccountDetails_accountNotFound_returnsNotFound() throws Exception {
+        // Given
+        when(accountService.getAccountDetails("987654", "12345678"))
+            .thenThrow(new IllegalArgumentException("Account not found"));
+
+        // When & Then
+        mockMvc.perform(get("/api/accounts/987654/12345678"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testProcessOverdraft_zeroAmount_returnsBadRequest() throws Exception {
+        // Given
+        Map<String, BigDecimal> request = new HashMap<>();
+        request.put("amount", BigDecimal.ZERO);
+
+        when(accountService.processOverdraft("987654", "12345678", BigDecimal.ZERO))
+            .thenThrow(new IllegalArgumentException("Overdraft amount must be positive"));
+
+        // When & Then
+        mockMvc.perform(post("/api/accounts/987654/12345678/overdraft")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetAccountsByCustomer_emptyList_returnsOkResponse() throws Exception {
+        // Given
+        when(accountService.getAccountsByCustomer(1234567890L)).thenReturn(Arrays.asList());
+
+        // When & Then
+        mockMvc.perform(get("/api/accounts/customer/1234567890"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$", hasSize(0)));
+    }
 }

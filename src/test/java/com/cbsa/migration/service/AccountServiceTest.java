@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -349,5 +350,331 @@ class AccountServiceTest {
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getAccountNumber()).isEqualTo("12345678");
         assertThat(result.get(1).getAccountNumber()).isEqualTo("12345679");
+    }
+
+    @Test
+    @DisplayName("Should use default interest rate for SAVINGS account when not provided")
+    void shouldUseDefaultInterestRateForSavingsAccount() {
+        // Given
+        AccountRequestDto request = AccountRequestDto.builder()
+                .accountType("SAVINGS")
+                .customerNumber(1234567890L)
+                .sortCode("987654")
+                .initialDeposit(new BigDecimal("1000.00"))
+                .build();
+
+        Customer customer = new Customer();
+        Control control = new Control();
+        control.setLastAccountNumber(12345678);
+        control.setAccountCount(10);
+
+        Account mockAccount = Account.builder()
+                .eyeCatcher("ACCT")
+                .customerNumber(1234567890L)
+                .sortCode("987654")
+                .accountNumber("12345679")
+                .accountType("SAVINGS")
+                .interestRate(null)
+                .overdraftLimit(0)
+                .availableBalance(new BigDecimal("1000.00"))
+                .actualBalance(new BigDecimal("1000.00"))
+                .openedDate(LocalDate.now())
+                .build();
+
+        when(customerRepository.findById("987654", 1234567890L)).thenReturn(Optional.of(customer));
+        when(controlRepository.initializeControlRecord()).thenReturn(control);
+        when(dtoMapper.toAccount(request)).thenReturn(mockAccount);
+        when(accountRepository.save(any(Account.class))).thenReturn(mockAccount);
+        when(dtoMapper.toAccountResponseDto(mockAccount)).thenReturn(AccountResponseDto.builder().build());
+
+        // When
+        accountService.createAccount(request);
+
+        // Then
+        verify(accountRepository).save(argThat(account -> 
+            account.getInterestRate().compareTo(new BigDecimal("2.50")) == 0));
+    }
+
+    @Test
+    @DisplayName("Should use default interest rate for CURRENT account when not provided")
+    void shouldUseDefaultInterestRateForCurrentAccount() {
+        // Given
+        AccountRequestDto request = AccountRequestDto.builder()
+                .accountType("CURRENT")
+                .customerNumber(1234567890L)
+                .sortCode("987654")
+                .initialDeposit(new BigDecimal("500.00"))
+                .build();
+
+        Customer customer = new Customer();
+        Control control = new Control();
+        control.setLastAccountNumber(12345678);
+        control.setAccountCount(10);
+
+        Account mockAccount = Account.builder()
+                .eyeCatcher("ACCT")
+                .customerNumber(1234567890L)
+                .sortCode("987654")
+                .accountNumber("12345679")
+                .accountType("CURRENT")
+                .interestRate(new BigDecimal("0.10"))
+                .overdraftLimit(0)
+                .availableBalance(new BigDecimal("500.00"))
+                .actualBalance(new BigDecimal("500.00"))
+                .openedDate(LocalDate.now())
+                .build();
+
+        when(customerRepository.findById("987654", 1234567890L)).thenReturn(Optional.of(customer));
+        when(controlRepository.initializeControlRecord()).thenReturn(control);
+        when(dtoMapper.toAccount(request)).thenReturn(mockAccount);
+        when(accountRepository.save(any(Account.class))).thenReturn(mockAccount);
+        when(dtoMapper.toAccountResponseDto(mockAccount)).thenReturn(AccountResponseDto.builder().build());
+
+        // When
+        accountService.createAccount(request);
+
+        // Then
+        verify(accountRepository).save(argThat(account -> 
+            account.getInterestRate().compareTo(new BigDecimal("0.10")) == 0));
+    }
+
+    @Test
+    @DisplayName("Should use default interest rate for unknown account type")
+    void shouldUseDefaultInterestRateForUnknownAccountType() {
+        // Given
+        AccountRequestDto request = AccountRequestDto.builder()
+                .accountType("UNKNOWN")
+                .customerNumber(1234567890L)
+                .sortCode("987654")
+                .initialDeposit(new BigDecimal("750.00"))
+                .build();
+
+        Customer customer = new Customer();
+        Control control = new Control();
+        control.setLastAccountNumber(12345678);
+        control.setAccountCount(10);
+
+        Account mockAccount = Account.builder()
+                .eyeCatcher("ACCT")
+                .customerNumber(1234567890L)
+                .sortCode("987654")
+                .accountNumber("12345679")
+                .accountType("UNKNOWN")
+                .interestRate(null)
+                .overdraftLimit(0)
+                .availableBalance(new BigDecimal("750.00"))
+                .actualBalance(new BigDecimal("750.00"))
+                .openedDate(LocalDate.now())
+                .build();
+
+        when(customerRepository.findById("987654", 1234567890L)).thenReturn(Optional.of(customer));
+        when(controlRepository.initializeControlRecord()).thenReturn(control);
+        when(dtoMapper.toAccount(request)).thenReturn(mockAccount);
+        when(accountRepository.save(any(Account.class))).thenReturn(mockAccount);
+        when(dtoMapper.toAccountResponseDto(mockAccount)).thenReturn(AccountResponseDto.builder().build());
+
+        // When
+        accountService.createAccount(request);
+
+        // Then
+        verify(accountRepository).save(argThat(account -> 
+            account.getInterestRate().compareTo(new BigDecimal("1.00")) == 0));
+    }
+
+    @Test
+    @DisplayName("Should get account details successfully")
+    void shouldGetAccountDetailsSuccessfully() {
+        // Given
+        String sortCode = "987654";
+        String accountNumber = "12345678";
+        Account account = Account.builder()
+                .sortCode(sortCode)
+                .accountNumber(accountNumber)
+                .accountType("CURRENT")
+                .customerNumber(1234567890L)
+                .availableBalance(new BigDecimal("1000.00"))
+                .actualBalance(new BigDecimal("1000.00"))
+                .interestRate(new BigDecimal("0.10"))
+                .overdraftLimit(1000)
+                .openedDate(LocalDate.of(2023, 1, 15))
+                .build();
+
+        AccountResponseDto expectedResponse = AccountResponseDto.builder()
+                .accountNumber(accountNumber)
+                .sortCode(sortCode)
+                .accountType("CURRENT")
+                .customerNumber(1234567890L)
+                .availableBalance(new BigDecimal("1000.00"))
+                .actualBalance(new BigDecimal("1000.00"))
+                .interestRate(new BigDecimal("0.10"))
+                .overdraftLimit(1000)
+                .openedDate(LocalDate.of(2023, 1, 15))
+                .status("ACTIVE")
+                .build();
+
+        when(accountRepository.findById(sortCode, accountNumber)).thenReturn(Optional.of(account));
+        when(dtoMapper.toAccountResponseDto(account)).thenReturn(expectedResponse);
+
+        // When
+        AccountResponseDto result = accountService.getAccountDetails(sortCode, accountNumber);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getAccountNumber()).isEqualTo(accountNumber);
+        assertThat(result.getAccountType()).isEqualTo("CURRENT");
+        assertThat(result.getCustomerNumber()).isEqualTo(1234567890L);
+        assertThat(result.getOverdraftLimit()).isEqualTo(1000);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when account not found for getAccountDetails")
+    void shouldThrowExceptionWhenAccountNotFoundForGetAccountDetails() {
+        // Given
+        String sortCode = "987654";
+        String accountNumber = "12345678";
+
+        when(accountRepository.findById(sortCode, accountNumber)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> accountService.getAccountDetails(sortCode, accountNumber))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Account not found: " + sortCode + accountNumber);
+    }
+
+    @Test
+    @DisplayName("Should set default overdraft limit when not provided")
+    void shouldSetDefaultOverdraftLimitWhenNotProvided() {
+        // Given
+        AccountRequestDto request = AccountRequestDto.builder()
+                .accountType("CURRENT")
+                .customerNumber(1234567890L)
+                .sortCode("987654")
+                .interestRate(new BigDecimal("0.10"))
+                .initialDeposit(new BigDecimal("500.00"))
+                .build();
+
+        Customer customer = new Customer();
+        Control control = new Control();
+        control.setLastAccountNumber(12345678);
+        control.setAccountCount(10);
+
+        Account mockAccount = Account.builder()
+                .eyeCatcher("ACCT")
+                .customerNumber(1234567890L)
+                .sortCode("987654")
+                .accountNumber("12345679")
+                .accountType("CURRENT")
+                .interestRate(new BigDecimal("0.10"))
+                .overdraftLimit(0)
+                .availableBalance(new BigDecimal("500.00"))
+                .actualBalance(new BigDecimal("500.00"))
+                .openedDate(LocalDate.now())
+                .build();
+
+        when(customerRepository.findById("987654", 1234567890L)).thenReturn(Optional.of(customer));
+        when(controlRepository.initializeControlRecord()).thenReturn(control);
+        when(dtoMapper.toAccount(request)).thenReturn(mockAccount);
+        when(accountRepository.save(any(Account.class))).thenReturn(mockAccount);
+        when(dtoMapper.toAccountResponseDto(mockAccount)).thenReturn(AccountResponseDto.builder().build());
+
+        // When
+        accountService.createAccount(request);
+
+        // Then
+        verify(accountRepository).save(argThat(account -> 
+            account.getOverdraftLimit().equals(0)));
+    }
+
+    @Test
+    @DisplayName("Should set zero balance when no initial deposit provided")
+    void shouldSetZeroBalanceWhenNoInitialDepositProvided() {
+        // Given
+        AccountRequestDto request = AccountRequestDto.builder()
+                .accountType("CURRENT")
+                .customerNumber(1234567890L)
+                .sortCode("987654")
+                .interestRate(new BigDecimal("0.10"))
+                .overdraftLimit(1000)
+                .build();
+
+        Customer customer = new Customer();
+        Control control = new Control();
+        control.setLastAccountNumber(12345678);
+        control.setAccountCount(10);
+
+        Account mockAccount = Account.builder()
+                .eyeCatcher("ACCT")
+                .customerNumber(1234567890L)
+                .sortCode("987654")
+                .accountNumber("12345679")
+                .accountType("CURRENT")
+                .interestRate(new BigDecimal("0.10"))
+                .overdraftLimit(1000)
+                .availableBalance(BigDecimal.ZERO)
+                .actualBalance(BigDecimal.ZERO)
+                .openedDate(LocalDate.now())
+                .build();
+
+        when(customerRepository.findById("987654", 1234567890L)).thenReturn(Optional.of(customer));
+        when(controlRepository.initializeControlRecord()).thenReturn(control);
+        when(dtoMapper.toAccount(request)).thenReturn(mockAccount);
+        when(accountRepository.save(any(Account.class))).thenReturn(mockAccount);
+        when(dtoMapper.toAccountResponseDto(mockAccount)).thenReturn(AccountResponseDto.builder().build());
+
+        // When
+        accountService.createAccount(request);
+
+        // Then
+        verify(accountRepository).save(argThat(account -> 
+            account.getAvailableBalance().compareTo(BigDecimal.ZERO) == 0 &&
+            account.getActualBalance().compareTo(BigDecimal.ZERO) == 0));
+    }
+
+    @Test
+    @DisplayName("Should update only provided fields in updateAccount")
+    void shouldUpdateOnlyProvidedFieldsInUpdateAccount() {
+        // Given
+        String sortCode = "987654";
+        String accountNumber = "12345678";
+        AccountRequestDto request = AccountRequestDto.builder()
+                .accountType("SAVINGS")
+                .build();
+
+        Account existingAccount = Account.builder()
+                .eyeCatcher("ACCT")
+                .customerNumber(1234567890L)
+                .sortCode(sortCode)
+                .accountNumber(accountNumber)
+                .accountType("CURRENT")
+                .interestRate(new BigDecimal("0.10"))
+                .overdraftLimit(1000)
+                .availableBalance(new BigDecimal("1000.00"))
+                .actualBalance(new BigDecimal("1000.00"))
+                .build();
+
+        Account updatedAccount = Account.builder()
+                .eyeCatcher("ACCT")
+                .customerNumber(1234567890L)
+                .sortCode(sortCode)
+                .accountNumber(accountNumber)
+                .accountType("SAVINGS")
+                .interestRate(new BigDecimal("0.10"))
+                .overdraftLimit(1000)
+                .availableBalance(new BigDecimal("1000.00"))
+                .actualBalance(new BigDecimal("1000.00"))
+                .build();
+
+        when(accountRepository.findById(sortCode, accountNumber)).thenReturn(Optional.of(existingAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(updatedAccount);
+        when(dtoMapper.toAccountResponseDto(updatedAccount)).thenReturn(AccountResponseDto.builder().build());
+
+        // When
+        accountService.updateAccount(sortCode, accountNumber, request);
+
+        // Then
+        verify(accountRepository).save(argThat(account -> 
+            account.getAccountType().equals("SAVINGS") &&
+            account.getInterestRate().compareTo(new BigDecimal("0.10")) == 0 &&
+            account.getOverdraftLimit().equals(1000)));
     }
 }
