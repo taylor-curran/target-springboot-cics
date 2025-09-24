@@ -406,4 +406,255 @@ class ApplicationErrorTest {
         assertThat(result).contains("in");
         assertThat(result).doesNotContain("UNKNOWN");
     }
+
+    @Test
+    @DisplayName("Should test comprehensive equals scenarios")
+    void testEquals_comprehensiveScenarios() {
+        ApplicationError base = new ApplicationError();
+        base.setId(1L);
+        base.setTimestamp("2023-01-01T10:00:00");
+        base.setApplicationId("TESTAPP");
+        base.setTransactionId("T001");
+        base.setErrorCode("ABND");
+        base.setProgramName("TESTPROG");
+        base.setErrorMessage("Test error");
+        base.setStackTrace("Stack trace");
+        base.setCreatedAt("2023-01-01T10:00:01");
+        base.setResponseCode("RC01");
+        base.setResponse2Code("RC02");
+        base.setSqlCode("SQL001");
+        base.setFreeformText("Freeform text");
+
+        assertThat(base).isEqualTo(base);
+        assertThat(base.equals(base)).isTrue();
+
+        assertThat(base.equals(null)).isFalse();
+
+        assertThat(base.equals("not an ApplicationError")).isFalse();
+        assertThat(base.equals(new Object())).isFalse();
+
+        ApplicationError identical = new ApplicationError();
+        identical.setId(1L);
+        identical.setTimestamp("2023-01-01T10:00:00");
+        identical.setApplicationId("TESTAPP");
+        identical.setTransactionId("T001");
+        identical.setErrorCode("ABND");
+        identical.setProgramName("TESTPROG");
+        identical.setErrorMessage("Test error");
+        identical.setStackTrace("Stack trace");
+        identical.setCreatedAt("2023-01-01T10:00:01");
+        identical.setResponseCode("RC01");
+        identical.setResponse2Code("RC02");
+        identical.setSqlCode("SQL001");
+        identical.setFreeformText("Freeform text");
+        
+        assertThat(base).isEqualTo(identical);
+        assertThat(base.hashCode()).isEqualTo(identical.hashCode());
+
+        ApplicationError diffId = new ApplicationError();
+        diffId.setId(2L);
+        diffId.setApplicationId("TESTAPP");
+        assertThat(base).isNotEqualTo(diffId);
+
+        ApplicationError diffTimestamp = new ApplicationError();
+        diffTimestamp.setId(1L);
+        diffTimestamp.setTimestamp("2023-12-31T23:59:59");
+        diffTimestamp.setApplicationId("TESTAPP");
+        assertThat(base).isNotEqualTo(diffTimestamp);
+
+        ApplicationError diffApplicationId = new ApplicationError();
+        diffApplicationId.setId(1L);
+        diffApplicationId.setTimestamp("2023-01-01T10:00:00");
+        diffApplicationId.setApplicationId("DIFFERENT");
+        assertThat(base).isNotEqualTo(diffApplicationId);
+
+        ApplicationError diffTransactionId = new ApplicationError();
+        diffTransactionId.setId(1L);
+        diffTransactionId.setTimestamp("2023-01-01T10:00:00");
+        diffTransactionId.setApplicationId("TESTAPP");
+        diffTransactionId.setTransactionId("DIFF");
+        assertThat(base).isNotEqualTo(diffTransactionId);
+
+        ApplicationError diffErrorCode = new ApplicationError();
+        diffErrorCode.setId(1L);
+        diffErrorCode.setTimestamp("2023-01-01T10:00:00");
+        diffErrorCode.setApplicationId("TESTAPP");
+        diffErrorCode.setTransactionId("T001");
+        diffErrorCode.setErrorCode("DIFF");
+        assertThat(base).isNotEqualTo(diffErrorCode);
+
+        ApplicationError diffProgramName = new ApplicationError();
+        diffProgramName.setId(1L);
+        diffProgramName.setTimestamp("2023-01-01T10:00:00");
+        diffProgramName.setApplicationId("TESTAPP");
+        diffProgramName.setTransactionId("T001");
+        diffProgramName.setErrorCode("ABND");
+        diffProgramName.setProgramName("DIFFERENT");
+        assertThat(base).isNotEqualTo(diffProgramName);
+
+        ApplicationError diffErrorMessage = new ApplicationError();
+        diffErrorMessage.setId(1L);
+        diffErrorMessage.setTimestamp("2023-01-01T10:00:00");
+        diffErrorMessage.setApplicationId("TESTAPP");
+        diffErrorMessage.setTransactionId("T001");
+        diffErrorMessage.setErrorCode("ABND");
+        diffErrorMessage.setProgramName("TESTPROG");
+        diffErrorMessage.setErrorMessage("Different error");
+        assertThat(base).isNotEqualTo(diffErrorMessage);
+
+        ApplicationError diffStackTrace = new ApplicationError();
+        diffStackTrace.setId(1L);
+        diffStackTrace.setTimestamp("2023-01-01T10:00:00");
+        diffStackTrace.setApplicationId("TESTAPP");
+        diffStackTrace.setTransactionId("T001");
+        diffStackTrace.setErrorCode("ABND");
+        diffStackTrace.setProgramName("TESTPROG");
+        diffStackTrace.setErrorMessage("Test error");
+        diffStackTrace.setStackTrace("Different stack trace");
+        assertThat(base).isNotEqualTo(diffStackTrace);
+
+        ApplicationError diffCreatedAt = new ApplicationError();
+        diffCreatedAt.setId(1L);
+        diffCreatedAt.setTimestamp("2023-01-01T10:00:00");
+        diffCreatedAt.setApplicationId("TESTAPP");
+        diffCreatedAt.setTransactionId("T001");
+        diffCreatedAt.setErrorCode("ABND");
+        diffCreatedAt.setProgramName("TESTPROG");
+        diffCreatedAt.setErrorMessage("Test error");
+        diffCreatedAt.setStackTrace("Stack trace");
+        diffCreatedAt.setCreatedAt("2023-12-31T23:59:59");
+        assertThat(base).isNotEqualTo(diffCreatedAt);
+
+        ApplicationError diffResponseCode = new ApplicationError();
+        diffResponseCode.setId(1L);
+        diffResponseCode.setTimestamp("2023-01-01T10:00:00");
+        diffResponseCode.setApplicationId("TESTAPP");
+        diffResponseCode.setTransactionId("T001");
+        diffResponseCode.setErrorCode("ABND");
+        diffResponseCode.setProgramName("TESTPROG");
+        diffResponseCode.setErrorMessage("Test error");
+        diffResponseCode.setStackTrace("Stack trace");
+        diffResponseCode.setCreatedAt("2023-01-01T10:00:01");
+        diffResponseCode.setResponseCode("DIFF");
+        assertThat(base).isNotEqualTo(diffResponseCode);
+
+        ApplicationError diffResponse2Code = new ApplicationError();
+        diffResponse2Code.setId(1L);
+        diffResponse2Code.setTimestamp("2023-01-01T10:00:00");
+        diffResponse2Code.setApplicationId("TESTAPP");
+        diffResponse2Code.setTransactionId("T001");
+        diffResponse2Code.setErrorCode("ABND");
+        diffResponse2Code.setProgramName("TESTPROG");
+        diffResponse2Code.setErrorMessage("Test error");
+        diffResponse2Code.setStackTrace("Stack trace");
+        diffResponse2Code.setCreatedAt("2023-01-01T10:00:01");
+        diffResponse2Code.setResponseCode("RC01");
+        diffResponse2Code.setResponse2Code("DIFF");
+        assertThat(base).isNotEqualTo(diffResponse2Code);
+
+        ApplicationError diffSqlCode = new ApplicationError();
+        diffSqlCode.setId(1L);
+        diffSqlCode.setTimestamp("2023-01-01T10:00:00");
+        diffSqlCode.setApplicationId("TESTAPP");
+        diffSqlCode.setTransactionId("T001");
+        diffSqlCode.setErrorCode("ABND");
+        diffSqlCode.setProgramName("TESTPROG");
+        diffSqlCode.setErrorMessage("Test error");
+        diffSqlCode.setStackTrace("Stack trace");
+        diffSqlCode.setCreatedAt("2023-01-01T10:00:01");
+        diffSqlCode.setResponseCode("RC01");
+        diffSqlCode.setResponse2Code("RC02");
+        diffSqlCode.setSqlCode("DIFF");
+        assertThat(base).isNotEqualTo(diffSqlCode);
+
+        ApplicationError diffFreeformText = new ApplicationError();
+        diffFreeformText.setId(1L);
+        diffFreeformText.setTimestamp("2023-01-01T10:00:00");
+        diffFreeformText.setApplicationId("TESTAPP");
+        diffFreeformText.setTransactionId("T001");
+        diffFreeformText.setErrorCode("ABND");
+        diffFreeformText.setProgramName("TESTPROG");
+        diffFreeformText.setErrorMessage("Test error");
+        diffFreeformText.setStackTrace("Stack trace");
+        diffFreeformText.setCreatedAt("2023-01-01T10:00:01");
+        diffFreeformText.setResponseCode("RC01");
+        diffFreeformText.setResponse2Code("RC02");
+        diffFreeformText.setSqlCode("SQL001");
+        diffFreeformText.setFreeformText("Different freeform text");
+        assertThat(base).isNotEqualTo(diffFreeformText);
+    }
+
+    @Test
+    @DisplayName("Should test equals with null fields")
+    void testEquals_withNullFields() {
+        ApplicationError error1 = new ApplicationError();
+        error1.setId(1L);
+        error1.setApplicationId("TESTAPP");
+        error1.setErrorCode(null);
+        error1.setTransactionId(null);
+
+        ApplicationError error2 = new ApplicationError();
+        error2.setId(1L);
+        error2.setApplicationId("TESTAPP");
+        error2.setErrorCode(null);
+        error2.setTransactionId(null);
+
+        ApplicationError error3 = new ApplicationError();
+        error3.setId(1L);
+        error3.setApplicationId("TESTAPP");
+        error3.setErrorCode("ABND");
+        error3.setTransactionId(null);
+
+        assertThat(error1).isEqualTo(error2);
+        assertThat(error1.hashCode()).isEqualTo(error2.hashCode());
+        assertThat(error1).isNotEqualTo(error3);
+    }
+
+    @Test
+    @DisplayName("Should test hashCode consistency and edge cases")
+    void testHashCode_comprehensiveScenarios() {
+        ApplicationError error1 = new ApplicationError();
+        error1.setId(1L);
+        error1.setApplicationId("TESTAPP");
+        error1.setErrorCode("ABND");
+
+        ApplicationError error2 = new ApplicationError();
+        error2.setId(1L);
+        error2.setApplicationId("TESTAPP");
+        error2.setErrorCode("ABND");
+
+        ApplicationError error3 = new ApplicationError();
+        error3.setId(2L);
+        error3.setApplicationId("TESTAPP");
+        error3.setErrorCode("ABND");
+
+        assertThat(error1.hashCode()).isEqualTo(error2.hashCode());
+        assertThat(error1.hashCode()).isNotEqualTo(error3.hashCode());
+
+        int hashCode1 = error1.hashCode();
+        int hashCode2 = error1.hashCode();
+        assertThat(hashCode1).isEqualTo(hashCode2);
+
+        ApplicationError errorWithNulls = new ApplicationError();
+        errorWithNulls.setId(1L);
+        errorWithNulls.setApplicationId(null);
+        errorWithNulls.setErrorCode(null);
+        errorWithNulls.setTransactionId(null);
+        errorWithNulls.setErrorMessage(null);
+
+        ApplicationError errorWithValues = new ApplicationError();
+        errorWithValues.setId(1L);
+        errorWithValues.setApplicationId("TESTAPP");
+        errorWithValues.setErrorCode("ABND");
+        errorWithValues.setTransactionId("T001");
+        errorWithValues.setErrorMessage("Error message");
+
+        int hashWithNulls = errorWithNulls.hashCode();
+        int hashWithValues = errorWithValues.hashCode();
+        
+        assertThat(hashWithNulls).isNotEqualTo(hashWithValues);
+        
+        assertThat(errorWithNulls.hashCode()).isEqualTo(hashWithNulls);
+        assertThat(errorWithValues.hashCode()).isEqualTo(hashWithValues);
+    }
 }

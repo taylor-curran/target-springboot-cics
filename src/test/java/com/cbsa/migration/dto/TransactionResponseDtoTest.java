@@ -502,4 +502,252 @@ class TransactionResponseDtoTest {
         dto.setRunningBalance(zeroBalance);
         assertThat(dto.getRunningBalance()).isEqualTo(zeroBalance);
     }
+
+    @Test
+    @DisplayName("Should test equals with null object")
+    void testEquals_withNullObject() {
+        // Given
+        TransactionResponseDto dto = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode("123456")
+            .build();
+        
+        // Then
+        assertThat(dto.equals(null)).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should test equals with same object")
+    void testEquals_withSameObject() {
+        // Given
+        TransactionResponseDto dto = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode("123456")
+            .build();
+        
+        // Then
+        assertThat(dto.equals(dto)).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should test equals with different class")
+    void testEquals_withDifferentClass() {
+        // Given
+        TransactionResponseDto dto = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode("123456")
+            .build();
+        
+        // Then
+        assertThat(dto.equals("not a TransactionResponseDto")).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should test equals with different field values")
+    void testEquals_withDifferentFieldValues() {
+        // Given
+        TransactionResponseDto dto1 = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode("123456")
+            .accountNumber("12345678")
+            .transactionDate(LocalDate.of(2024, 9, 24))
+            .transactionTime(LocalTime.of(14, 30, 45))
+            .transactionType("CRE")
+            .description("Test transaction")
+            .amount(new BigDecimal("100.00"))
+            .targetSortCode("654321")
+            .targetAccountNumber("87654321")
+            .isDebit(false)
+            .status("COMPLETED")
+            .runningBalance(new BigDecimal("1500.00"))
+            .build();
+        
+        TransactionResponseDto dto2 = TransactionResponseDto.builder()
+            .referenceNumber(2000002L)
+            .sortCode("123456")
+            .accountNumber("12345678")
+            .transactionDate(LocalDate.of(2024, 9, 24))
+            .transactionTime(LocalTime.of(14, 30, 45))
+            .transactionType("CRE")
+            .description("Test transaction")
+            .amount(new BigDecimal("100.00"))
+            .targetSortCode("654321")
+            .targetAccountNumber("87654321")
+            .isDebit(false)
+            .status("COMPLETED")
+            .runningBalance(new BigDecimal("1500.00"))
+            .build();
+        
+        TransactionResponseDto dto3 = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode("123456")
+            .accountNumber("12345678")
+            .transactionDate(LocalDate.of(2024, 9, 24))
+            .transactionTime(LocalTime.of(14, 30, 45))
+            .transactionType("CRE")
+            .description("Test transaction")
+            .amount(new BigDecimal("200.00"))
+            .targetSortCode("654321")
+            .targetAccountNumber("87654321")
+            .isDebit(false)
+            .status("COMPLETED")
+            .runningBalance(new BigDecimal("1500.00"))
+            .build();
+        
+        TransactionResponseDto dto4 = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode("123456")
+            .accountNumber("12345678")
+            .transactionDate(LocalDate.of(2024, 9, 24))
+            .transactionTime(LocalTime.of(14, 30, 45))
+            .transactionType("CRE")
+            .description("Test transaction")
+            .amount(new BigDecimal("100.00"))
+            .targetSortCode("654321")
+            .targetAccountNumber("87654321")
+            .isDebit(true)
+            .status("COMPLETED")
+            .runningBalance(new BigDecimal("1500.00"))
+            .build();
+        
+        // Then
+        assertThat(dto1).isNotEqualTo(dto2);
+        assertThat(dto1).isNotEqualTo(dto3);
+        assertThat(dto1).isNotEqualTo(dto4);
+        assertThat(dto1.hashCode()).isNotEqualTo(dto2.hashCode());
+        assertThat(dto1.hashCode()).isNotEqualTo(dto3.hashCode());
+        assertThat(dto1.hashCode()).isNotEqualTo(dto4.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should test equals with null fields")
+    void testEquals_withNullFields() {
+        // Given
+        TransactionResponseDto dto1 = new TransactionResponseDto();
+        TransactionResponseDto dto2 = new TransactionResponseDto();
+        
+        assertThat(dto1).isEqualTo(dto2);
+        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+        
+        dto1.setReferenceNumber(1000001L);
+        assertThat(dto1).isNotEqualTo(dto2);
+        assertThat(dto1.hashCode()).isNotEqualTo(dto2.hashCode());
+        
+        dto2.setReferenceNumber(1000001L);
+        assertThat(dto1).isEqualTo(dto2);
+        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should test equals with mixed null and non-null fields")
+    void testEquals_withMixedNullAndNonNullFields() {
+        // Given
+        TransactionResponseDto dto1 = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode(null)
+            .accountNumber("12345678")
+            .transactionDate(null)
+            .transactionTime(LocalTime.of(14, 30, 45))
+            .transactionType(null)
+            .description("Test transaction")
+            .amount(null)
+            .targetSortCode("654321")
+            .targetAccountNumber(null)
+            .isDebit(false)
+            .status(null)
+            .runningBalance(new BigDecimal("1500.00"))
+            .build();
+        
+        TransactionResponseDto dto2 = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode(null)
+            .accountNumber("12345678")
+            .transactionDate(null)
+            .transactionTime(LocalTime.of(14, 30, 45))
+            .transactionType(null)
+            .description("Test transaction")
+            .amount(null)
+            .targetSortCode("654321")
+            .targetAccountNumber(null)
+            .isDebit(false)
+            .status(null)
+            .runningBalance(new BigDecimal("1500.00"))
+            .build();
+        
+        TransactionResponseDto dto3 = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode("123456")  // Different: non-null vs null
+            .accountNumber("12345678")
+            .transactionDate(null)
+            .transactionTime(LocalTime.of(14, 30, 45))
+            .transactionType(null)
+            .description("Test transaction")
+            .amount(null)
+            .targetSortCode("654321")
+            .targetAccountNumber(null)
+            .isDebit(false)
+            .status(null)
+            .runningBalance(new BigDecimal("1500.00"))
+            .build();
+        
+        // Then
+        assertThat(dto1).isEqualTo(dto2);
+        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+        assertThat(dto1).isNotEqualTo(dto3);
+        assertThat(dto1.hashCode()).isNotEqualTo(dto3.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should test hashCode consistency")
+    void testHashCode_consistency() {
+        // Given
+        TransactionResponseDto dto = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode("123456")
+            .accountNumber("12345678")
+            .transactionDate(LocalDate.of(2024, 9, 24))
+            .transactionTime(LocalTime.of(14, 30, 45))
+            .transactionType("CRE")
+            .description("Test transaction")
+            .amount(new BigDecimal("100.00"))
+            .targetSortCode("654321")
+            .targetAccountNumber("87654321")
+            .isDebit(false)
+            .status("COMPLETED")
+            .runningBalance(new BigDecimal("1500.00"))
+            .build();
+        
+        // When
+        int hashCode1 = dto.hashCode();
+        int hashCode2 = dto.hashCode();
+        
+        // Then
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    @DisplayName("Should test toString with null fields")
+    void testToString_withNullFields() {
+        // Given
+        TransactionResponseDto dto = TransactionResponseDto.builder()
+            .referenceNumber(1000001L)
+            .sortCode(null)
+            .accountNumber("12345678")
+            .transactionDate(null)
+            .transactionTime(LocalTime.of(14, 30, 45))
+            .description("Test transaction")
+            .build();
+        
+        // When
+        String result = dto.toString();
+        
+        // Then
+        assertThat(result).contains("TransactionResponseDto");
+        assertThat(result).contains("referenceNumber=1000001");
+        assertThat(result).contains("sortCode=null");
+        assertThat(result).contains("accountNumber=12345678");
+        assertThat(result).contains("transactionDate=null");
+        assertThat(result).contains("transactionTime=14:30:45");
+        assertThat(result).contains("description=Test transaction");
+    }
 }

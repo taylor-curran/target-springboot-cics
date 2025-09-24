@@ -134,4 +134,115 @@ class CreditScoreResponseDtoTest {
         assertThat(toString).contains("780");
         assertThat(toString).contains("Credit score updated successfully");
     }
+
+    @Test
+    @DisplayName("Should create CreditScoreResponseDto with all args constructor")
+    void shouldCreateWithAllArgsConstructor() {
+        // When
+        CreditScoreResponseDto dto = new CreditScoreResponseDto(
+                "654321",
+                9876543210L,
+                650,
+                LocalDate.of(2023, 7, 1),
+                200L,
+                false,
+                "Credit score review failed"
+        );
+
+        // Then
+        assertThat(dto).isNotNull();
+        assertThat(dto.getSortCode()).isEqualTo("654321");
+        assertThat(dto.getCustomerNumber()).isEqualTo(9876543210L);
+        assertThat(dto.getSuccess()).isFalse();
+        assertThat(dto.getUpdatedCreditScore()).isEqualTo(650);
+        assertThat(dto.getScoreReviewDate()).isEqualTo(LocalDate.of(2023, 7, 1));
+        assertThat(dto.getProcessingTimeMs()).isEqualTo(200L);
+        assertThat(dto.getErrorMessage()).isEqualTo("Credit score review failed");
+    }
+
+    @Test
+    @DisplayName("Should support partial builder usage")
+    void shouldSupportPartialBuilder() {
+        // When
+        CreditScoreResponseDto dto = CreditScoreResponseDto.builder()
+                .sortCode("111111")
+                .customerNumber(1111111111L)
+                .success(true)
+                .build();
+
+        // Then
+        assertThat(dto).isNotNull();
+        assertThat(dto.getSortCode()).isEqualTo("111111");
+        assertThat(dto.getCustomerNumber()).isEqualTo(1111111111L);
+        assertThat(dto.getSuccess()).isTrue();
+        assertThat(dto.getUpdatedCreditScore()).isNull();
+        assertThat(dto.getScoreReviewDate()).isNull();
+        assertThat(dto.getProcessingTimeMs()).isNull();
+        assertThat(dto.getErrorMessage()).isNull();
+    }
+
+    @Test
+    @DisplayName("Should handle null values in equals comparison")
+    void shouldHandleNullValuesInEquals() {
+        // Given
+        CreditScoreResponseDto dto1 = new CreditScoreResponseDto();
+        CreditScoreResponseDto dto2 = new CreditScoreResponseDto();
+
+        // Then
+        assertThat(dto1).isEqualTo(dto2);
+        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should handle different objects in equals comparison")
+    void shouldHandleDifferentObjectsInEquals() {
+        // Given
+        CreditScoreResponseDto dto1 = CreditScoreResponseDto.builder()
+                .sortCode("111111")
+                .customerNumber(1111111111L)
+                .success(true)
+                .build();
+
+        CreditScoreResponseDto dto2 = CreditScoreResponseDto.builder()
+                .sortCode("222222")
+                .customerNumber(2222222222L)
+                .success(false)
+                .build();
+
+        // Then
+        assertThat(dto1).isNotEqualTo(dto2);
+        assertThat(dto1.hashCode()).isNotEqualTo(dto2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should handle toString with null values")
+    void shouldHandleToStringWithNullValues() {
+        // Given
+        CreditScoreResponseDto dto = new CreditScoreResponseDto();
+
+        // When
+        String toString = dto.toString();
+
+        // Then
+        assertThat(toString).isNotNull();
+        assertThat(toString).contains("CreditScoreResponseDto");
+    }
+
+    @Test
+    @DisplayName("Should handle boolean values correctly")
+    void shouldHandleBooleanValuesCorrectly() {
+        // Given
+        CreditScoreResponseDto successDto = CreditScoreResponseDto.builder()
+                .success(true)
+                .build();
+
+        CreditScoreResponseDto failureDto = CreditScoreResponseDto.builder()
+                .success(false)
+                .build();
+
+        // Then
+        assertThat(successDto.getSuccess()).isTrue();
+        assertThat(failureDto.getSuccess()).isFalse();
+        assertThat(successDto).isNotEqualTo(failureDto);
+    }
 }

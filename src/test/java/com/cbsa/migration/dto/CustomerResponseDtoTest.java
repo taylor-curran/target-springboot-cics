@@ -159,4 +159,131 @@ class CustomerResponseDtoTest {
         assertThat(toString).contains("987654");
         assertThat(toString).contains("GOOD_STANDING");
     }
+
+    @Test
+    @DisplayName("Should create CustomerResponseDto with all args constructor")
+    void shouldCreateWithAllArgsConstructor() {
+        // Given
+        List<AccountSummaryDto> accounts = Arrays.asList(
+                AccountSummaryDto.builder()
+                        .accountNumber("11111111")
+                        .accountType("SAVINGS")
+                        .build()
+        );
+
+        // When
+        CustomerResponseDto dto = new CustomerResponseDto(
+                "Jane Smith",
+                "456 Oak Ave",
+                LocalDate.of(1985, 8, 20),
+                9876543210L,
+                "654321",
+                accounts,
+                1,
+                "FAIR"
+        );
+
+        // Then
+        assertThat(dto).isNotNull();
+        assertThat(dto.getName()).isEqualTo("Jane Smith");
+        assertThat(dto.getAddress()).isEqualTo("456 Oak Ave");
+        assertThat(dto.getDateOfBirth()).isEqualTo(LocalDate.of(1985, 8, 20));
+        assertThat(dto.getCustomerNumber()).isEqualTo(9876543210L);
+        assertThat(dto.getSortCode()).isEqualTo("654321");
+        assertThat(dto.getAccounts()).hasSize(1);
+        assertThat(dto.getAccountCount()).isEqualTo(1);
+        assertThat(dto.getStatus()).isEqualTo("FAIR");
+    }
+
+    @Test
+    @DisplayName("Should support partial builder usage")
+    void shouldSupportPartialBuilder() {
+        // When
+        CustomerResponseDto dto = CustomerResponseDto.builder()
+                .name("Partial User")
+                .customerNumber(1111111111L)
+                .sortCode("111111")
+                .build();
+
+        // Then
+        assertThat(dto).isNotNull();
+        assertThat(dto.getName()).isEqualTo("Partial User");
+        assertThat(dto.getCustomerNumber()).isEqualTo(1111111111L);
+        assertThat(dto.getSortCode()).isEqualTo("111111");
+        assertThat(dto.getAddress()).isNull();
+        assertThat(dto.getDateOfBirth()).isNull();
+        assertThat(dto.getAccounts()).isNull();
+        assertThat(dto.getAccountCount()).isNull();
+        assertThat(dto.getStatus()).isNull();
+    }
+
+    @Test
+    @DisplayName("Should handle null values in equals comparison")
+    void shouldHandleNullValuesInEquals() {
+        // Given
+        CustomerResponseDto dto1 = new CustomerResponseDto();
+        CustomerResponseDto dto2 = new CustomerResponseDto();
+
+        // Then
+        assertThat(dto1).isEqualTo(dto2);
+        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should handle different objects in equals comparison")
+    void shouldHandleDifferentObjectsInEquals() {
+        // Given
+        CustomerResponseDto dto1 = CustomerResponseDto.builder()
+                .name("User1")
+                .customerNumber(1111111111L)
+                .sortCode("111111")
+                .build();
+
+        CustomerResponseDto dto2 = CustomerResponseDto.builder()
+                .name("User2")
+                .customerNumber(2222222222L)
+                .sortCode("222222")
+                .build();
+
+        // Then
+        assertThat(dto1).isNotEqualTo(dto2);
+        assertThat(dto1.hashCode()).isNotEqualTo(dto2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should handle toString with null values")
+    void shouldHandleToStringWithNullValues() {
+        // Given
+        CustomerResponseDto dto = new CustomerResponseDto();
+
+        // When
+        String toString = dto.toString();
+
+        // Then
+        assertThat(toString).isNotNull();
+        assertThat(toString).contains("CustomerResponseDto");
+    }
+
+    @Test
+    @DisplayName("Should handle empty accounts list")
+    void shouldHandleEmptyAccountsList() {
+        // Given
+        List<AccountSummaryDto> emptyAccounts = Arrays.asList();
+
+        // When
+        CustomerResponseDto dto = CustomerResponseDto.builder()
+                .name("No Accounts User")
+                .customerNumber(1111111111L)
+                .sortCode("111111")
+                .accounts(emptyAccounts)
+                .accountCount(0)
+                .status("NEW")
+                .build();
+
+        // Then
+        assertThat(dto).isNotNull();
+        assertThat(dto.getAccounts()).isEmpty();
+        assertThat(dto.getAccountCount()).isEqualTo(0);
+        assertThat(dto.getStatus()).isEqualTo("NEW");
+    }
 }

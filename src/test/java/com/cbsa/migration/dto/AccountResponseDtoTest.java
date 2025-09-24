@@ -419,4 +419,250 @@ class AccountResponseDtoTest {
         assertThat(dto.getActualBalance()).isEqualTo(negativeActualBalance);
         assertThat(dto.getOverdraftLimit()).isEqualTo(negativeOverdraft);
     }
+
+    @Test
+    @DisplayName("Should test equals with null object")
+    void testEquals_withNullObject() {
+        // Given
+        AccountResponseDto dto = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode("123456")
+            .build();
+        
+        // Then
+        assertThat(dto.equals(null)).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should test equals with same object")
+    void testEquals_withSameObject() {
+        // Given
+        AccountResponseDto dto = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode("123456")
+            .build();
+        
+        // Then
+        assertThat(dto.equals(dto)).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should test equals with different class")
+    void testEquals_withDifferentClass() {
+        // Given
+        AccountResponseDto dto = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode("123456")
+            .build();
+        
+        // Then
+        assertThat(dto.equals("not an AccountResponseDto")).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should test equals with different field values")
+    void testEquals_withDifferentFieldValues() {
+        // Given
+        AccountResponseDto dto1 = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode("123456")
+            .accountType("CURRENT")
+            .customerNumber(1000001L)
+            .customerName("John Doe")
+            .availableBalance(new BigDecimal("1500.00"))
+            .actualBalance(new BigDecimal("1500.00"))
+            .interestRate(new BigDecimal("2.5"))
+            .openedDate(LocalDate.of(2023, 1, 15))
+            .overdraftLimit(500)
+            .lastStatementDate(LocalDate.of(2024, 8, 31))
+            .nextStatementDate(LocalDate.of(2024, 9, 30))
+            .status("ACTIVE")
+            .build();
+        
+        AccountResponseDto dto2 = AccountResponseDto.builder()
+            .accountNumber("87654321")
+            .sortCode("123456")
+            .accountType("CURRENT")
+            .customerNumber(1000001L)
+            .customerName("John Doe")
+            .availableBalance(new BigDecimal("1500.00"))
+            .actualBalance(new BigDecimal("1500.00"))
+            .interestRate(new BigDecimal("2.5"))
+            .openedDate(LocalDate.of(2023, 1, 15))
+            .overdraftLimit(500)
+            .lastStatementDate(LocalDate.of(2024, 8, 31))
+            .nextStatementDate(LocalDate.of(2024, 9, 30))
+            .status("ACTIVE")
+            .build();
+        
+        AccountResponseDto dto3 = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode("654321")
+            .accountType("CURRENT")
+            .customerNumber(1000001L)
+            .customerName("John Doe")
+            .availableBalance(new BigDecimal("1500.00"))
+            .actualBalance(new BigDecimal("1500.00"))
+            .interestRate(new BigDecimal("2.5"))
+            .openedDate(LocalDate.of(2023, 1, 15))
+            .overdraftLimit(500)
+            .lastStatementDate(LocalDate.of(2024, 8, 31))
+            .nextStatementDate(LocalDate.of(2024, 9, 30))
+            .status("ACTIVE")
+            .build();
+        
+        AccountResponseDto dto4 = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode("123456")
+            .accountType("CURRENT")
+            .customerNumber(2000002L)
+            .customerName("John Doe")
+            .availableBalance(new BigDecimal("1500.00"))
+            .actualBalance(new BigDecimal("1500.00"))
+            .interestRate(new BigDecimal("2.5"))
+            .openedDate(LocalDate.of(2023, 1, 15))
+            .overdraftLimit(500)
+            .lastStatementDate(LocalDate.of(2024, 8, 31))
+            .nextStatementDate(LocalDate.of(2024, 9, 30))
+            .status("ACTIVE")
+            .build();
+        
+        // Then
+        assertThat(dto1).isNotEqualTo(dto2);
+        assertThat(dto1).isNotEqualTo(dto3);
+        assertThat(dto1).isNotEqualTo(dto4);
+        assertThat(dto1.hashCode()).isNotEqualTo(dto2.hashCode());
+        assertThat(dto1.hashCode()).isNotEqualTo(dto3.hashCode());
+        assertThat(dto1.hashCode()).isNotEqualTo(dto4.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should test equals with null fields")
+    void testEquals_withNullFields() {
+        // Given
+        AccountResponseDto dto1 = new AccountResponseDto();
+        AccountResponseDto dto2 = new AccountResponseDto();
+        
+        assertThat(dto1).isEqualTo(dto2);
+        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+        
+        dto1.setAccountNumber("12345678");
+        assertThat(dto1).isNotEqualTo(dto2);
+        assertThat(dto1.hashCode()).isNotEqualTo(dto2.hashCode());
+        
+        dto2.setAccountNumber("12345678");
+        assertThat(dto1).isEqualTo(dto2);
+        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should test equals with mixed null and non-null fields")
+    void testEquals_withMixedNullAndNonNullFields() {
+        // Given
+        AccountResponseDto dto1 = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode(null)
+            .accountType("CURRENT")
+            .customerNumber(null)
+            .customerName("John Doe")
+            .availableBalance(null)
+            .actualBalance(new BigDecimal("1500.00"))
+            .interestRate(null)
+            .openedDate(LocalDate.of(2023, 1, 15))
+            .overdraftLimit(null)
+            .lastStatementDate(null)
+            .nextStatementDate(LocalDate.of(2024, 9, 30))
+            .status(null)
+            .build();
+        
+        AccountResponseDto dto2 = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode(null)
+            .accountType("CURRENT")
+            .customerNumber(null)
+            .customerName("John Doe")
+            .availableBalance(null)
+            .actualBalance(new BigDecimal("1500.00"))
+            .interestRate(null)
+            .openedDate(LocalDate.of(2023, 1, 15))
+            .overdraftLimit(null)
+            .lastStatementDate(null)
+            .nextStatementDate(LocalDate.of(2024, 9, 30))
+            .status(null)
+            .build();
+        
+        AccountResponseDto dto3 = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode("123456")  // Different: non-null vs null
+            .accountType("CURRENT")
+            .customerNumber(null)
+            .customerName("John Doe")
+            .availableBalance(null)
+            .actualBalance(new BigDecimal("1500.00"))
+            .interestRate(null)
+            .openedDate(LocalDate.of(2023, 1, 15))
+            .overdraftLimit(null)
+            .lastStatementDate(null)
+            .nextStatementDate(LocalDate.of(2024, 9, 30))
+            .status(null)
+            .build();
+        
+        // Then
+        assertThat(dto1).isEqualTo(dto2);
+        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+        assertThat(dto1).isNotEqualTo(dto3);
+        assertThat(dto1.hashCode()).isNotEqualTo(dto3.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should test hashCode consistency")
+    void testHashCode_consistency() {
+        // Given
+        AccountResponseDto dto = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode("123456")
+            .accountType("CURRENT")
+            .customerNumber(1000001L)
+            .customerName("John Doe")
+            .availableBalance(new BigDecimal("1500.00"))
+            .actualBalance(new BigDecimal("1500.00"))
+            .interestRate(new BigDecimal("2.5"))
+            .openedDate(LocalDate.of(2023, 1, 15))
+            .overdraftLimit(500)
+            .lastStatementDate(LocalDate.of(2024, 8, 31))
+            .nextStatementDate(LocalDate.of(2024, 9, 30))
+            .status("ACTIVE")
+            .build();
+        
+        // When
+        int hashCode1 = dto.hashCode();
+        int hashCode2 = dto.hashCode();
+        
+        // Then
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    @DisplayName("Should test toString with null fields")
+    void testToString_withNullFields() {
+        // Given
+        AccountResponseDto dto = AccountResponseDto.builder()
+            .accountNumber("12345678")
+            .sortCode(null)
+            .accountType("CURRENT")
+            .customerNumber(null)
+            .customerName("John Doe")
+            .build();
+        
+        // When
+        String result = dto.toString();
+        
+        // Then
+        assertThat(result).contains("AccountResponseDto");
+        assertThat(result).contains("accountNumber=12345678");
+        assertThat(result).contains("sortCode=null");
+        assertThat(result).contains("accountType=CURRENT");
+        assertThat(result).contains("customerNumber=null");
+        assertThat(result).contains("customerName=John Doe");
+    }
 }

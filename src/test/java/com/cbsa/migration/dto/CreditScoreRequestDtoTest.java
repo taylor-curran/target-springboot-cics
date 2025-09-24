@@ -124,4 +124,94 @@ class CreditScoreRequestDtoTest {
         assertThat(toString).contains("1234567890");
         assertThat(toString).contains("John Doe");
     }
+
+    @Test
+    @DisplayName("Should create CreditScoreRequestDto with all args constructor")
+    void shouldCreateWithAllArgsConstructor() {
+        // When
+        CreditScoreRequestDto dto = new CreditScoreRequestDto(
+                "654321",
+                9876543210L,
+                "Jane Smith",
+                "456 Oak Ave",
+                LocalDate.of(1985, 8, 20),
+                680
+        );
+
+        // Then
+        assertThat(dto).isNotNull();
+        assertThat(dto.getSortCode()).isEqualTo("654321");
+        assertThat(dto.getCustomerNumber()).isEqualTo(9876543210L);
+        assertThat(dto.getName()).isEqualTo("Jane Smith");
+        assertThat(dto.getAddress()).isEqualTo("456 Oak Ave");
+        assertThat(dto.getDateOfBirth()).isEqualTo(LocalDate.of(1985, 8, 20));
+        assertThat(dto.getCurrentCreditScore()).isEqualTo(680);
+    }
+
+    @Test
+    @DisplayName("Should support partial builder usage")
+    void shouldSupportPartialBuilder() {
+        // When
+        CreditScoreRequestDto dto = CreditScoreRequestDto.builder()
+                .sortCode("111111")
+                .customerNumber(1111111111L)
+                .name("Partial User")
+                .build();
+
+        // Then
+        assertThat(dto).isNotNull();
+        assertThat(dto.getSortCode()).isEqualTo("111111");
+        assertThat(dto.getCustomerNumber()).isEqualTo(1111111111L);
+        assertThat(dto.getName()).isEqualTo("Partial User");
+        assertThat(dto.getAddress()).isNull();
+        assertThat(dto.getDateOfBirth()).isNull();
+        assertThat(dto.getCurrentCreditScore()).isNull();
+    }
+
+    @Test
+    @DisplayName("Should handle null values in equals comparison")
+    void shouldHandleNullValuesInEquals() {
+        // Given
+        CreditScoreRequestDto dto1 = new CreditScoreRequestDto();
+        CreditScoreRequestDto dto2 = new CreditScoreRequestDto();
+
+        // Then
+        assertThat(dto1).isEqualTo(dto2);
+        assertThat(dto1.hashCode()).isEqualTo(dto2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should handle different objects in equals comparison")
+    void shouldHandleDifferentObjectsInEquals() {
+        // Given
+        CreditScoreRequestDto dto1 = CreditScoreRequestDto.builder()
+                .sortCode("111111")
+                .customerNumber(1111111111L)
+                .name("User1")
+                .build();
+
+        CreditScoreRequestDto dto2 = CreditScoreRequestDto.builder()
+                .sortCode("222222")
+                .customerNumber(2222222222L)
+                .name("User2")
+                .build();
+
+        // Then
+        assertThat(dto1).isNotEqualTo(dto2);
+        assertThat(dto1.hashCode()).isNotEqualTo(dto2.hashCode());
+    }
+
+    @Test
+    @DisplayName("Should handle toString with null values")
+    void shouldHandleToStringWithNullValues() {
+        // Given
+        CreditScoreRequestDto dto = new CreditScoreRequestDto();
+
+        // When
+        String toString = dto.toString();
+
+        // Then
+        assertThat(toString).isNotNull();
+        assertThat(toString).contains("CreditScoreRequestDto");
+    }
 }

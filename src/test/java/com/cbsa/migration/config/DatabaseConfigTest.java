@@ -5,59 +5,63 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for DatabaseConfig
- * Tests database configuration and connection setup
+ * Tests database configuration methods and bean creation
  */
 class DatabaseConfigTest {
 
-    private DataSource testDataSource;
+    private DatabaseConfig databaseConfig;
 
     @BeforeEach
     void setUp() {
-        DriverManagerDataSource ds = new DriverManagerDataSource();
-        ds.setDriverClassName("org.h2.Driver");
-        ds.setUrl("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1");
-        testDataSource = ds;
+        databaseConfig = new DatabaseConfig();
+        ReflectionTestUtils.setField(databaseConfig, "databaseUrl", "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1");
+        ReflectionTestUtils.setField(databaseConfig, "driverClassName", "org.h2.Driver");
     }
 
     @Test
-    @DisplayName("Should create DataSource with correct properties")
-    void shouldCreateDataSourceWithCorrectProperties() {
-        // Given
-        DriverManagerDataSource ds = new DriverManagerDataSource();
-        ds.setDriverClassName("org.h2.Driver");
-        ds.setUrl("jdbc:h2:mem:testdb");
-
-        // Then
-        assertThat(ds).isNotNull();
-        assertThat(ds.getUrl()).isEqualTo("jdbc:h2:mem:testdb");
+    @DisplayName("Should create DataSource bean with correct properties")
+    void shouldCreateDataSourceBeanWithCorrectProperties() {
+        DataSource dataSource = databaseConfig.dataSource();
+        
+        assertThat(dataSource).isNotNull();
+        assertThat(dataSource).isInstanceOf(DriverManagerDataSource.class);
     }
 
     @Test
-    @DisplayName("Should create JdbcTemplate with DataSource")
-    void shouldCreateJdbcTemplateWithDataSource() {
-        // When
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(testDataSource);
-
-        // Then
+    @DisplayName("Should create JdbcTemplate bean with DataSource")
+    void shouldCreateJdbcTemplateBeanWithDataSource() {
+        JdbcTemplate jdbcTemplate = databaseConfig.jdbcTemplate();
+        
         assertThat(jdbcTemplate).isNotNull();
-        assertThat(jdbcTemplate.getDataSource()).isEqualTo(testDataSource);
+        assertThat(jdbcTemplate.getDataSource()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should reuse same DataSource instance")
+    void shouldReuseSameDataSourceInstance() {
+        DataSource dataSource1 = databaseConfig.dataSource();
+        DataSource dataSource2 = databaseConfig.dataSource();
+        
+        assertThat(dataSource1).isSameAs(dataSource2);
     }
 
     @Test
     @DisplayName("Should establish database connection")
     void shouldEstablishDatabaseConnection() throws SQLException {
-        // When
-        try (Connection connection = testDataSource.getConnection()) {
-            // Then
+        DataSource dataSource = databaseConfig.dataSource();
+        
+        try (Connection connection = dataSource.getConnection()) {
             assertThat(connection).isNotNull();
             assertThat(connection.isClosed()).isFalse();
         }
@@ -66,32 +70,16 @@ class DatabaseConfigTest {
     @Test
     @DisplayName("Should support basic database operations")
     void shouldSupportBasicDatabaseOperations() {
-        // Given
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(testDataSource);
-
-        // When & Then
-        assertThat(jdbcTemplate.queryForObject("SELECT 1", Integer.class)).isEqualTo(1);
+        JdbcTemplate jdbcTemplate = databaseConfig.jdbcTemplate();
+        
+        Integer result = jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+        assertThat(result).isEqualTo(1);
     }
 
     @Test
-    @DisplayName("Should handle H2 database URL format")
-    void shouldHandleH2DatabaseUrlFormat() {
-        // Given
-        String h2Url = "jdbc:h2:mem:testdb";
-        DriverManagerDataSource ds = new DriverManagerDataSource();
-        ds.setUrl(h2Url);
-
-        // Then
-        assertThat(ds.getUrl()).contains("h2:mem:");
-    }
-
-    @Test
-    @DisplayName("Should support transaction-ready configuration")
-    void shouldSupportTransactionReadyConfiguration() {
-        // Given
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(testDataSource);
-
-        assertThat(jdbcTemplate).isNotNull();
-        assertThat(testDataSource).isNotNull();
+    @DisplayName("Should handle database initialization errors")
+    void shouldHandleDatabaseInitializationErrors() {
+        assertThatThrownBy(() -> databaseConfig.initializeDatabase())
+            .isInstanceOf(Exception.class);
     }
 }

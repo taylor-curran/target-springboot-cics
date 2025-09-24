@@ -1,11 +1,6 @@
 package com.cbsa.migration.dto.mapper;
 
-import com.cbsa.migration.dto.AccountRequestDto;
-import com.cbsa.migration.dto.AccountResponseDto;
-import com.cbsa.migration.dto.CustomerRequestDto;
-import com.cbsa.migration.dto.CustomerResponseDto;
-import com.cbsa.migration.dto.TransactionRequestDto;
-import com.cbsa.migration.dto.TransactionResponseDto;
+import com.cbsa.migration.dto.*;
 import com.cbsa.migration.model.Account;
 import com.cbsa.migration.model.Customer;
 import com.cbsa.migration.model.Transaction;
@@ -16,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -262,5 +259,284 @@ class DtoMapperTest {
 
         // Then
         assertThat(result.getStatus()).isEqualTo("COMPLETED");
+    }
+
+    @Test
+    @DisplayName("Should map Customer to CustomerResponseDto with accounts list")
+    void testToCustomerResponseDtoWithAccounts() {
+        // Given
+        Customer customer = Customer.builder()
+                .eyeCatcher("CUST")
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .address("123 Main St")
+                .dateOfBirth(LocalDate.of(1990, 5, 15))
+                .creditScore(750)
+                .build();
+
+        List<Account> accounts = Arrays.asList(
+                Account.builder()
+                        .eyeCatcher("ACCT")
+                        .sortCode("987654")
+                        .accountNumber("12345678")
+                        .customerNumber(1234567890L)
+                        .accountType("CURRENT")
+                        .availableBalance(new BigDecimal("1500.00"))
+                        .actualBalance(new BigDecimal("1500.00"))
+                        .build(),
+                Account.builder()
+                        .eyeCatcher("ACCT")
+                        .sortCode("987654")
+                        .accountNumber("87654321")
+                        .customerNumber(1234567890L)
+                        .accountType("SAVINGS")
+                        .availableBalance(new BigDecimal("5000.00"))
+                        .actualBalance(new BigDecimal("5000.00"))
+                        .build()
+        );
+
+        // When
+        CustomerResponseDto result = dtoMapper.toCustomerResponseDto(customer, accounts);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("John Doe");
+        assertThat(result.getAccounts()).hasSize(2);
+        assertThat(result.getAccountCount()).isEqualTo(2);
+        assertThat(result.getAccounts().get(0).getAccountNumber()).isEqualTo("12345678");
+        assertThat(result.getAccounts().get(1).getAccountNumber()).isEqualTo("87654321");
+    }
+
+    @Test
+    @DisplayName("Should map Account to AccountResponseDto with customer name")
+    void testToAccountResponseDtoWithCustomerName() {
+        // Given
+        Account account = Account.builder()
+                .eyeCatcher("ACCT")
+                .sortCode("987654")
+                .accountNumber("12345678")
+                .customerNumber(1234567890L)
+                .accountType("CURRENT")
+                .availableBalance(new BigDecimal("1500.00"))
+                .actualBalance(new BigDecimal("1500.00"))
+                .build();
+
+        String customerName = "Jane Smith";
+
+        // When
+        AccountResponseDto result = dtoMapper.toAccountResponseDto(account, customerName);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getAccountNumber()).isEqualTo("12345678");
+        assertThat(result.getCustomerName()).isEqualTo("Jane Smith");
+        assertThat(result.getStatus()).isEqualTo("ACTIVE");
+    }
+
+    @Test
+    @DisplayName("Should map Account to AccountSummaryDto")
+    void testToAccountSummaryDto() {
+        // Given
+        Account account = Account.builder()
+                .eyeCatcher("ACCT")
+                .sortCode("987654")
+                .accountNumber("12345678")
+                .customerNumber(1234567890L)
+                .accountType("SAVINGS")
+                .availableBalance(new BigDecimal("2500.00"))
+                .actualBalance(new BigDecimal("2500.00"))
+                .build();
+
+        // When
+        AccountSummaryDto result = dtoMapper.toAccountSummaryDto(account);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getAccountNumber()).isEqualTo("12345678");
+        assertThat(result.getAccountType()).isEqualTo("SAVINGS");
+        assertThat(result.getAvailableBalance()).isEqualByComparingTo(new BigDecimal("2500.00"));
+        assertThat(result.getActualBalance()).isEqualByComparingTo(new BigDecimal("2500.00"));
+        assertThat(result.getStatus()).isEqualTo("ACTIVE");
+    }
+
+    @Test
+    @DisplayName("Should map Customer to CreditScoreRequestDto")
+    void testToCreditScoreRequestDto() {
+        // Given
+        Customer customer = Customer.builder()
+                .eyeCatcher("CUST")
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .address("123 Main St")
+                .dateOfBirth(LocalDate.of(1990, 5, 15))
+                .creditScore(650)
+                .build();
+
+        // When
+        CreditScoreRequestDto result = dtoMapper.toCreditScoreRequestDto(customer);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getSortCode()).isEqualTo("987654");
+        assertThat(result.getCustomerNumber()).isEqualTo(1234567890L);
+        assertThat(result.getName()).isEqualTo("John Doe");
+        assertThat(result.getAddress()).isEqualTo("123 Main St");
+        assertThat(result.getDateOfBirth()).isEqualTo(LocalDate.of(1990, 5, 15));
+        assertThat(result.getCurrentCreditScore()).isEqualTo(650);
+    }
+
+    @Test
+    @DisplayName("Should update Customer from successful CreditScoreResponseDto")
+    void testUpdateCustomerFromCreditResponseSuccess() {
+        // Given
+        Customer customer = Customer.builder()
+                .eyeCatcher("CUST")
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .creditScore(650)
+                .build();
+
+        CreditScoreResponseDto response = CreditScoreResponseDto.builder()
+                .success(true)
+                .updatedCreditScore(720)
+                .scoreReviewDate(LocalDate.of(2023, 12, 1))
+                .build();
+
+        // When
+        Customer result = dtoMapper.updateCustomerFromCreditResponse(customer, response);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getCreditScore()).isEqualTo(720);
+        assertThat(result.getCreditScoreReviewDate()).isEqualTo(LocalDate.of(2023, 12, 1));
+    }
+
+    @Test
+    @DisplayName("Should not update Customer from failed CreditScoreResponseDto")
+    void testUpdateCustomerFromCreditResponseFailure() {
+        // Given
+        Customer customer = Customer.builder()
+                .eyeCatcher("CUST")
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .creditScore(650)
+                .build();
+
+        CreditScoreResponseDto response = CreditScoreResponseDto.builder()
+                .success(false)
+                .errorMessage("Credit check failed")
+                .build();
+
+        // When
+        Customer result = dtoMapper.updateCustomerFromCreditResponse(customer, response);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getCreditScore()).isEqualTo(650); // Should remain unchanged
+        assertThat(result.getCreditScoreReviewDate()).isNull(); // Should remain unchanged
+    }
+
+    @Test
+    @DisplayName("Should derive customer status for fair credit score")
+    void testCustomerStatusDerivationFairCredit() {
+        // Given
+        Customer customer = Customer.builder()
+                .eyeCatcher("CUST")
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .creditScore(600) // Fair credit
+                .build();
+
+        // When
+        CustomerResponseDto result = dtoMapper.toCustomerResponseDto(customer);
+
+        // Then
+        assertThat(result.getStatus()).isEqualTo("FAIR");
+    }
+
+    @Test
+    @DisplayName("Should derive customer status for null credit score")
+    void testCustomerStatusDerivationNullCredit() {
+        // Given
+        Customer customer = Customer.builder()
+                .eyeCatcher("CUST")
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .creditScore(null)
+                .build();
+
+        // When
+        CustomerResponseDto result = dtoMapper.toCustomerResponseDto(customer);
+
+        // Then
+        assertThat(result.getStatus()).isEqualTo("REVIEW_REQUIRED");
+    }
+
+    @Test
+    @DisplayName("Should derive account status for active account")
+    void testAccountStatusDerivationActive() {
+        // Given
+        Account account = Account.builder()
+                .eyeCatcher("ACCT")
+                .sortCode("987654")
+                .accountNumber("12345678")
+                .customerNumber(1234567890L)
+                .accountType("CURRENT")
+                .availableBalance(new BigDecimal("1000.00"))
+                .actualBalance(new BigDecimal("1000.00"))
+                .build();
+
+        // When
+        AccountResponseDto result = dtoMapper.toAccountResponseDto(account);
+
+        // Then
+        assertThat(result.getStatus()).isEqualTo("ACTIVE");
+    }
+
+    @Test
+    @DisplayName("Should handle null values in CustomerRequestDto")
+    void testToCustomerWithNullCreditScore() {
+        // Given
+        CustomerRequestDto request = CustomerRequestDto.builder()
+                .sortCode("987654")
+                .name("Jane Smith")
+                .address("456 Oak Ave")
+                .dateOfBirth(LocalDate.of(1985, 8, 20))
+                .creditScore(null) // Null credit score
+                .build();
+
+        // When
+        Customer result = dtoMapper.toCustomer(request);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getCreditScore()).isNull();
+    }
+
+    @Test
+    @DisplayName("Should handle null values in AccountRequestDto")
+    void testToAccountWithNullValues() {
+        // Given
+        AccountRequestDto request = AccountRequestDto.builder()
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .accountType("SAVINGS")
+                .interestRate(null) // Null interest rate
+                .overdraftLimit(null) // Null overdraft limit
+                .build();
+
+        // When
+        Account result = dtoMapper.toAccount(request);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getInterestRate()).isNull();
+        assertThat(result.getOverdraftLimit()).isNull();
     }
 }

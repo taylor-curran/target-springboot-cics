@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
  * Tests credit score processing business logic
  */
 @ExtendWith(MockitoExtension.class)
-class CreditAgencyServiceTestFixed {
+class CreditAgencyServiceTest {
 
     @Mock
     private CustomerRepository customerRepository;
@@ -124,16 +124,9 @@ class CreditAgencyServiceTestFixed {
                 .dateOfBirth(LocalDate.of(1990, 5, 15))
                 .build();
 
-        Customer customer = new Customer();
-        customer.setCustomerNumber(1234567890L);
-        customer.setSortCode("987654"); // Different sort code
-        customer.setName("John Doe");
-        customer.setAddress("123 Main St");
-        customer.setDateOfBirth(LocalDate.of(1990, 5, 15));
-        customer.setCreditScore(700);
-
+        // Repository should return empty for wrong sort code
         when(customerRepository.findById("123456", 1234567890L))
-                .thenReturn(Optional.of(customer));
+                .thenReturn(Optional.empty());
 
         // When
         CreditScoreResponseDto response = creditAgencyService.processCredit(request);
@@ -145,7 +138,7 @@ class CreditAgencyServiceTestFixed {
         assertThat(response.getCustomerNumber()).isEqualTo(1234567890L);
         assertThat(response.getUpdatedCreditScore()).isNull();
         assertThat(response.getProcessingTimeMs()).isGreaterThanOrEqualTo(0L);
-        assertThat(response.getErrorMessage()).isEqualTo("Customer data mismatch");
+        assertThat(response.getErrorMessage()).isEqualTo("Customer not found");
     }
 
     @Test
@@ -307,5 +300,263 @@ class CreditAgencyServiceTestFixed {
         assertThat(response.getSuccess()).isTrue();
         assertThat(response.getProcessingTimeMs()).isGreaterThanOrEqualTo(0L);
         assertThat(endTime - startTime).isGreaterThanOrEqualTo(response.getProcessingTimeMs());
+    }
+
+    @Test
+    @DisplayName("Should return error when name mismatch")
+    void shouldReturnErrorWhenNameMismatch() {
+        // Given
+        CreditScoreRequestDto request = CreditScoreRequestDto.builder()
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("Wrong Name")
+                .address("123 Main St")
+                .dateOfBirth(LocalDate.of(1990, 5, 15))
+                .build();
+
+        Customer customer = new Customer();
+        customer.setCustomerNumber(1234567890L);
+        customer.setSortCode("987654");
+        customer.setName("John Doe"); // Different name
+        customer.setAddress("123 Main St");
+        customer.setDateOfBirth(LocalDate.of(1990, 5, 15));
+        customer.setCreditScore(700);
+
+        when(customerRepository.findById("987654", 1234567890L))
+                .thenReturn(Optional.of(customer));
+
+        // When
+        CreditScoreResponseDto response = creditAgencyService.processCredit(request);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getSuccess()).isFalse();
+        assertThat(response.getErrorMessage()).isEqualTo("Customer data mismatch");
+    }
+
+    @Test
+    @DisplayName("Should return error when address mismatch")
+    void shouldReturnErrorWhenAddressMismatch() {
+        // Given
+        CreditScoreRequestDto request = CreditScoreRequestDto.builder()
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .address("Wrong Address")
+                .dateOfBirth(LocalDate.of(1990, 5, 15))
+                .build();
+
+        Customer customer = new Customer();
+        customer.setCustomerNumber(1234567890L);
+        customer.setSortCode("987654");
+        customer.setName("John Doe");
+        customer.setAddress("123 Main St"); // Different address
+        customer.setDateOfBirth(LocalDate.of(1990, 5, 15));
+        customer.setCreditScore(700);
+
+        when(customerRepository.findById("987654", 1234567890L))
+                .thenReturn(Optional.of(customer));
+
+        // When
+        CreditScoreResponseDto response = creditAgencyService.processCredit(request);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getSuccess()).isFalse();
+        assertThat(response.getErrorMessage()).isEqualTo("Customer data mismatch");
+    }
+
+    @Test
+    @DisplayName("Should return error when date of birth mismatch")
+    void shouldReturnErrorWhenDateOfBirthMismatch() {
+        // Given
+        CreditScoreRequestDto request = CreditScoreRequestDto.builder()
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .address("123 Main St")
+                .dateOfBirth(LocalDate.of(1985, 1, 1)) // Different date
+                .build();
+
+        Customer customer = new Customer();
+        customer.setCustomerNumber(1234567890L);
+        customer.setSortCode("987654");
+        customer.setName("John Doe");
+        customer.setAddress("123 Main St");
+        customer.setDateOfBirth(LocalDate.of(1990, 5, 15));
+        customer.setCreditScore(700);
+
+        when(customerRepository.findById("987654", 1234567890L))
+                .thenReturn(Optional.of(customer));
+
+        // When
+        CreditScoreResponseDto response = creditAgencyService.processCredit(request);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getSuccess()).isFalse();
+        assertThat(response.getErrorMessage()).isEqualTo("Customer data mismatch");
+    }
+
+    @Test
+    @DisplayName("Should handle repository save exception")
+    void shouldHandleRepositorySaveException() {
+        // Given
+        CreditScoreRequestDto request = CreditScoreRequestDto.builder()
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .address("123 Main St")
+                .dateOfBirth(LocalDate.of(1990, 5, 15))
+                .currentCreditScore(700)
+                .build();
+
+        Customer customer = new Customer();
+        customer.setCustomerNumber(1234567890L);
+        customer.setSortCode("987654");
+        customer.setName("John Doe");
+        customer.setAddress("123 Main St");
+        customer.setDateOfBirth(LocalDate.of(1990, 5, 15));
+        customer.setCreditScore(700);
+
+        when(customerRepository.findById("987654", 1234567890L))
+                .thenReturn(Optional.of(customer));
+        when(customerRepository.save(any(Customer.class)))
+                .thenThrow(new RuntimeException("Database error"));
+
+        // When
+        CreditScoreResponseDto response = creditAgencyService.processCredit(request);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getSuccess()).isFalse();
+        assertThat(response.getErrorMessage()).contains("error");
+    }
+
+    @Test
+    @DisplayName("Should test with delay enabled")
+    void shouldTestWithDelayEnabled() {
+        CreditAgencyService delayEnabledService = new CreditAgencyService(
+            customerRepository,
+            true,  // delayEnabled = true
+            1,     // maxDelaySeconds = 1 for faster test
+            300,   // minScore
+            850    // maxScore
+        );
+
+        CreditScoreRequestDto request = CreditScoreRequestDto.builder()
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .address("123 Main St")
+                .dateOfBirth(LocalDate.of(1990, 5, 15))
+                .currentCreditScore(700)
+                .build();
+
+        Customer customer = new Customer();
+        customer.setCustomerNumber(1234567890L);
+        customer.setSortCode("987654");
+        customer.setName("John Doe");
+        customer.setAddress("123 Main St");
+        customer.setDateOfBirth(LocalDate.of(1990, 5, 15));
+        customer.setCreditScore(700);
+
+        when(customerRepository.findById("987654", 1234567890L))
+                .thenReturn(Optional.of(customer));
+        when(customerRepository.save(any(Customer.class)))
+                .thenAnswer(invocation -> {
+                    Customer savedCustomer = invocation.getArgument(0);
+                    savedCustomer.setCreditScoreReviewDate(LocalDate.now());
+                    return savedCustomer;
+                });
+
+        // When
+        long startTime = System.currentTimeMillis();
+        CreditScoreResponseDto response = delayEnabledService.processCredit(request);
+        long endTime = System.currentTimeMillis();
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getSuccess()).isTrue();
+        assertThat(response.getProcessingTimeMs()).isGreaterThanOrEqualTo(0L);
+        assertThat(endTime - startTime).isGreaterThanOrEqualTo(response.getProcessingTimeMs());
+    }
+
+    @Test
+    @DisplayName("Should handle edge case with minimum score boundary")
+    void shouldHandleMinimumScoreBoundary() {
+        // Given
+        CreditScoreRequestDto request = CreditScoreRequestDto.builder()
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .address("123 Main St")
+                .dateOfBirth(LocalDate.of(1990, 5, 15))
+                .currentCreditScore(299) // Below minimum
+                .build();
+
+        Customer customer = new Customer();
+        customer.setCustomerNumber(1234567890L);
+        customer.setSortCode("987654");
+        customer.setName("John Doe");
+        customer.setAddress("123 Main St");
+        customer.setDateOfBirth(LocalDate.of(1990, 5, 15));
+        customer.setCreditScore(299);
+
+        when(customerRepository.findById("987654", 1234567890L))
+                .thenReturn(Optional.of(customer));
+        when(customerRepository.save(any(Customer.class)))
+                .thenAnswer(invocation -> {
+                    Customer savedCustomer = invocation.getArgument(0);
+                    savedCustomer.setCreditScoreReviewDate(LocalDate.now());
+                    return savedCustomer;
+                });
+
+        // When
+        CreditScoreResponseDto response = creditAgencyService.processCredit(request);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getSuccess()).isTrue();
+        assertThat(response.getUpdatedCreditScore()).isBetween(300, 850);
+    }
+
+    @Test
+    @DisplayName("Should handle edge case with maximum score boundary")
+    void shouldHandleMaximumScoreBoundary() {
+        // Given
+        CreditScoreRequestDto request = CreditScoreRequestDto.builder()
+                .sortCode("987654")
+                .customerNumber(1234567890L)
+                .name("John Doe")
+                .address("123 Main St")
+                .dateOfBirth(LocalDate.of(1990, 5, 15))
+                .currentCreditScore(851) // Above maximum
+                .build();
+
+        Customer customer = new Customer();
+        customer.setCustomerNumber(1234567890L);
+        customer.setSortCode("987654");
+        customer.setName("John Doe");
+        customer.setAddress("123 Main St");
+        customer.setDateOfBirth(LocalDate.of(1990, 5, 15));
+        customer.setCreditScore(851);
+
+        when(customerRepository.findById("987654", 1234567890L))
+                .thenReturn(Optional.of(customer));
+        when(customerRepository.save(any(Customer.class)))
+                .thenAnswer(invocation -> {
+                    Customer savedCustomer = invocation.getArgument(0);
+                    savedCustomer.setCreditScoreReviewDate(LocalDate.now());
+                    return savedCustomer;
+                });
+
+        // When
+        CreditScoreResponseDto response = creditAgencyService.processCredit(request);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getSuccess()).isTrue();
+        assertThat(response.getUpdatedCreditScore()).isBetween(300, 850);
     }
 }
