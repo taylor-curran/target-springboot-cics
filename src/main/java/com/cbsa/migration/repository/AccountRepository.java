@@ -59,6 +59,14 @@ public interface AccountRepository {
     int count();
 
     /**
+     * Count accounts for a customer
+     * 
+     * @param customerNumber the customer number
+     * @return the number of accounts
+     */
+    int countByCustomerNumber(Long customerNumber);
+
+    /**
      * Find all accounts for the specified sort code.
      *
      * @param sortCode the branch sort code

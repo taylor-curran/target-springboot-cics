@@ -1,47 +1,39 @@
 package com.cbsa.migration.repository;
 
-import com.cbsa.migration.model.Control;
-
-import java.util.Optional;
-
 /**
- * Repository interface for Control operations
+ * Repository interface for Control table operations
  */
 public interface ControlRepository {
 
     /**
-     * Get the control record (only one exists in the system)
+     * Get a numeric control value by name
      * 
-     * @return the control record if found
+     * @param controlName the control name
+     * @return the numeric value, or null if not found
      */
-    Optional<Control> getControl();
+    Integer getControlValueNum(String controlName);
     
     /**
-     * Save the control record
+     * Update a numeric control value by name
      * 
-     * @param control the control record to save
-     * @return the saved control record
+     * @param controlName the control name
+     * @param value the new numeric value
      */
-    Control save(Control control);
+    void updateControlValueNum(String controlName, Integer value);
     
     /**
-     * Increment and get the next customer number
+     * Get a string control value by name
      * 
-     * @return the next customer number
+     * @param controlName the control name
+     * @return the string value, or null if not found
      */
-    Long getNextCustomerNumber();
+    String getControlValueStr(String controlName);
     
     /**
-     * Increment and get the next account number
+     * Update a string control value by name
      * 
-     * @return the next account number
+     * @param controlName the control name
+     * @param value the new string value
      */
-    Integer getNextAccountNumber();
-    
-    /**
-     * Initialize the control record with default values if it doesn't exist
-     * 
-     * @return the initialized control record
-     */
-    Control initializeControlRecord();
+    void updateControlValueStr(String controlName, String value);
 }
