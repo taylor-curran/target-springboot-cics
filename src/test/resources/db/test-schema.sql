@@ -95,13 +95,13 @@ CREATE TABLE IF NOT EXISTS application_error (
     transaction_id VARCHAR(255),
     error_code VARCHAR(255),
     program_name VARCHAR(255) NOT NULL,
-    error_message TEXT,
-    stack_trace TEXT,
+    error_message VARCHAR(255),
+    stack_trace VARCHAR(255),
     response_code VARCHAR(255),      -- COBOL RESP code
     response2_code VARCHAR(255),     -- COBOL RESP2 code
     sql_code VARCHAR(255),           -- COBOL SQLCODE
-    freeform_text TEXT,              -- COBOL freeform area (up to 600 chars)
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    freeform_text VARCHAR(255),      -- COBOL freeform area (up to 600 chars)
+    created_at VARCHAR(255) DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes for application_error table

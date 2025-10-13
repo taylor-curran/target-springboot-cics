@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS account (
 );
 
 -- Transaction table - migrated from PROCTRAN.cpy DB2 table
-CREATE TABLE IF NOT EXISTS `bank_transaction` (
+CREATE TABLE IF NOT EXISTS bank_transaction (
     eye_catcher TEXT NOT NULL,
     logically_deleted INTEGER NOT NULL DEFAULT 0, -- Boolean (0/1) for logical delete flag
     sort_code TEXT NOT NULL,
@@ -83,8 +83,8 @@ CREATE INDEX IF NOT EXISTS idx_transaction_date_amount ON bank_transaction(trans
 CREATE INDEX IF NOT EXISTS idx_transaction_deleted ON bank_transaction(logically_deleted);
 
 -- Index for transfer transactions
-CREATE INDEX IF NOT EXISTS idx_transaction_transfer ON bank_transaction(target_sort_code, target_account_number) 
-    WHERE target_sort_code IS NOT NULL;
+-- Note: Partial index WHERE clause removed for H2 compatibility
+CREATE INDEX IF NOT EXISTS idx_transaction_transfer ON bank_transaction(target_sort_code, target_account_number);
 
 -- Application error table - migrated from COBOL ABNDPROC program
 -- Stores application errors and exceptions for centralized monitoring

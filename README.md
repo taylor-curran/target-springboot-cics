@@ -122,12 +122,17 @@ Response: {"status": "UP", "database": "connected", "tables": {...}}
 
 ### **Run Tests**
 ```bash
-# Unit and integration tests
-mvn test
+# Unit and integration tests (with Java 17)
+JAVA_HOME=/opt/homebrew/Cellar/openjdk@17/17.0.16/libexec/openjdk.jdk/Contents/Home mvn test
 
-# With coverage reporting (when configured)
-mvn clean verify
+# With coverage reporting via JaCoCo
+JAVA_HOME=/opt/homebrew/Cellar/openjdk@17/17.0.16/libexec/openjdk.jdk/Contents/Home mvn clean test jacoco:report
 ```
+
+### **⚠️ Important: Schema Synchronization**
+We maintain separate schemas for production (SQLite) and testing (H2). The `DatabaseSchemaConsistencyTest` ensures they stay synchronized. **This test will fail if schemas diverge** - update both schemas when making changes!
+
+📚 **See [TESTING.md](TESTING.md) for comprehensive testing documentation**
 
 ## 📋 Development Notes
 
