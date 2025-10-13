@@ -1,5 +1,78 @@
 # Testing Guide for CBSA Java Migration
 
+## 🎯 Quick Start: Check Your Coverage
+
+```bash
+# Run this command to check if your code meets coverage requirements:
+mvn verify
+
+# Or with Java 17 explicitly (if not your default):
+JAVA_HOME=/opt/homebrew/Cellar/openjdk@17/17.0.16/libexec/openjdk.jdk/Contents/Home mvn verify
+```
+
+**What happens when you run `mvn verify`:**
+1. Compiles your code
+2. Runs all tests
+3. Generates JaCoCo coverage report
+4. **Checks coverage against layer-specific thresholds**
+5. **Fails the build if any layer is below its required threshold**
+
+## 📊 Layer-Based Coverage Analysis
+
+This project uses **layer-based coverage requirements** - different parts of the application have different coverage thresholds based on their criticality. JaCoCo enforces these requirements automatically during the build.
+
+### **Coverage Requirements by Layer**
+
+| Layer | Required Coverage | Why This Threshold? | Current Status |
+|-------|------------------|-------------------|----------------|
+| **Service** | 80% instructions, 70% branches | Critical business logic - must be thoroughly tested | ❌ 2% |
+| **Repository** | 70% instructions | Database operations need validation | ❌ 55% |
+| **Controller** | 60% instructions | REST endpoints & validation | ❌ 10% |
+| **Model** | 50% instructions | Entity validation & business rules | ✅ 66% |
+| **DTO/Mapper** | 40% instructions | Mostly generated/boilerplate code | ❌ 13% |
+| **Config** | 0% (optional) | Spring auto-configuration | ✅ N/A |
+| **Overall Project** | 50% minimum | Safety net for entire codebase | ❌ 33% |
+
+### **Understanding Layer Coverage**
+
+- **Service Layer** (80% required): Contains your business logic from migrated COBOL programs. This is the most critical layer.
+- **Repository Layer** (70% required): Database access code that replaced VSAM/DB2. Must be tested with real database.
+- **Controller Layer** (60% required): REST endpoints that replaced CICS transactions. Focus on request/response validation.
+- **Model/Entity Layer** (50% required): Data structures. Test validation logic, not just getters/setters.
+- **DTO/Mapper Layer** (40% required): Data transfer objects. Lower threshold since mostly boilerplate.
+- **Config Layer** (0% optional): Spring configuration. Usually doesn't need testing.
+
+### **How to Fix Coverage Violations**
+
+When `mvn verify` fails, it will show exactly which layers need more tests:
+
+```
+[WARNING] Rule violated for package com.cbsa.migration.service: 
+         instructions covered ratio is 0.02, but expected minimum is 0.80
+```
+
+This means: Add more service tests! Focus on the layers with the biggest gaps first.
+
+### **Viewing Detailed Coverage Reports**
+
+After running tests, you can view detailed coverage information:
+
+```bash
+# Generate coverage report
+mvn clean test jacoco:report
+
+# View HTML report (open in browser)
+open target/site/jacoco/index.html
+
+# Check coverage without running tests (if tests were already run)
+mvn jacoco:check
+```
+
+The HTML report shows:
+- **Green**: Fully covered code
+- **Yellow**: Partially covered (some branches missed)
+- **Red**: Uncovered code that needs tests
+
 ## 🧪 Testing Overview
 
 This project uses a comprehensive testing strategy to ensure reliability during the COBOL-to-Java migration.
@@ -168,9 +241,8 @@ void testSave() {
 - **Never** let tests touch production data
 
 ### **Coverage Requirements**
-- **Minimum**: 50% instruction coverage (enforced by JaCoCo)
-- **Target**: 80%+ for critical business logic
-- **Excluded**: Configuration classes, DTOs with only getters/setters
+
+Coverage requirements are enforced per layer - see the **Layer-Based Coverage Analysis** section at the top of this document for details.
 
 ## 📝 Adding New Tests
 
