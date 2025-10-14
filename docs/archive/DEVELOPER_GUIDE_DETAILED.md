@@ -2,11 +2,12 @@
 
 ## 📋 Quick Reference
 
-**Original System:** `/og-cics-cobol-app` (COBOL/CICS)  
-**New System:** `/target-springboot-cics` (Java 17/Spring Boot)  
+**Original System:** `og-cics-cobol-app` (COBOL/CICS)  
+**New System:** `target-springboot-cics` (Java 17/Spring Boot)  
 **Check Coverage:** `mvn verify`  
 **Run Tests:** `mvn test`  
 **Start App:** `mvn spring-boot:run`  
+**Reset Data:** `rm banking.db && mvn spring-boot:run`  
 
 ---
 
@@ -17,13 +18,14 @@ You're migrating a CICS banking application from COBOL to Java Spring Boot.
 ### Migration Status
 - **Source:** `og-cics-cobol-app/` - Original COBOL programs
 - **Target:** `target-springboot-cics/` - New Java implementation
-- **Progress:** 4/29 programs migrated (14%)
+- **Progress:** 5/29 programs migrated (17%)
 
 ### Completed Migrations
 ✅ `GETCOMPY.cbl` → `CompanyInfoService.java`  
 ✅ `GETSCODE.cbl` → `SortCodeService.java`  
 ✅ `CRDTAGY1.cbl` → `CreditAgencyService.java`  
 ✅ `ABNDPROC.cbl` → `ErrorLoggingService.java`  
+✅ `BANKDATA.cbl` → `BankDataGenerator.java` + Auto-initialization  
 
 ---
 
@@ -36,7 +38,8 @@ target-springboot-cics/
 │   ├── service/        # Business logic (replace COBOL programs)
 │   ├── repository/     # Data access (replace VSAM/DB2)
 │   ├── model/          # Entities (replace COBOL copybooks)
-│   └── dto/            # Request/Response objects
+│   ├── dto/            # Request/Response objects
+│   └── datagen/        # Test data generation (from BANKDATA.cbl)
 ├── src/main/resources/
 │   └── db/schema.sql   # SQLite production schema
 └── src/test/resources/
@@ -47,6 +50,159 @@ target-springboot-cics/
 
 ## 🗄️ Database Management
 
+### Local Development Database
+
+#### **Current Setup**
+- **Database:** SQLite file `banking.db` (created in project root)
+- **Auto-creation:** Database and schema created automatically on app startup
+- **Auto-population:** Test data automatically generated if DB is empty (NEW!)
+- **Not in Git:** Each developer has their own local database
+- **Generated data:** 100 customers, ~275 accounts, ~2500 transactions
+
+#### **Starting Fresh**
+```bash
+# Delete existing database
+rm banking.db
+
+# Start the application - database auto-creates and auto-populates
+mvn spring-boot:run
+
+# Database now has 100 customers with accounts and transactions!
+```
+
+#### **Checking Database Contents**
+```bash
+# Count records
+sqlite3 banking.db "SELECT 'Customers: ' || COUNT(*) FROM customer 
+UNION ALL SELECT 'Accounts: ' || COUNT(*) FROM account 
+UNION ALL SELECT 'Transactions: ' || COUNT(*) FROM bank_transaction;"
+
+# View sample customers
+sqlite3 banking.db "SELECT * FROM customer LIMIT 5;"
+
+# View account balances
+sqlite3 banking.db "SELECT account_number, actual_balance FROM account;"
+```
+
+#### **Backing Up Your Test Data**
+```bash
+# Backup your current database
+cp banking.db banking.db.backup
+
+# Restore from backup
+cp banking.db.backup banking.db
+```
+
+### Test Data Management
+
+#### **Current State**
+- ✅ **Auto-generation** - Data automatically generated on startup if DB is empty
+- ✅ **COBOL Migrated** - `BANKDATA.cbl` migrated to `BankDataGenerator.java`
+- ✅ **Enhanced** - Now generates transactions (not in original COBOL)
+- 🧪 **Test environment** uses H2 in-memory DB (fresh each run)
+- 💾 **Local development** gets consistent test data automatically
+
+#### **Creating Test Data via API**
+```bash
+# Currently available endpoints:
+
+# Check credit score (creates test transaction)
+curl -X POST http://localhost:8085/api/credit-agency/check \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customerId": "12345",
+    "requestType": "SCORE_CHECK"
+  }'
+
+# Log an error (creates error record)
+curl -X POST http://localhost:8085/api/error/log \
+  -H "Content-Type: application/json" \
+  -d '{
+    "programName": "TEST_PROGRAM",
+    "errorMessage": "Test error for development"
+  }'
+
+# Note: Customer and Account creation APIs not yet migrated from COBOL
+# Use SQL inserts below for now
+```
+
+#### **Creating Test Data via SQL**
+```bash
+# Insert sample customer
+sqlite3 banking.db "INSERT INTO customer VALUES (
+  'CUST', '999999', 10001, 'Test User', '456 Test Ave', 
+  '1985-06-15', 700, '2024-01-01'
+);"
+
+# Insert sample account
+sqlite3 banking.db "INSERT INTO account VALUES (
+  'ACCT', 10001, '999999', '00000001', 'CHECKING', 
+  0.01, '2024-01-01', 1000, NULL, NULL, 5000.00, 5000.00
+);"
+
+# Initialize control record (required for some operations)
+sqlite3 banking.db "INSERT OR REPLACE INTO control VALUES (
+  'CONTROL', 0, 0, 0, 0
+);"
+```
+
+#### **Quick Development Reset**
+```bash
+# Full reset script (save as reset-db.sh)
+#!/bin/bash
+echo "Resetting database..."
+rm -f banking.db
+mvn spring-boot:run &
+sleep 5
+kill %1
+echo "Database reset complete. Run 'mvn spring-boot:run' to start."
+```
+
+### Automatic Data Generation Configuration
+
+#### **Default Settings (application.properties)**
+```properties
+data.generation.enabled=true              # Enable auto-generation
+data.generation.customer.start=1          # Starting customer number
+data.generation.customer.end=100          # Ending customer number
+data.generation.customer.step=1           # Customer increment
+data.generation.seed=12345                # Random seed for reproducibility
+data.generation.transaction.days=30       # Days of transaction history
+```
+
+#### **Test Settings (application-test.properties)**
+```properties
+data.generation.customer.end=10           # Only 10 customers for faster tests
+data.generation.transaction.days=7        # Less transaction history
+```
+
+#### **Manual Generation Command**
+```bash
+# Force regenerate data with custom parameters
+mvn spring-boot:run -Dspring-boot.run.arguments="generate-data --start=1 --end=50 --seed=99999"
+```
+
+### Original COBOL Data Generation
+
+The original COBOL application has a sophisticated test data generator:
+
+#### **BANKDATA.cbl Program**
+- **Purpose:** Batch program to populate CUSTOMER (VSAM) and ACCOUNT (DB2)
+- **Parameters:** `fffffff,ttttttt,ssssss,rrrrrr`
+  - `fffffff` - Starting key for generation
+  - `ttttttt` - Last key to generate
+  - `ssssss` - Step size for generation
+  - `rrrrrr` - Random seed for variations
+- **Not yet migrated** to Java - potential future enhancement
+
+#### **Future Improvements Needed**
+1. **Migrate BANKDATA.cbl** to Java data generator utility
+2. **Create seed SQL scripts** with standard test data
+3. **Add data fixtures** for integration tests
+4. **Implement reset endpoint** for development (`/api/admin/reset-data`)
+5. **Create data profiles** (minimal, standard, stress-test)
+WIP END
+
 ### Critical: Two Schema Files
 ⚠️ **ALWAYS maintain both schemas in sync:**
 1. **Production:** `src/main/resources/db/schema.sql` (SQLite)
@@ -54,20 +210,28 @@ target-springboot-cics/
 
 ### Schema Change Process
 ```bash
-# 1. FIRST update test schema (H2 compatible)
+# 1. FIRST update test schema (H2 compatible) for your development
 edit src/test/resources/db/test-schema.sql
 
-# 2. THEN update production schema (SQLite)
+# 2. Continue development with your tests
+mvn test
+# Note: DatabaseSchemaConsistencyTest will FAIL - this is expected!
+
+# 3. When you're confident in your changes, update production schema
 edit src/main/resources/db/schema.sql
 
-# 3. Run consistency test - MUST PASS
+# 4. Verify schemas are now in sync
 mvn test -Dtest=DatabaseSchemaConsistencyTest
+# This should now PASS
 
-# 4. Run all tests
+# 5. Run all tests
 mvn test
 ```
 
-**The `DatabaseSchemaConsistencyTest` will FAIL if schemas diverge - this is intentional!**
+**The `DatabaseSchemaConsistencyTest` acts as a notification system:**
+- ✅ **Failing test = Expected** during development (schemas intentionally out of sync)
+- ❌ **Failing test = Problem** if you didn't expect it (schemas drifted unexpectedly)
+- ✅ **Passing test = Good** when you're ready to commit (schemas are in sync)
 
 ### Database Structure (from COBOL)
 - **Eye-catchers:** String prefixes for record identification (e.g., 'CUST', 'ACCT')

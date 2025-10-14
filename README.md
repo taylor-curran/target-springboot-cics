@@ -1,6 +1,6 @@
 # CICS Banking Sample Application - Java Migration
 
-> 📖 **For developers:** See [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) for a complete guide on working with this migration project.
+> 📖 **For developers:** See [MIGRATION_PLAYBOOK.md](MIGRATION_PLAYBOOK.md) for the practical migration guide.
 
 ## 🏦 Overview
 Modern Java implementation of the CICS Banking Sample Application (CBSA), migrating 29 COBOL programs to Spring Boot microservices architecture.
