@@ -31,13 +31,11 @@ public class AccountRequestDto {
     /**
      * Customer number who will own this account
      */
-    @NotNull(message = "Customer number is required")
     private Long customerNumber;
     
     /**
      * Branch sort code
      */
-    @NotBlank(message = "Sort code is required")
     @Size(min = 6, max = 6, message = "Sort code must be exactly 6 characters")
     private String sortCode;
     
