@@ -1,0 +1,897 @@
+
+context:
+  status:
+    overall_progress_percent: 17
+    programs_total: 29
+    programs_migrated: 5
+    programs_remaining: 24
+    current_phase: "Customer Operations"
+    last_updated: "2025-10-25"
+    notes: |
+      Foundation phase complete (5/29 programs migrated).
+      Starting Customer Operations phase.
+      
+      Migrated programs:
+      - ABNDPROC → ErrorLoggingService
+      - GETCOMPY → CompanyInfoService  
+      - GETSCODE → SortCodeService
+      - CRDTAGY1 → CreditAgencyService
+      - One more service to identify
+      
+      Key insights:
+      - Most programs depend on ABNDPROC for error handling
+      - Screen programs (BNK1*) depend on backend services
+      - Customer operations must precede account operations
+      - Transaction operations need both customer and account services
+
+metadata:
+  project_name: "CICS Banking Sample Application Migration"
+  source_repo: "taylor-curran/og-cics-cobol-app"
+  target_repo: "taylor-curran/target-springboot-cics"
+  migration_start_date: "2025-01-01"
+  estimated_completion_date: "2025-06-30"
+  team_size: 3
+  technology_stack:
+    source: "COBOL, CICS, DB2"
+    target: "Java 17, Spring Boot 2.7.18, SQLite, Maven"
+  coverage_targets:
+    service: 80
+    repository: 70
+    controller: 60
+    model: 50
+    dto: 40
+
+phases:
+  - id: "foundation"
+    name: "Foundation Phase"
+    description: "Core utilities and error handling - foundational components used by all programs"
+    status: "completed"
+    progress_percent: 100
+    estimated_duration_days: 15
+    
+  - id: "customer-operations"
+    name: "Customer Operations Phase"
+    description: "Customer CRUD operations and inquiry services"
+    status: "pending"
+    progress_percent: 0
+    estimated_duration_days: 20
+    dependencies: ["foundation"]
+    
+  - id: "account-operations"
+    name: "Account Operations Phase"
+    description: "Account CRUD operations and inquiry services"
+    status: "pending"
+    progress_percent: 0
+    estimated_duration_days: 25
+    dependencies: ["customer-operations"]
+    
+  - id: "transaction-operations"
+    name: "Transaction Operations Phase"
+    description: "Fund transfer and debit/credit transaction services"
+    status: "pending"
+    progress_percent: 0
+    estimated_duration_days: 10
+    dependencies: ["account-operations"]
+    
+  - id: "credit-agency"
+    name: "Credit Agency Phase"
+    description: "Credit agency integration and simulation services"
+    status: "in-progress"
+    progress_percent: 20
+    estimated_duration_days: 12
+    dependencies: ["customer-operations"]
+    
+  - id: "screen-programs"
+    name: "Screen Programs Phase"
+    description: "REST API controllers for frontend CICS screens"
+    status: "pending"
+    progress_percent: 0
+    estimated_duration_days: 27
+    dependencies: ["customer-operations", "account-operations", "transaction-operations"]
+    
+  - id: "testing"
+    name: "Integration Testing Phase"
+    description: "End-to-end testing, performance testing, and validation"
+    status: "pending"
+    progress_percent: 0
+    estimated_duration_days: 20
+    dependencies: ["screen-programs"]
+    
+  - id: "documentation"
+    name: "Documentation Phase"
+    description: "API documentation, migration guides, and operational runbooks"
+    status: "in-progress"
+    progress_percent: 30
+    estimated_duration_days: 10
+    dependencies: []
+
+tasks:
+  
+  - id: "foundation-abndproc"
+    name: "Migrate ABNDPROC - Error Logging Service"
+    description: |
+      Migrate COBOL ABNDPROC program to Java ErrorLoggingService.
+      This is the error handling utility used by all other programs.
+      Critical foundation component.
+    cobol_program: "ABNDPROC.cbl"
+    target_component: "ErrorLoggingService.java"
+    phase: "foundation"
+    status: "completed"
+    priority: "high"
+    estimated_effort_hours: 16
+    actual_effort_hours: 18
+    dependencies: []
+    acceptance_criteria:
+      - "Service logs errors to APPLICATION_ERROR table"
+      - "Handles error-while-logging-error gracefully"
+      - "Unit tests achieve 80%+ coverage"
+      - "Integration tests validate database writes"
+      - "Service methods match COBOL ABNDPROC behavior"
+    notes: "Completed. All error handling patterns migrated successfully."
+    
+  - id: "foundation-getcompy"
+    name: "Migrate GETCOMPY - Company Info Service"
+    description: |
+      Migrate COBOL GETCOMPY program to Java CompanyInfoService.
+      Provides company information lookup functionality.
+    cobol_program: "GETCOMPY.cbl"
+    target_component: "CompanyInfoService.java"
+    phase: "foundation"
+    status: "completed"
+    priority: "medium"
+    estimated_effort_hours: 12
+    actual_effort_hours: 14
+    dependencies: ["foundation-abndproc"]
+    acceptance_criteria:
+      - "Service retrieves company information"
+      - "REST endpoint /api/company/{id} operational"
+      - "Unit tests achieve 80%+ coverage"
+      - "Error handling via ErrorLoggingService"
+    notes: "Completed. Company lookup functionality operational."
+    
+  - id: "foundation-getscode"
+    name: "Migrate GETSCODE - Sort Code Service"
+    description: |
+      Migrate COBOL GETSCODE program to Java SortCodeService.
+      Provides sort code validation and lookup.
+    cobol_program: "GETSCODE.cbl"
+    target_component: "SortCodeService.java"
+    phase: "foundation"
+    status: "completed"
+    priority: "medium"
+    estimated_effort_hours: 12
+    actual_effort_hours: 13
+    dependencies: ["foundation-abndproc"]
+    acceptance_criteria:
+      - "Service validates and retrieves sort codes"
+      - "REST endpoint /api/sortcode/{code} operational"
+      - "Unit tests achieve 80%+ coverage"
+      - "Error handling via ErrorLoggingService"
+    notes: "Completed. Sort code validation operational."
+    
+  - id: "foundation-bankdata"
+    name: "Migrate BANKDATA - Data Initialization"
+    description: |
+      Migrate COBOL BANKDATA program to Java initialization service.
+      Handles bank data initialization and setup.
+      Need to investigate exact functionality.
+    cobol_program: "BANKDATA.cbl"
+    target_component: "BankDataService.java"
+    phase: "foundation"
+    status: "pending"
+    priority: "low"
+    estimated_effort_hours: 16
+    dependencies: ["foundation-abndproc"]
+    acceptance_criteria:
+      - "Data initialization logic migrated"
+      - "Service integrates with Spring Boot startup"
+      - "Unit tests achieve 70%+ coverage"
+      - "Database seeding functionality operational"
+    notes: "Low priority. Investigate BANKDATA.cbl functionality first."
+
+  
+  - id: "credit-crdtagy1"
+    name: "Migrate CRDTAGY1 - Credit Agency Service"
+    description: |
+      Migrate COBOL CRDTAGY1 program to Java CreditAgencyService.
+      Simulates external credit agency with random delays and scores.
+      Includes customer validation and credit score updates.
+    cobol_program: "CRDTAGY1.cbl"
+    target_component: "CreditAgencyService.java"
+    phase: "credit-agency"
+    status: "completed"
+    priority: "high"
+    estimated_effort_hours: 20
+    actual_effort_hours: 22
+    dependencies: ["foundation-abndproc", "customer-inqcust"]
+    acceptance_criteria:
+      - "Random delay simulation (0-3 seconds)"
+      - "Credit score generation (1-999)"
+      - "Customer validation against request data"
+      - "Credit score and review date updates"
+      - "Unit tests achieve 80%+ coverage"
+      - "REST endpoint operational"
+    notes: "Completed. Credit agency simulation operational."
+    
+  - id: "credit-crdtagy2"
+    name: "Migrate CRDTAGY2 - Credit Agency Variant 2"
+    description: |
+      Migrate COBOL CRDTAGY2 program. May be variant of CRDTAGY1
+      or separate credit agency integration point.
+      Investigate if covered by CreditAgencyService.
+    cobol_program: "CRDTAGY2.cbl"
+    target_component: "CreditAgencyService.java or CreditAgency2Service.java"
+    phase: "credit-agency"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 18
+    dependencies: ["credit-crdtagy1"]
+    acceptance_criteria:
+      - "Determine if separate service needed or configuration variant"
+      - "If separate: implement distinct credit agency logic"
+      - "If variant: add configuration support to CreditAgencyService"
+      - "Unit tests achieve 80%+ coverage"
+    notes: "Investigate relationship to CRDTAGY1. May share implementation."
+    
+  - id: "credit-crdtagy3"
+    name: "Migrate CRDTAGY3 - Credit Agency Variant 3"
+    description: |
+      Migrate COBOL CRDTAGY3 program. Likely variant of CRDTAGY1.
+    cobol_program: "CRDTAGY3.cbl"
+    target_component: "CreditAgencyService.java or CreditAgency3Service.java"
+    phase: "credit-agency"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 18
+    dependencies: ["credit-crdtagy1"]
+    acceptance_criteria:
+      - "Determine if separate service needed"
+      - "Implement distinct logic if required"
+      - "Unit tests achieve 80%+ coverage"
+    notes: "Investigate relationship to CRDTAGY1."
+    
+  - id: "credit-crdtagy4"
+    name: "Migrate CRDTAGY4 - Credit Agency Variant 4"
+    description: |
+      Migrate COBOL CRDTAGY4 program. Likely variant of CRDTAGY1.
+    cobol_program: "CRDTAGY4.cbl"
+    target_component: "CreditAgencyService.java or CreditAgency4Service.java"
+    phase: "credit-agency"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 18
+    dependencies: ["credit-crdtagy1"]
+    acceptance_criteria:
+      - "Determine if separate service needed"
+      - "Implement distinct logic if required"
+      - "Unit tests achieve 80%+ coverage"
+    notes: "Investigate relationship to CRDTAGY1."
+    
+  - id: "credit-crdtagy5"
+    name: "Migrate CRDTAGY5 - Credit Agency Variant 5"
+    description: |
+      Migrate COBOL CRDTAGY5 program. Likely variant of CRDTAGY1.
+    cobol_program: "CRDTAGY5.cbl"
+    target_component: "CreditAgencyService.java or CreditAgency5Service.java"
+    phase: "credit-agency"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 18
+    dependencies: ["credit-crdtagy1"]
+    acceptance_criteria:
+      - "Determine if separate service needed"
+      - "Implement distinct logic if required"
+      - "Unit tests achieve 80%+ coverage"
+    notes: "Investigate relationship to CRDTAGY1."
+
+  
+  - id: "customer-inqcust"
+    name: "Migrate INQCUST - Customer Inquiry Service"
+    description: |
+      Migrate COBOL INQCUST program to Java CustomerInquiryService.
+      Retrieves customer information by customer number and sort code.
+      Returns customer data or low-values if not found.
+      Foundation for other customer operations.
+    cobol_program: "INQCUST.cbl"
+    target_component: "CustomerInquiryService.java"
+    phase: "customer-operations"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 24
+    dependencies: ["foundation-abndproc"]
+    acceptance_criteria:
+      - "Service retrieves customer by sort code and customer number"
+      - "Returns Optional<Customer> or DTO with customer data"
+      - "Handles not-found cases gracefully"
+      - "Date of birth validation (min year 1601, max age 150, no future dates)"
+      - "Repository layer with CUSTOMER table integration"
+      - "Unit tests achieve 80%+ coverage"
+      - "Integration tests with H2 database"
+      - "REST endpoint /api/customers/{sortCode}/{customerNumber}"
+    notes: "Critical dependency for most customer operations."
+    
+  - id: "customer-crecust"
+    name: "Migrate CRECUST - Customer Creation Service"
+    description: |
+      Migrate COBOL CRECUST program to Java CustomerCreationService.
+      Creates new customer records with validation.
+      Uses INQCUST for validation checks.
+    cobol_program: "CRECUST.cbl"
+    target_component: "CustomerCreationService.java"
+    phase: "customer-operations"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 28
+    dependencies: ["foundation-abndproc", "customer-inqcust"]
+    acceptance_criteria:
+      - "Service creates new customer with validation"
+      - "Date of birth validation (min year 1601, max age 150, reject future dates)"
+      - "Named counter for customer number generation"
+      - "Duplicate customer check via CustomerInquiryService"
+      - "Repository layer handles database inserts"
+      - "Transaction management for atomicity"
+      - "Unit tests achieve 80%+ coverage"
+      - "Integration tests with database"
+      - "REST endpoint POST /api/customers"
+    notes: "Depends on INQCUST for validation. Critical for customer creation flow."
+    
+  - id: "customer-updcust"
+    name: "Migrate UPDCUST - Customer Update Service"
+    description: |
+      Migrate COBOL UPDCUST program to Java CustomerUpdateService.
+      Updates existing customer records with validation.
+    cobol_program: "UPDCUST.cbl"
+    target_component: "CustomerUpdateService.java"
+    phase: "customer-operations"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 24
+    dependencies: ["foundation-abndproc", "customer-inqcust"]
+    acceptance_criteria:
+      - "Service updates customer with validation"
+      - "Date of birth validation rules preserved"
+      - "Verify customer exists via CustomerInquiryService"
+      - "Optimistic locking for concurrent updates"
+      - "Repository layer handles database updates"
+      - "Unit tests achieve 80%+ coverage"
+      - "REST endpoint PUT /api/customers/{sortCode}/{customerNumber}"
+    notes: "Depends on INQCUST for existence check."
+    
+  - id: "customer-delcus"
+    name: "Migrate DELCUS - Customer Deletion Service"
+    description: |
+      Migrate COBOL DELCUS program to Java CustomerDeletionService.
+      Deletes customer and associated accounts.
+      Calls INQCUST, DELACC, INQACCCU.
+    cobol_program: "DELCUS.cbl"
+    target_component: "CustomerDeletionService.java"
+    phase: "customer-operations"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 28
+    dependencies: ["foundation-abndproc", "customer-inqcust", "account-delacc", "account-inqacccu"]
+    acceptance_criteria:
+      - "Service deletes customer and associated accounts"
+      - "Verify customer exists via CustomerInquiryService"
+      - "Delete all customer accounts via AccountDeletionService"
+      - "Transaction management for atomicity"
+      - "Logical delete vs physical delete based on requirements"
+      - "Unit tests achieve 80%+ coverage"
+      - "REST endpoint DELETE /api/customers/{sortCode}/{customerNumber}"
+    notes: "Complex dependencies on account operations. Schedule after account services."
+
+  
+  - id: "account-inqacc"
+    name: "Migrate INQACC - Account Inquiry Service"
+    description: |
+      Migrate COBOL INQACC program to Java AccountInquiryService.
+      Retrieves account information by account number and sort code.
+      Foundation for other account operations.
+    cobol_program: "INQACC.cbl"
+    target_component: "AccountInquiryService.java"
+    phase: "account-operations"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 24
+    dependencies: ["foundation-abndproc", "customer-inqcust"]
+    acceptance_criteria:
+      - "Service retrieves account by sort code and account number"
+      - "Returns account with balance, type, interest rate details"
+      - "Handles not-found cases gracefully"
+      - "Repository layer with ACCOUNT table integration"
+      - "Unit tests achieve 80%+ coverage"
+      - "REST endpoint /api/accounts/{sortCode}/{accountNumber}"
+    notes: "Critical dependency for account operations."
+    
+  - id: "account-creacc"
+    name: "Migrate CREACC - Account Creation Service"
+    description: |
+      Migrate COBOL CREACC program to Java AccountCreationService.
+      Creates new account with customer validation.
+      Calls INQCUST and INQACCCU for validation.
+    cobol_program: "CREACC.cbl"
+    target_component: "AccountCreationService.java"
+    phase: "account-operations"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 32
+    dependencies: ["foundation-abndproc", "customer-inqcust", "account-inqacccu"]
+    acceptance_criteria:
+      - "Service creates account linked to customer"
+      - "Validate customer exists via CustomerInquiryService"
+      - "Named counter for account number generation"
+      - "Account type validation (savings, checking, etc)"
+      - "Interest rate and overdraft limit setup"
+      - "Transaction record to PROCTRAN table"
+      - "Transaction management with rollback support"
+      - "Unit tests achieve 80%+ coverage"
+      - "REST endpoint POST /api/accounts"
+    notes: "Complex transaction logic with named counter and DB2 writes."
+    
+  - id: "account-updacc"
+    name: "Migrate UPDACC - Account Update Service"
+    description: |
+      Migrate COBOL UPDACC program to Java AccountUpdateService.
+      Updates account details and balances.
+    cobol_program: "UPDACC.cbl"
+    target_component: "AccountUpdateService.java"
+    phase: "account-operations"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 24
+    dependencies: ["foundation-abndproc", "account-inqacc"]
+    acceptance_criteria:
+      - "Service updates account details"
+      - "Balance validation (overdraft limits)"
+      - "Available vs actual balance handling"
+      - "Verify account exists via AccountInquiryService"
+      - "Optimistic locking for concurrent updates"
+      - "Unit tests achieve 80%+ coverage"
+      - "REST endpoint PUT /api/accounts/{sortCode}/{accountNumber}"
+    notes: "Depends on INQACC for existence check."
+    
+  - id: "account-delacc"
+    name: "Migrate DELACC - Account Deletion Service"
+    description: |
+      Migrate COBOL DELACC program to Java AccountDeletionService.
+      Deletes account records.
+    cobol_program: "DELACC.cbl"
+    target_component: "AccountDeletionService.java"
+    phase: "account-operations"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 20
+    dependencies: ["foundation-abndproc", "account-inqacc"]
+    acceptance_criteria:
+      - "Service deletes account"
+      - "Verify account exists via AccountInquiryService"
+      - "Check account balance is zero before deletion"
+      - "Logical delete with delete flag"
+      - "Transaction management"
+      - "Unit tests achieve 80%+ coverage"
+      - "REST endpoint DELETE /api/accounts/{sortCode}/{accountNumber}"
+    notes: "Implements logical delete pattern."
+    
+  - id: "account-inqacccu"
+    name: "Migrate INQACCCU - Account/Customer Inquiry Service"
+    description: |
+      Migrate COBOL INQACCCU program to combined inquiry service.
+      Retrieves accounts for a specific customer.
+      Calls INQCUST to get customer details.
+    cobol_program: "INQACCCU.cbl"
+    target_component: "AccountCustomerInquiryService.java"
+    phase: "account-operations"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 28
+    dependencies: ["foundation-abndproc", "customer-inqcust"]
+    acceptance_criteria:
+      - "Service retrieves all accounts for a customer"
+      - "Returns customer details with account list"
+      - "Validate customer via CustomerInquiryService"
+      - "Supports pagination for large account lists"
+      - "Unit tests achieve 80%+ coverage"
+      - "REST endpoint /api/customers/{sortCode}/{customerNumber}/accounts"
+    notes: "Critical for customer-account relationship queries."
+
+  
+  - id: "transaction-dbcrfun"
+    name: "Migrate DBCRFUN - Debit/Credit Funds Service"
+    description: |
+      Migrate COBOL DBCRFUN program to Java DebitCreditService.
+      Handles debit and credit transactions on accounts.
+      Updates account balances and transaction history.
+    cobol_program: "DBCRFUN.cbl"
+    target_component: "DebitCreditService.java"
+    phase: "transaction-operations"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 32
+    dependencies: ["foundation-abndproc", "account-inqacc", "account-updacc"]
+    acceptance_criteria:
+      - "Service processes debit and credit transactions"
+      - "Balance validation with overdraft checking"
+      - "Transaction record to PROCTRAN table"
+      - "Available balance vs actual balance handling"
+      - "Transaction management with rollback"
+      - "Concurrent transaction handling"
+      - "Unit tests achieve 80%+ coverage"
+      - "REST endpoint POST /api/transactions/debit-credit"
+    notes: "Critical for financial transaction processing."
+    
+  - id: "transaction-xfrfun"
+    name: "Migrate XFRFUN - Transfer Funds Service"
+    description: |
+      Migrate COBOL XFRFUN program to Java FundsTransferService.
+      Transfers funds between two accounts.
+      Uses debit/credit operations internally.
+    cobol_program: "XFRFUN.cbl"
+    target_component: "FundsTransferService.java"
+    phase: "transaction-operations"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 36
+    dependencies: ["foundation-abndproc", "transaction-dbcrfun"]
+    acceptance_criteria:
+      - "Service transfers funds between accounts"
+      - "Two-phase transaction (debit source, credit target)"
+      - "Atomicity via transaction management"
+      - "Balance validation on source account"
+      - "Transaction records for both accounts"
+      - "Rollback on any failure"
+      - "Unit tests achieve 80%+ coverage"
+      - "REST endpoint POST /api/transactions/transfer"
+    notes: "Complex transaction with multiple account updates."
+
+  
+  - id: "screen-bnkmenu"
+    name: "Migrate BNKMENU - Main Menu Controller"
+    description: |
+      Migrate COBOL BNKMENU program to REST controller.
+      Main menu navigation and application entry point.
+    cobol_program: "BNKMENU.cbl"
+    target_component: "MenuController.java"
+    phase: "screen-programs"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 16
+    dependencies: ["foundation-abndproc"]
+    acceptance_criteria:
+      - "REST endpoint returns menu structure"
+      - "Navigation links to other endpoints"
+      - "User session management if needed"
+      - "Unit tests achieve 60%+ coverage"
+      - "REST endpoint GET /api/menu"
+    notes: "Simple navigation controller."
+    
+  - id: "screen-bnk1ccs"
+    name: "Migrate BNK1CCS - Create Customer Screen Controller"
+    description: |
+      Migrate COBOL BNK1CCS screen program to REST controller.
+      Calls CRECUST service to create customers.
+    cobol_program: "BNK1CCS.cbl"
+    target_component: "CustomerCreationController.java"
+    phase: "screen-programs"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 20
+    dependencies: ["foundation-abndproc", "customer-crecust"]
+    acceptance_criteria:
+      - "REST endpoint validates and creates customers"
+      - "Input validation (required fields, formats)"
+      - "Date of birth validation"
+      - "Calls CustomerCreationService"
+      - "Error handling with proper HTTP status codes"
+      - "Unit tests achieve 60%+ coverage"
+      - "REST endpoint POST /api/screens/create-customer"
+    notes: "Depends on CRECUST service."
+    
+  - id: "screen-bnk1cac"
+    name: "Migrate BNK1CAC - Create Account Screen Controller"
+    description: |
+      Migrate COBOL BNK1CAC screen program to REST controller.
+      Calls CREACC service to create accounts.
+    cobol_program: "BNK1CAC.cbl"
+    target_component: "AccountCreationController.java"
+    phase: "screen-programs"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 20
+    dependencies: ["foundation-abndproc", "account-creacc"]
+    acceptance_criteria:
+      - "REST endpoint validates and creates accounts"
+      - "Input validation"
+      - "Calls AccountCreationService"
+      - "Error handling with proper HTTP status codes"
+      - "Unit tests achieve 60%+ coverage"
+      - "REST endpoint POST /api/screens/create-account"
+    notes: "Depends on CREACC service."
+    
+  - id: "screen-bnk1uac"
+    name: "Migrate BNK1UAC - Update Account Screen Controller"
+    description: |
+      Migrate COBOL BNK1UAC screen program to REST controller.
+      Calls INQACC and UPDACC services.
+    cobol_program: "BNK1UAC.cbl"
+    target_component: "AccountUpdateController.java"
+    phase: "screen-programs"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 20
+    dependencies: ["foundation-abndproc", "account-inqacc", "account-updacc"]
+    acceptance_criteria:
+      - "REST endpoint retrieves and updates accounts"
+      - "Two-step process: inquiry then update"
+      - "Calls AccountInquiryService and AccountUpdateService"
+      - "Unit tests achieve 60%+ coverage"
+      - "REST endpoints GET and PUT /api/screens/update-account"
+    notes: "Depends on INQACC and UPDACC services."
+    
+  - id: "screen-bnk1dac"
+    name: "Migrate BNK1DAC - Delete Account Screen Controller"
+    description: |
+      Migrate COBOL BNK1DAC screen program to REST controller.
+      Calls INQACC and DELACC services.
+    cobol_program: "BNK1DAC.cbl"
+    target_component: "AccountDeletionController.java"
+    phase: "screen-programs"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 18
+    dependencies: ["foundation-abndproc", "account-inqacc", "account-delacc"]
+    acceptance_criteria:
+      - "REST endpoint confirms and deletes accounts"
+      - "Calls AccountInquiryService and AccountDeletionService"
+      - "Confirmation step before deletion"
+      - "Unit tests achieve 60%+ coverage"
+      - "REST endpoints GET and DELETE /api/screens/delete-account"
+    notes: "Depends on INQACC and DELACC services."
+    
+  - id: "screen-bnk1dcs"
+    name: "Migrate BNK1DCS - Delete Customer Screen Controller"
+    description: |
+      Migrate COBOL BNK1DCS screen program to REST controller.
+      Calls DELCUS service.
+    cobol_program: "BNK1DCS.cbl"
+    target_component: "CustomerDeletionController.java"
+    phase: "screen-programs"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 18
+    dependencies: ["foundation-abndproc", "customer-delcus"]
+    acceptance_criteria:
+      - "REST endpoint confirms and deletes customers"
+      - "Calls CustomerDeletionService"
+      - "Confirmation step before deletion"
+      - "Unit tests achieve 60%+ coverage"
+      - "REST endpoint DELETE /api/screens/delete-customer"
+    notes: "Depends on DELCUS service."
+    
+  - id: "screen-bnk1cca"
+    name: "Migrate BNK1CCA - Customer/Account Inquiry Controller"
+    description: |
+      Migrate COBOL BNK1CCA screen program to REST controller.
+      Calls INQACCCU service to show customer with accounts.
+    cobol_program: "BNK1CCA.cbl"
+    target_component: "CustomerAccountInquiryController.java"
+    phase: "screen-programs"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 18
+    dependencies: ["foundation-abndproc", "account-inqacccu"]
+    acceptance_criteria:
+      - "REST endpoint retrieves customer with accounts"
+      - "Calls AccountCustomerInquiryService"
+      - "Pagination support for large account lists"
+      - "Unit tests achieve 60%+ coverage"
+      - "REST endpoint GET /api/screens/customer-accounts"
+    notes: "Depends on INQACCCU service."
+    
+  - id: "screen-bnk1cra"
+    name: "Migrate BNK1CRA - Credit/Account Screen Controller"
+    description: |
+      Migrate COBOL BNK1CRA screen program to REST controller.
+      Calls DBCRFUN service for credit/debit operations.
+    cobol_program: "BNK1CRA.cbl"
+    target_component: "CreditAccountController.java"
+    phase: "screen-programs"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 20
+    dependencies: ["foundation-abndproc", "transaction-dbcrfun"]
+    acceptance_criteria:
+      - "REST endpoint processes credit/debit transactions"
+      - "Calls DebitCreditService"
+      - "Input validation for amounts"
+      - "Unit tests achieve 60%+ coverage"
+      - "REST endpoint POST /api/screens/credit-account"
+    notes: "Depends on DBCRFUN service."
+    
+  - id: "screen-bnk1tfn"
+    name: "Migrate BNK1TFN - Transfer Funds Screen Controller"
+    description: |
+      Migrate COBOL BNK1TFN screen program to REST controller.
+      Calls XFRFUN service for fund transfers.
+    cobol_program: "BNK1TFN.cbl"
+    target_component: "TransferFundsController.java"
+    phase: "screen-programs"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 22
+    dependencies: ["foundation-abndproc", "transaction-xfrfun"]
+    acceptance_criteria:
+      - "REST endpoint processes fund transfers"
+      - "Calls FundsTransferService"
+      - "Input validation for amounts and accounts"
+      - "Unit tests achieve 60%+ coverage"
+      - "REST endpoint POST /api/screens/transfer-funds"
+    notes: "Depends on XFRFUN service."
+
+  
+  - id: "testing-integration"
+    name: "End-to-End Integration Testing"
+    description: |
+      Comprehensive integration testing across all services.
+      Test complete workflows from customer creation to transactions.
+    phase: "testing"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 40
+    dependencies: ["screen-bnk1tfn", "screen-bnk1cra", "screen-bnk1cca", "screen-bnk1dcs", "screen-bnk1dac", "screen-bnk1uac", "screen-bnk1cac", "screen-bnk1ccs", "screen-bnkmenu"]
+    acceptance_criteria:
+      - "End-to-end test scenarios for all workflows"
+      - "Customer lifecycle: create → update → transactions → delete"
+      - "Account lifecycle: create → update → transactions → delete"
+      - "Transaction scenarios: debit, credit, transfer"
+      - "Error handling and rollback scenarios"
+      - "Concurrent transaction testing"
+      - "Performance benchmarks established"
+    notes: "Critical validation phase before production."
+    
+  - id: "testing-performance"
+    name: "Performance and Load Testing"
+    description: |
+      Performance testing and optimization.
+      Ensure system meets throughput requirements.
+    phase: "testing"
+    status: "pending"
+    priority: "medium"
+    estimated_effort_hours: 32
+    dependencies: ["testing-integration"]
+    acceptance_criteria:
+      - "Load tests with concurrent users"
+      - "Transaction throughput benchmarks"
+      - "Database query optimization"
+      - "Memory and CPU profiling"
+      - "Identify and resolve bottlenecks"
+      - "Performance regression testing"
+    notes: "Optimize based on load test results."
+    
+  - id: "testing-security"
+    name: "Security Testing and Validation"
+    description: |
+      Security testing and vulnerability assessment.
+    phase: "testing"
+    status: "pending"
+    priority: "high"
+    estimated_effort_hours: 24
+    dependencies: ["testing-integration"]
+    acceptance_criteria:
+      - "SQL injection prevention validation"
+      - "Authentication and authorization testing"
+      - "Input validation testing"
+      - "Sensitive data handling review"
+      - "Security scanning with OWASP tools"
+    notes: "Critical for production readiness."
+
+  
+  - id: "docs-api"
+    name: "API Documentation"
+    description: |
+      Complete API documentation with OpenAPI/Swagger.
+      Document all REST endpoints.
+    phase: "documentation"
+    status: "in-progress"
+    priority: "medium"
+    estimated_effort_hours: 20
+    dependencies: []
+    acceptance_criteria:
+      - "OpenAPI 3.0 specification complete"
+      - "Swagger UI accessible"
+      - "All endpoints documented with examples"
+      - "Request/response schemas documented"
+      - "Error codes documented"
+    notes: "Update continuously as APIs are added."
+    
+  - id: "docs-migration-guide"
+    name: "Migration Guide and Playbook"
+    description: |
+      Document migration patterns and lessons learned.
+      Update existing MIGRATION_PLAYBOOK.md.
+    phase: "documentation"
+    status: "in-progress"
+    priority: "medium"
+    estimated_effort_hours: 16
+    dependencies: []
+    acceptance_criteria:
+      - "COBOL to Java pattern mapping documented"
+      - "Date validation patterns documented"
+      - "Transaction management patterns"
+      - "Testing strategies documented"
+      - "Common pitfalls and solutions"
+    notes: "Living document updated throughout migration."
+    
+  - id: "docs-operations"
+    name: "Operations and Deployment Guide"
+    description: |
+      Operational runbooks and deployment procedures.
+    phase: "documentation"
+    status: "pending"
+    priority: "low"
+    estimated_effort_hours: 16
+    dependencies: ["testing-integration"]
+    acceptance_criteria:
+      - "Deployment procedures documented"
+      - "Monitoring and alerting setup"
+      - "Troubleshooting guides"
+      - "Database migration procedures"
+      - "Rollback procedures"
+    notes: "Critical for production operations."
+
+review_gates:
+  - id: "gate-foundation"
+    name: "Foundation Phase Review"
+    description: "Review foundation components before proceeding"
+    phase: "foundation"
+    status: "passed"
+    criteria:
+      - "All utility services operational"
+      - "Error handling framework validated"
+      - "Code review completed"
+      - "Documentation updated"
+    
+  - id: "gate-customer-ops"
+    name: "Customer Operations Review"
+    description: "Review customer services before account operations"
+    phase: "customer-operations"
+    status: "pending"
+    criteria:
+      - "All customer CRUD operations working"
+      - "Date validation patterns verified"
+      - "Integration tests passing"
+      - "Code coverage targets met"
+      
+  - id: "gate-account-ops"
+    name: "Account Operations Review"
+    description: "Review account services before transactions"
+    phase: "account-operations"
+    status: "pending"
+    criteria:
+      - "All account CRUD operations working"
+      - "Customer-account relationships validated"
+      - "Integration tests passing"
+      - "Code coverage targets met"
+      
+  - id: "gate-transactions"
+    name: "Transaction Operations Review"
+    description: "Review transaction services before screen programs"
+    phase: "transaction-operations"
+    status: "pending"
+    criteria:
+      - "Transaction atomicity verified"
+      - "Rollback scenarios tested"
+      - "Concurrent transaction handling validated"
+      - "Code coverage targets met"
+      
+  - id: "gate-production"
+    name: "Production Readiness Review"
+    description: "Final review before production deployment"
+    phase: "testing"
+    status: "pending"
+    criteria:
+      - "All integration tests passing"
+      - "Performance benchmarks met"
+      - "Security testing completed"
+      - "Documentation complete"
+      - "Operations runbooks ready"
+      - "Stakeholder sign-off obtained"

@@ -1,0 +1,52 @@
+gantt
+    title COBOL to Spring Boot Migration Timeline
+    dateFormat YYYY-MM-DD
+    
+    section Foundation Phase
+    ABNDPROC Migration                  :done, abndproc, 2025-01-01, 3d
+    GETCOMPY Migration                  :done, getcompy, 2025-01-04, 2d
+    GETSCODE Migration                  :done, getscode, 2025-01-06, 2d
+    BANKDATA Migration                  :bankdata, 2025-02-01, 3d
+    
+    section Credit Agency Phase
+    CRDTAGY1 Migration                  :done, crdtagy1, 2025-01-08, 4d
+    CRDTAGY2 Migration                  :crdtagy2, 2025-02-04, 3d
+    CRDTAGY3 Migration                  :crdtagy3, after crdtagy2, 3d
+    CRDTAGY4 Migration                  :crdtagy4, after crdtagy3, 3d
+    CRDTAGY5 Migration                  :crdtagy5, after crdtagy4, 3d
+    
+    section Customer Operations
+    INQCUST Migration                   :crit, inqcust, 2025-02-12, 5d
+    CRECUST Migration                   :crit, crecust, after inqcust, 5d
+    UPDCUST Migration                   :updcust, after inqcust, 5d
+    DELCUS Migration                    :delcus, after crecust, 5d
+    
+    section Account Operations
+    INQACC Migration                    :crit, inqacc, after inqcust, 5d
+    INQACCCU Migration                  :crit, inqacccu, after inqcust, 5d
+    CREACC Migration                    :crit, creacc, after inqacccu, 6d
+    UPDACC Migration                    :updacc, after inqacc, 5d
+    DELACC Migration                    :delacc, after inqacc, 4d
+    
+    section Transaction Operations
+    DBCRFUN Migration                   :crit, dbcrfun, after updacc, 6d
+    XFRFUN Migration                    :crit, xfrfun, after dbcrfun, 6d
+    
+    section Screen Programs
+    BNKMENU Migration                   :bnkmenu, after xfrfun, 3d
+    BNK1CCS Migration                   :crit, bnk1ccs, after crecust, 4d
+    BNK1CAC Migration                   :crit, bnk1cac, after creacc, 4d
+    BNK1UAC Migration                   :bnk1uac, after updacc, 4d
+    BNK1DAC Migration                   :bnk1dac, after delacc, 3d
+    BNK1DCS Migration                   :bnk1dcs, after delcus, 3d
+    BNK1CCA Migration                   :bnk1cca, after inqacccu, 3d
+    BNK1CRA Migration                   :bnk1cra, after dbcrfun, 4d
+    BNK1TFN Migration                   :crit, bnk1tfn, after xfrfun, 4d
+    
+    section Testing & Documentation
+    Integration Testing                 :crit, testing, after bnk1tfn, 10d
+    Performance Testing                 :perf, after testing, 7d
+    Security Testing                    :crit, security, after testing, 5d
+    API Documentation                   :active, docs-api, 2025-01-15, 20d
+    Migration Guide                     :active, docs-guide, 2025-01-15, 16d
+    Operations Guide                    :docs-ops, after testing, 16d

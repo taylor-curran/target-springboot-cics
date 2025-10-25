@@ -1,0 +1,118 @@
+graph TD
+    %% Foundation Phase (Completed)
+    foundation-abndproc[ABNDPROC<br/>ErrorLoggingService]:::completed
+    foundation-getcompy[GETCOMPY<br/>CompanyInfoService]:::completed
+    foundation-getscode[GETSCODE<br/>SortCodeService]:::completed
+    foundation-bankdata[BANKDATA<br/>BankDataService]:::pending
+    
+    %% Credit Agency Phase
+    credit-crdtagy1[CRDTAGY1<br/>CreditAgencyService]:::completed
+    credit-crdtagy2[CRDTAGY2<br/>TBD]:::pending
+    credit-crdtagy3[CRDTAGY3<br/>TBD]:::pending
+    credit-crdtagy4[CRDTAGY4<br/>TBD]:::pending
+    credit-crdtagy5[CRDTAGY5<br/>TBD]:::pending
+    
+    %% Customer Operations Phase
+    customer-inqcust[INQCUST<br/>CustomerInquiryService]:::pending-high
+    customer-crecust[CRECUST<br/>CustomerCreationService]:::pending-high
+    customer-updcust[UPDCUST<br/>CustomerUpdateService]:::pending
+    customer-delcus[DELCUS<br/>CustomerDeletionService]:::pending
+    
+    %% Account Operations Phase
+    account-inqacc[INQACC<br/>AccountInquiryService]:::pending-high
+    account-creacc[CREACC<br/>AccountCreationService]:::pending-high
+    account-updacc[UPDACC<br/>AccountUpdateService]:::pending
+    account-delacc[DELACC<br/>AccountDeletionService]:::pending
+    account-inqacccu[INQACCCU<br/>AccountCustomerInquiryService]:::pending-high
+    
+    %% Transaction Operations Phase
+    transaction-dbcrfun[DBCRFUN<br/>DebitCreditService]:::pending-high
+    transaction-xfrfun[XFRFUN<br/>FundsTransferService]:::pending-high
+    
+    %% Screen Programs Phase
+    screen-bnkmenu[BNKMENU<br/>MenuController]:::pending
+    screen-bnk1ccs[BNK1CCS<br/>CustomerCreationController]:::pending-high
+    screen-bnk1cac[BNK1CAC<br/>AccountCreationController]:::pending-high
+    screen-bnk1uac[BNK1UAC<br/>AccountUpdateController]:::pending
+    screen-bnk1dac[BNK1DAC<br/>AccountDeletionController]:::pending
+    screen-bnk1dcs[BNK1DCS<br/>CustomerDeletionController]:::pending
+    screen-bnk1cca[BNK1CCA<br/>CustomerAccountInquiryController]:::pending
+    screen-bnk1cra[BNK1CRA<br/>CreditAccountController]:::pending
+    screen-bnk1tfn[BNK1TFN<br/>TransferFundsController]:::pending-high
+    
+    %% Testing Phase
+    testing-integration[Integration Testing]:::pending-high
+    testing-performance[Performance Testing]:::pending
+    testing-security[Security Testing]:::pending-high
+    
+    %% Foundation Dependencies
+    foundation-abndproc --> foundation-getcompy
+    foundation-abndproc --> foundation-getscode
+    foundation-abndproc --> foundation-bankdata
+    foundation-abndproc --> credit-crdtagy1
+    foundation-abndproc --> credit-crdtagy2
+    foundation-abndproc --> credit-crdtagy3
+    foundation-abndproc --> credit-crdtagy4
+    foundation-abndproc --> credit-crdtagy5
+    foundation-abndproc --> customer-inqcust
+    foundation-abndproc --> screen-bnkmenu
+    
+    %% Credit Agency Dependencies
+    credit-crdtagy1 --> credit-crdtagy2
+    credit-crdtagy1 --> credit-crdtagy3
+    credit-crdtagy1 --> credit-crdtagy4
+    credit-crdtagy1 --> credit-crdtagy5
+    customer-inqcust --> credit-crdtagy1
+    
+    %% Customer Operations Dependencies
+    customer-inqcust --> customer-crecust
+    customer-inqcust --> customer-updcust
+    customer-crecust --> customer-delcus
+    
+    %% Account Operations Dependencies - Customer First
+    customer-inqcust --> account-inqacc
+    customer-inqcust --> account-inqacccu
+    customer-inqcust --> account-creacc
+    
+    %% Account Internal Dependencies
+    account-inqacccu --> account-creacc
+    account-inqacc --> account-updacc
+    account-inqacc --> account-delacc
+    account-delacc --> customer-delcus
+    account-inqacccu --> customer-delcus
+    
+    %% Transaction Dependencies
+    account-inqacc --> transaction-dbcrfun
+    account-updacc --> transaction-dbcrfun
+    transaction-dbcrfun --> transaction-xfrfun
+    
+    %% Screen Program Dependencies
+    customer-crecust --> screen-bnk1ccs
+    account-creacc --> screen-bnk1cac
+    account-inqacc --> screen-bnk1uac
+    account-updacc --> screen-bnk1uac
+    account-inqacc --> screen-bnk1dac
+    account-delacc --> screen-bnk1dac
+    customer-delcus --> screen-bnk1dcs
+    account-inqacccu --> screen-bnk1cca
+    transaction-dbcrfun --> screen-bnk1cra
+    transaction-xfrfun --> screen-bnk1tfn
+    
+    %% Testing Dependencies
+    screen-bnkmenu --> testing-integration
+    screen-bnk1ccs --> testing-integration
+    screen-bnk1cac --> testing-integration
+    screen-bnk1uac --> testing-integration
+    screen-bnk1dac --> testing-integration
+    screen-bnk1dcs --> testing-integration
+    screen-bnk1cca --> testing-integration
+    screen-bnk1cra --> testing-integration
+    screen-bnk1tfn --> testing-integration
+    
+    testing-integration --> testing-performance
+    testing-integration --> testing-security
+    
+    %% Style Classes
+    classDef completed fill:#90EE90,stroke:#006400,stroke-width:3px,color:#000
+    classDef pending fill:#D3D3D3,stroke:#696969,stroke-width:2px,color:#000
+    classDef pending-high fill:#FFE4B5,stroke:#FF8C00,stroke-width:3px,color:#000
