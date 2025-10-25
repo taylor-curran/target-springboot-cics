@@ -1,0 +1,436 @@
+# 
+#
+
+migration_plan = {
+    "tasks": [
+        {
+            "id": "setup_001",
+            "title": "Establish Performance Baseline for Legacy System",
+            "content": "Measure and document current COBOL application performance metrics for the 26 remaining programs. Create baseline measurements for P50/P95/P99 latencies, throughput (transactions per second), error rates, and resource utilization across all program categories.",
+            "depends_on": [],
+            "prompt": "Analyze the legacy COBOL application at taylor-curran/og-cics-cobol-app. Focus on the 26 remaining unmigrated programs in /src/base/cobol_src/. For each program category (Customer ops: CRECUST/INQCUST/UPDCUST/DELCUS, Account ops: CREACC/INQACC/INQACCCU/UPDACC/DELACC/BNK1CCA, Transactions: DBCRFUN/XFRFUN/BNK1TFN, Credit agencies: CRDTAGY2-5, BMS: BNKMENU/BNK1CAC/BNK1CCS/BNK1CRA/BNK1DAC/BNK1DCS/BNK1UAC, Infrastructure: ABNDPROC/BANKDATA), document: transaction latency (P50/P95/P99 in ms), throughput (TPS), error rates (%), and resource usage. Create baseline_metrics.md with findings and recommendations for target performance in Java Spring Boot. If production metrics aren't available, create load testing scripts to simulate realistic workloads.",
+            "definition_of_done": "Baseline report exists at target repo root with documented metrics for all 26 programs. Report includes specific latency numbers, throughput benchmarks, error rates, and target performance goals for Java migration.",
+            "validation_mechanism": "baseline_metrics.md file exists with complete data tables showing metrics per program category. Stakeholder review confirms metrics represent realistic production workloads.",
+            "estimated_hours": 10,
+            "deliverables": ["baseline_metrics.md", "load_test_scripts/", "baseline_results.json"]
+        },
+        {
+            "id": "setup_002",
+            "title": "Setup Monitoring and Observability Infrastructure",
+            "content": "Deploy comprehensive monitoring stack for the target Spring Boot application including Prometheus for metrics collection, Grafana dashboards for visualization, and structured logging with correlation IDs. Establish monitoring for latency, throughput, error rates, JVM metrics, and database connection pools.",
+            "depends_on": [],
+            "prompt": "Set up monitoring infrastructure for taylor-curran/target-springboot-cics. Deploy or configure: 1) Prometheus metrics collection via Spring Boot Actuator, 2) Grafana dashboards showing key metrics (request latency P50/P95/P99, throughput, error rates, JVM heap/GC, database pool stats), 3) Structured logging with correlation IDs for request tracing, 4) Alerting rules for critical thresholds (error rate >1%, latency P95 >500ms, heap usage >80%). Document setup in monitoring_setup.md. Test that metrics flow correctly and alerts fire as expected. Reference existing patterns in the Spring Boot application.",
+            "definition_of_done": "Monitoring stack deployed and collecting metrics from running Spring Boot application. Grafana dashboards accessible with real-time data. Test alerts successfully triggered. Documentation complete.",
+            "validation_mechanism": "Dashboards display live metrics when application runs. Test API calls generate observable metrics. Test alerts fire correctly when thresholds exceeded. monitoring_setup.md documents all URLs and configurations.",
+            "estimated_hours": 8,
+            "deliverables": ["monitoring_setup.md", "grafana_dashboards.json", "prometheus_config.yml", "alert_rules.yml"]
+        },
+        {
+            "id": "setup_003",
+            "title": "Create Performance Testing Framework",
+            "content": "Build automated performance testing framework using JMeter or Gatling to validate that migrated Java code meets or exceeds legacy COBOL performance. Create test scenarios for each operation type with realistic load profiles.",
+            "depends_on": ["setup_001", "setup_002"],
+            "prompt": "Create performance testing framework for taylor-curran/target-springboot-cics. Use JMeter or Gatling to build: 1) Test scenarios for customer operations (create/read/update/delete), 2) Account operations test scenarios, 3) Transaction processing scenarios (debit/credit, transfers), 4) Load profiles matching baseline metrics from setup_001, 5) Automated test execution scripts, 6) Result comparison against baseline. Framework should validate: latency within 110% of baseline, throughput >90% of baseline, error rate <0.1%. Document in performance_testing_guide.md. Integrate with CI/CD pipeline if possible.",
+            "definition_of_done": "Performance test suite exists with scenarios for all operation types. Tests execute successfully and generate comparable metrics. Documentation explains how to run tests and interpret results.",
+            "validation_mechanism": "Execute test suite against existing migrated endpoints (GETCOMPY, GETSCODE, CRDTAGY1). Verify metrics collection works. Results show expected latency/throughput patterns. performance_testing_guide.md contains clear instructions.",
+            "estimated_hours": 10,
+            "deliverables": ["performance_tests/", "performance_testing_guide.md", "test_execution_scripts/", "result_comparison_tool.py"]
+        },
+        {
+            "id": "setup_004",
+            "title": "Document System Architecture and Data Flows",
+            "content": "Create comprehensive architecture documentation showing data flows, database schemas, API contracts, and dependencies between COBOL programs. Map how each program interacts with VSAM files, DB2 tables, and other programs.",
+            "depends_on": [],
+            "prompt": "Analyze taylor-curran/og-cics-cobol-app to document complete system architecture. Create architecture_documentation.md covering: 1) Database schema (CUSTOMER VSAM, ACCOUNT/CONTROL/PROCTRAN DB2 tables), 2) Data flow diagrams for each operation type, 3) Program dependencies (which programs call which, async operations), 4) CICS transaction IDs and their purposes, 5) Copybook structures and field mappings, 6) Business rule documentation (credit scoring, date validation, transaction processing rules), 7) Error handling patterns (ABNDPROC usage). Include diagrams where helpful. Review CBSA_Architecture_guide.md, examine all 26 COBOL programs, analyze copybooks in the source repo.",
+            "definition_of_done": "Complete architecture documentation exists covering all 26 programs, database schemas, data flows, and business rules. Documentation includes diagrams and is reviewed for accuracy.",
+            "validation_mechanism": "architecture_documentation.md file exists with all sections complete. Peer review confirms accuracy. Document referenced successfully by migration task executors.",
+            "estimated_hours": 12,
+            "deliverables": ["architecture_documentation.md", "data_flow_diagrams/", "schema_diagrams/", "business_rules.md"]
+        },
+        {
+            "id": "setup_005",
+            "title": "Enhance CI/CD Pipeline for Migration",
+            "content": "Enhance the existing CI/CD pipeline to support migration validation including automated test execution, code coverage enforcement, performance regression detection, and database schema consistency checks.",
+            "depends_on": ["setup_003"],
+            "prompt": "Enhance CI/CD pipeline for taylor-curran/target-springboot-cics. Review existing pipeline configuration and add: 1) Automated execution of performance tests from setup_003, 2) Code coverage gates (Service 80%, Repository 70%, Controller 60%, Model 50%, DTO 40% per TESTING.md), 3) Database schema consistency validation (H2 test vs SQLite production), 4) Integration test execution, 5) Performance regression detection (alert if latency increases >10%), 6) Migration progress tracking dashboard. Update CI configuration files (.github/workflows/ or similar). Document in ci_cd_enhancements.md.",
+            "definition_of_done": "CI/CD pipeline enhanced with all validation steps. Test run demonstrates all checks execute correctly. Coverage gates enforce thresholds. Documentation complete.",
+            "validation_mechanism": "Trigger CI pipeline and verify all new steps execute. Coverage reports generated with thresholds enforced. Performance tests run automatically. Schema consistency validated. ci_cd_enhancements.md documents all changes.",
+            "estimated_hours": 8,
+            "deliverables": ["ci_cd_enhancements.md", ".github/workflows/migration-validation.yml", "coverage-config/", "performance-regression-detector.py"]
+        },
+        {
+            "id": "validator_001",
+            "title": "Create Credit Agency Integration Test Suite",
+            "content": "Build comprehensive integration test suite for credit agency operations to validate CRDTAGY2-5 migrations. Include tests for async credit scoring, delay simulation, random score generation, and multi-agency aggregation patterns.",
+            "depends_on": ["setup_002", "setup_004"],
+            "prompt": "Create integration test suite for credit agency operations in taylor-curran/target-springboot-cics. Analyze CRDTAGY1.cbl (already migrated) and CRDTAGY2-5.cbl in taylor-curran/og-cics-cobol-app. Build CreditAgencyIntegrationTest.java with 30+ test cases covering: 1) Single agency scoring, 2) Multiple agency scoring with aggregation, 3) Delay simulation (0-3 seconds), 4) Random score generation (1-999), 5) Timeout handling (parent waits 3 seconds), 6) Container/channel data passing patterns, 7) Customer validation before scoring, 8) Credit score update in customer records. Use existing CreditAgencyService as reference. Configure JaCoCo for coverage reporting. Create test fixtures with sample customer data.",
+            "definition_of_done": "CreditAgencyIntegrationTest.java exists with 30+ passing test cases. JaCoCo configured and generates coverage reports. Test fixtures created. All tests pass successfully.",
+            "validation_mechanism": "Run `mvn test -Dtest=CreditAgencyIntegrationTest`. All tests pass. JaCoCo report shows >90% coverage of credit agency code. Test execution completes in <30 seconds.",
+            "estimated_hours": 10,
+            "deliverables": ["src/test/java/com/cbsa/migration/integration/CreditAgencyIntegrationTest.java", "src/test/resources/credit-agency-test-data.sql", "test-fixtures/CreditAgencyTestFixtures.java"]
+        },
+        {
+            "id": "validator_002",
+            "title": "Create Customer CRUD Operations Test Suite",
+            "content": "Build comprehensive integration test suite for customer CRUD operations covering create, read, update, and delete functionality. Include validation for business rules like date of birth validation, credit scoring integration, and counter management.",
+            "depends_on": ["setup_002", "setup_004"],
+            "prompt": "Create integration test suite for customer operations in taylor-curran/target-springboot-cics. Analyze CRECUST.cbl (1440 lines), INQCUST.cbl (712 lines), UPDCUST.cbl, and DELCUS.cbl in taylor-curran/og-cics-cobol-app. Build CustomerCrudIntegrationTest.java with 50+ test cases covering: 1) Customer creation with credit scoring, 2) Customer inquiry by number, 3) Customer update operations, 4) Customer deletion with account validation, 5) Date of birth validation (min year 1601, max age 150, reject future dates, fail codes 'O' and 'Y'), 6) Counter increment/decrement on create/delete, 7) PROCTRAN record writing, 8) VSAM/DB2 datastore operations, 9) Error handling and rollback scenarios, 10) Concurrent operation handling. Use H2 for tests, ensure schema matches SQLite production. Configure JaCoCo >90% coverage target.",
+            "definition_of_done": "CustomerCrudIntegrationTest.java exists with 50+ passing test cases. Date validation rules implemented correctly. JaCoCo configured. Test fixtures with diverse customer data created.",
+            "validation_mechanism": "Run `mvn test -Dtest=CustomerCrudIntegrationTest`. All tests pass. JaCoCo shows >90% coverage. DatabaseSchemaConsistencyTest passes confirming H2/SQLite schema sync.",
+            "estimated_hours": 12,
+            "deliverables": ["src/test/java/com/cbsa/migration/integration/CustomerCrudIntegrationTest.java", "src/test/resources/customer-test-data.sql", "test-fixtures/CustomerTestFixtures.java"]
+        },
+        {
+            "id": "validator_003",
+            "title": "Create Account Inquiry Operations Test Suite",
+            "content": "Build integration test suite for account inquiry operations including single account lookup and customer account list operations. Test SQL cursor handling, composite key operations, and data retrieval patterns.",
+            "depends_on": ["setup_002", "setup_004"],
+            "prompt": "Create integration test suite for account inquiry in taylor-curran/target-springboot-cics. Analyze INQACC.cbl (1003 lines with SQL cursor operations) and INQACCCU.cbl in taylor-curran/og-cics-cobol-app. Build AccountInquiryIntegrationTest.java with 30+ test cases covering: 1) Single account inquiry by account number, 2) Account inquiry with account type filter, 3) Customer account list retrieval (all accounts for a customer), 4) Composite key operations (sortcode + customer_number), 5) SQL cursor handling patterns, 6) Empty result handling (return low values like COBOL), 7) Invalid account number handling, 8) DB2 retry logic patterns from COBOL, 9) Account data field mapping (ACCT eye-catcher, fixed-width fields, YYYYMMDD dates), 10) Performance with multiple accounts per customer. Test against realistic data (100 customers with 1-5 accounts each).",
+            "definition_of_done": "AccountInquiryIntegrationTest.java exists with 30+ passing test cases. SQL cursor patterns properly tested. JaCoCo configured. Test data includes 100+ accounts.",
+            "validation_mechanism": "Run `mvn test -Dtest=AccountInquiryIntegrationTest`. All tests pass. JaCoCo shows >90% coverage. Tests execute in <20 seconds. Verify cursor handling with 100+ account dataset.",
+            "estimated_hours": 10,
+            "deliverables": ["src/test/java/com/cbsa/migration/integration/AccountInquiryIntegrationTest.java", "src/test/resources/account-inquiry-test-data.sql", "test-fixtures/AccountTestFixtures.java"]
+        },
+        {
+            "id": "validator_004",
+            "title": "Create Account CRUD Operations Test Suite",
+            "content": "Build comprehensive integration test suite for account create, update, and delete operations including transaction boundary handling, validation rules, and multi-datastore coordination.",
+            "depends_on": ["setup_002", "setup_004"],
+            "prompt": "Create integration test suite for account CRUD in taylor-curran/target-springboot-cics. Analyze CREACC.cbl, UPDACC.cbl, DELACC.cbl, and BNK1CCA.cbl in taylor-curran/og-cics-cobol-app. Build AccountCrudIntegrationTest.java with 40+ test cases covering: 1) Account creation with validation, 2) Account update operations (balance, type, etc.), 3) Account deletion with balance validation (must be zero), 4) Transaction boundary handling, 5) Rollback scenarios on errors, 6) Account type validation (checking, savings, loan, etc.), 7) Opening date validation (YYYYMMDD format), 8) Composite key integrity (sortcode + account_number), 9) PROCTRAN record writing for successful operations, 10) Concurrent account operations, 11) BMS interface patterns from BNK1CCA. Include tests for customer with multiple accounts scenarios.",
+            "definition_of_done": "AccountCrudIntegrationTest.java exists with 40+ passing test cases. Transaction handling properly tested. JaCoCo configured. Test fixtures cover all account types.",
+            "validation_mechanism": "Run `mvn test -Dtest=AccountCrudIntegrationTest`. All tests pass. JaCoCo shows >90% coverage. Transaction rollback tests verify data consistency.",
+            "estimated_hours": 12,
+            "deliverables": ["src/test/java/com/cbsa/migration/integration/AccountCrudIntegrationTest.java", "src/test/resources/account-crud-test-data.sql", "test-fixtures/AccountCrudTestFixtures.java"]
+        },
+        {
+            "id": "validator_005",
+            "title": "Create Transaction Processing Test Suite",
+            "content": "Build comprehensive integration test suite for financial transaction operations including debit/credit and transfer operations. Include validation for zero-tolerance accuracy, transaction logging, and rollback scenarios.",
+            "depends_on": ["setup_002", "setup_004"],
+            "prompt": "Create integration test suite for transaction processing in taylor-curran/target-springboot-cics. Analyze DBCRFUN.cbl (debit/credit) and XFRFUN.cbl (transfer) in taylor-curran/og-cics-cobol-app. Build TransactionProcessingIntegrationTest.java with 50+ test cases covering: 1) Debit operations (pay in cash), 2) Credit operations (withdrawal), 3) Balance validation before operations, 4) Transfer between accounts (same customer), 5) Transfer between accounts (different customers), 6) Transfer within same bank vs external, 7) PROCTRAN transaction logging, 8) Transaction amount validation, 9) Insufficient funds handling, 10) Concurrent transaction handling, 11) Transaction rollback scenarios, 12) Decimal precision for financial amounts (ZERO TOLERANCE), 13) Audit trail creation, 14) Transaction timestamp handling. Use BigDecimal for all monetary calculations.",
+            "definition_of_done": "TransactionProcessingIntegrationTest.java exists with 50+ passing test cases. Financial calculations use BigDecimal. Zero-discrepancy validation included. JaCoCo configured.",
+            "validation_mechanism": "Run `mvn test -Dtest=TransactionProcessingIntegrationTest`. All tests pass. Verify BigDecimal usage in all monetary calculations. JaCoCo shows >90% coverage. Financial accuracy tests validate zero tolerance.",
+            "estimated_hours": 14,
+            "deliverables": ["src/test/java/com/cbsa/migration/integration/TransactionProcessingIntegrationTest.java", "src/test/resources/transaction-test-data.sql", "test-fixtures/TransactionTestFixtures.java"]
+        },
+        {
+            "id": "validator_006",
+            "title": "Create BMS Interface Test Suite",
+            "content": "Build test suite for BMS interface programs focusing on API contract validation, request/response mapping, and business logic extraction from BMS screen handling code.",
+            "depends_on": ["setup_002", "setup_004"],
+            "prompt": "Create test suite for BMS interface programs in taylor-curran/target-springboot-cics. Analyze BNKMENU.cbl, BNK1CAC.cbl, BNK1CCS.cbl, BNK1CRA.cbl, BNK1DAC.cbl, BNK1DCS.cbl, and BNK1UAC.cbl in taylor-curran/og-cics-cobol-app. Build BmsIntegrationTest.java with 30+ test cases covering: 1) Main menu navigation logic, 2) Create account BMS operations (BNK1CAC, BNK1CRA), 3) Delete account/customer BMS operations (BNK1DAC, BNK1DCS), 4) Update account BMS operations (BNK1UAC), 5) Customer services BMS operations (BNK1CCS), 6) Screen field validation extraction, 7) BMS map data structure to REST API mapping, 8) Business logic separation from presentation, 9) CICS COMMAREA handling patterns. Note: BMS programs may be migrated as REST APIs rather than maintaining terminal UI.",
+            "definition_of_done": "BmsIntegrationTest.java exists with 30+ test cases for BMS business logic. API contract specifications documented. JaCoCo configured.",
+            "validation_mechanism": "Run `mvn test -Dtest=BmsIntegrationTest`. All tests pass. API contracts documented show clear REST endpoint mappings. JaCoCo shows >85% coverage.",
+            "estimated_hours": 10,
+            "deliverables": ["src/test/java/com/cbsa/migration/integration/BmsIntegrationTest.java", "bms_api_contracts.md", "test-fixtures/BmsTestFixtures.java"]
+        },
+        {
+            "id": "validator_007",
+            "title": "Create Infrastructure and System Test Suite",
+            "content": "Build test suite for infrastructure programs including error handling (ABNDPROC) and bank data management (BANKDATA). Include tests for error logging, abend processing, and data generation.",
+            "depends_on": ["setup_002", "setup_004"],
+            "prompt": "Create test suite for infrastructure programs in taylor-curran/target-springboot-cics. Analyze ABNDPROC.cbl (abend processing) and BANKDATA.cbl in taylor-curran/og-cics-cobol-app. Build InfrastructureIntegrationTest.java with 25+ test cases covering: 1) Error logging patterns from ABNDPROC, 2) Abend information capture (RESP, RESP2, program, transaction ID), 3) Error record writing to ABNDFILE, 4) BANKDATA data generation patterns, 5) Integration with existing ErrorLoggingService, 6) Error correlation ID generation, 7) Timestamp handling for errors, 8) Application error repository usage, 9) Test data generation for customers/accounts/transactions. Review existing ErrorLoggingService and BankDataGenerator in target repo.",
+            "definition_of_done": "InfrastructureIntegrationTest.java exists with 25+ passing test cases. Error handling patterns validated. JaCoCo configured.",
+            "validation_mechanism": "Run `mvn test -Dtest=InfrastructureIntegrationTest`. All tests pass. Verify integration with ErrorLoggingService. JaCoCo shows >85% coverage.",
+            "estimated_hours": 8,
+            "deliverables": ["src/test/java/com/cbsa/migration/integration/InfrastructureIntegrationTest.java", "test-fixtures/InfrastructureTestFixtures.java"]
+        },
+        {
+            "id": "validator_008",
+            "title": "Create End-to-End Integration Test Suite",
+            "content": "Build comprehensive end-to-end test suite that validates complete business workflows across multiple migrated components including customer creation with credit scoring, account opening, and transaction processing.",
+            "depends_on": ["validator_001", "validator_002", "validator_003", "validator_004", "validator_005"],
+            "prompt": "Create end-to-end integration test suite in taylor-curran/target-springboot-cics. Build EndToEndIntegrationTest.java with 20+ test scenarios covering complete business workflows: 1) New customer onboarding (create customer with credit scoring, open account, initial deposit), 2) Customer banking session (inquiry, transfer, withdrawal), 3) Multi-account customer workflows, 4) Cross-program interaction validation, 5) Data consistency across operations, 6) Transaction processing with account updates, 7) Error recovery scenarios, 8) Performance under load (multiple concurrent workflows). Use test fixtures from other validator tasks. Ensure tests validate that migrated Java code produces identical business outcomes to COBOL programs.",
+            "definition_of_done": "EndToEndIntegrationTest.java exists with 20+ passing workflow test scenarios. Tests validate cross-component interactions. JaCoCo configured.",
+            "validation_mechanism": "Run `mvn test -Dtest=EndToEndIntegrationTest`. All tests pass. Workflow tests complete successfully in <60 seconds. JaCoCo shows coverage across all components.",
+            "estimated_hours": 12,
+            "deliverables": ["src/test/java/com/cbsa/migration/integration/EndToEndIntegrationTest.java", "end_to_end_test_scenarios.md"]
+        },
+        {
+            "id": "migrate_001",
+            "title": "Enhance CreditAgencyService for Multiple Agencies (CRDTAGY2-5)",
+            "content": "Enhance existing CreditAgencyService to support multiple credit agency simulation (CRDTAGY2-5). Implement async parallel agency calls with timeout handling and score aggregation.",
+            "depends_on": ["setup_001", "setup_002", "validator_001"],
+            "prompt": "Enhance CreditAgencyService in taylor-curran/target-springboot-cics to support multiple credit agencies. Current service handles CRDTAGY1 only. Review CRDTAGY2.cbl, CRDTAGY3.cbl, CRDTAGY4.cbl, CRDTAGY5.cbl in taylor-curran/og-cics-cobol-app (all nearly identical with different container names). Implement: 1) Multi-agency async call simulation (CompletableFuture or @Async), 2) 3-second timeout matching COBOL parent wait, 3) Random delay per agency (0-3 seconds), 4) Score aggregation from agencies that respond in time, 5) Default to 0 if no agencies respond, 6) Configuration for number of agencies (1-5), 7) Individual agency response tracking. Update CreditAgencyController to expose multi-agency endpoint. Run tests from validator_001 continuously. Achieve >90% code coverage via JaCoCo. Follow patterns from existing CreditAgencyService.",
+            "definition_of_done": "CreditAgencyService enhanced to support 1-5 concurrent agencies. Multi-agency endpoint working. All tests from validator_001 pass. JaCoCo shows >90% coverage.",
+            "validation_mechanism": "Run `mvn test -Dtest=CreditAgencyIntegrationTest`. All tests pass. Manual API test with curl shows multi-agency scoring works with timeout. JaCoCo report confirms >90% coverage.",
+            "estimated_hours": 10,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/CreditAgencyService.java", "src/main/java/com/cbsa/migration/controller/CreditAgencyController.java", "multi_agency_design.md"]
+        },
+        {
+            "id": "migrate_002",
+            "title": "Migrate CRECUST - Create Customer with Credit Scoring",
+            "content": "Migrate CRECUST.cbl (1440 lines) to Java Spring Boot including customer creation, async credit scoring across multiple agencies, counter management, and multi-datastore writes to customer and transaction records.",
+            "depends_on": ["setup_001", "setup_002", "validator_002", "migrate_001"],
+            "prompt": "Migrate CRECUST.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Create CustomerCreationService.java and CustomerController.java (if not exists, extend existing). Implement: 1) Customer data validation (name, address, DOB with validation rules: min year 1601, max age 150, reject future dates, fail codes 'O'/'Y'), 2) Sort code retrieval (use SortCodeService), 3) Credit scoring via multiple agencies (use enhanced CreditAgencyService from migrate_001), 4) 3-second wait for agency responses with aggregation, 5) Default credit score to 0 if no responses, 6) Customer number counter increment (CustomerCounterRepository), 7) Customer record write to database, 8) PROCTRAN transaction record write on success, 9) Counter decrement and cleanup on failure, 10) Transaction boundary management. Reference architecture_documentation.md from setup_004. Run CustomerCrudIntegrationTest continuously. Achieve >80% service coverage, >70% repository coverage, >60% controller coverage.",
+            "definition_of_done": "CustomerCreationService and CustomerController implemented. REST endpoint POST /api/customers creates customers with credit scoring. All CustomerCrudIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=CustomerCrudIntegrationTest`. All tests pass. Manual API test creates customer successfully with credit scores. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%. Performance test shows latency within 110% of baseline.",
+            "estimated_hours": 14,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/CustomerCreationService.java", "src/main/java/com/cbsa/migration/controller/CustomerController.java", "src/main/java/com/cbsa/migration/repository/CustomerRepository.java", "CRECUST_migration_notes.md"]
+        },
+        {
+            "id": "migrate_003",
+            "title": "Migrate INQCUST - Customer Inquiry",
+            "content": "Migrate INQCUST.cbl (712 lines) to Java Spring Boot including customer data retrieval with VSAM/DB2 retry logic patterns and proper handling of not-found scenarios.",
+            "depends_on": ["setup_001", "setup_002", "validator_002"],
+            "prompt": "Migrate INQCUST.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Create CustomerInquiryService.java and extend CustomerController.java. Implement: 1) Customer inquiry by customer number, 2) Composite key lookup (sortcode + customer_number), 3) Return customer data (name, address, DOB, credit score, review date), 4) Return record with 'low values' pattern if not found (empty CustomerDTO with appropriate defaults), 5) Retry logic patterns from COBOL (attempt VSAM then DB2), 6) Error handling with appropriate HTTP status codes (404 for not found, 500 for errors), 7) Field mapping from COBOL structures (CUST eye-catcher, fixed-width fields). Run CustomerCrudIntegrationTest continuously. Achieve coverage thresholds per TESTING.md.",
+            "definition_of_done": "CustomerInquiryService implemented. REST endpoint GET /api/customers/{customerNumber} retrieves customer data. Not-found cases handled correctly. CustomerCrudIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=CustomerCrudIntegrationTest`. All tests pass. Manual API test retrieves existing customers successfully. 404 returned for non-existent customers. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%.",
+            "estimated_hours": 8,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/CustomerInquiryService.java", "src/main/java/com/cbsa/migration/controller/CustomerController.java", "INQCUST_migration_notes.md"]
+        },
+        {
+            "id": "migrate_004",
+            "title": "Migrate UPDCUST - Update Customer",
+            "content": "Migrate UPDCUST.cbl to Java Spring Boot including customer update operations with validation, transaction handling, and PROCTRAN logging.",
+            "depends_on": ["setup_001", "setup_002", "validator_002", "migrate_003"],
+            "prompt": "Migrate UPDCUST.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Create CustomerUpdateService.java and extend CustomerController.java. Implement: 1) Customer update by customer number, 2) Field validation (name max 60 chars, address max 160 chars, DOB validation with rules), 3) Existence check before update, 4) Transaction boundary management with rollback on error, 5) PROCTRAN record write on successful update, 6) Optimistic locking for concurrent updates, 7) Audit trail of changes, 8) Update timestamp tracking. Run CustomerCrudIntegrationTest continuously. Achieve coverage thresholds.",
+            "definition_of_done": "CustomerUpdateService implemented. REST endpoint PUT /api/customers/{customerNumber} updates customers. Transaction handling correct. CustomerCrudIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=CustomerCrudIntegrationTest`. All tests pass. Manual API test updates customer successfully. Concurrent update test validates optimistic locking. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%.",
+            "estimated_hours": 8,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/CustomerUpdateService.java", "src/main/java/com/cbsa/migration/controller/CustomerController.java", "UPDCUST_migration_notes.md"]
+        },
+        {
+            "id": "migrate_005",
+            "title": "Migrate DELCUS - Delete Customer",
+            "content": "Migrate DELCUS.cbl to Java Spring Boot including customer deletion with account validation, counter decrement, and cascading delete considerations.",
+            "depends_on": ["setup_001", "setup_002", "validator_002", "migrate_003"],
+            "prompt": "Migrate DELCUS.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Create CustomerDeletionService.java and extend CustomerController.java. Implement: 1) Customer deletion by customer number, 2) Pre-deletion validation (customer must not have active accounts), 3) Customer number counter decrement (CustomerCounterRepository), 4) Transaction boundary management, 5) PROCTRAN record write on successful deletion, 6) Soft delete vs hard delete consideration (recommend soft delete with deleted_flag), 7) Audit trail of deletions, 8) Rollback on any error. Run CustomerCrudIntegrationTest continuously. Achieve coverage thresholds.",
+            "definition_of_done": "CustomerDeletionService implemented. REST endpoint DELETE /api/customers/{customerNumber} deletes customers with validation. Counter decrement works. CustomerCrudIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=CustomerCrudIntegrationTest`. All tests pass. Manual API test deletes customer without accounts successfully. Test with active accounts returns error. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%.",
+            "estimated_hours": 8,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/CustomerDeletionService.java", "src/main/java/com/cbsa/migration/controller/CustomerController.java", "DELCUS_migration_notes.md"]
+        },
+        {
+            "id": "migrate_006",
+            "title": "Migrate INQACC - Account Inquiry",
+            "content": "Migrate INQACC.cbl (1003 lines) to Java Spring Boot including account data retrieval with SQL cursor patterns, composite key operations, and DB2 retry logic.",
+            "depends_on": ["setup_001", "setup_002", "validator_003"],
+            "prompt": "Migrate INQACC.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Create AccountInquiryService.java and AccountController.java. Implement: 1) Account inquiry by account number, 2) Account inquiry with account type filter, 3) Composite key operations (sortcode + account_number), 4) SQL cursor handling patterns (JdbcTemplate with RowMapper), 5) Return account data (type, balance, opened date, etc.), 6) Return empty result if not found (similar to COBOL low values pattern), 7) DB2 retry logic patterns, 8) Field mapping (ACCT eye-catcher, fixed-width to Java types, YYYYMMDD dates to LocalDate). Run AccountInquiryIntegrationTest continuously. Achieve coverage thresholds per TESTING.md.",
+            "definition_of_done": "AccountInquiryService and AccountController implemented. REST endpoint GET /api/accounts/{accountNumber} retrieves account data. AccountInquiryIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=AccountInquiryIntegrationTest`. All tests pass. Manual API test retrieves accounts successfully. 404 returned for non-existent accounts. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%. Performance test shows latency within 110% of baseline.",
+            "estimated_hours": 10,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/AccountInquiryService.java", "src/main/java/com/cbsa/migration/controller/AccountController.java", "src/main/java/com/cbsa/migration/repository/AccountRepository.java", "INQACC_migration_notes.md"]
+        },
+        {
+            "id": "migrate_007",
+            "title": "Migrate INQACCCU - Inquiry Accounts for Customer",
+            "content": "Migrate INQACCCU.cbl to Java Spring Boot including retrieval of all accounts belonging to a specific customer with proper handling of multiple results.",
+            "depends_on": ["setup_001", "setup_002", "validator_003", "migrate_006"],
+            "prompt": "Migrate INQACCCU.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Extend AccountInquiryService.java and AccountController.java. Implement: 1) List all accounts for a customer by customer number, 2) Composite key query (sortcode + customer_number), 3) Return empty list if no accounts found, 4) Sort results by account number or opened date, 5) Pagination support for customers with many accounts, 6) Include account summary data (type, balance, status), 7) Performance optimization for customers with 5+ accounts. Run AccountInquiryIntegrationTest continuously. Test with realistic data (100 customers with 1-5 accounts each). Achieve coverage thresholds.",
+            "definition_of_done": "AccountInquiryService extended. REST endpoint GET /api/customers/{customerNumber}/accounts lists accounts. AccountInquiryIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=AccountInquiryIntegrationTest`. All tests pass. Manual API test lists accounts for customer successfully. Empty list for customer without accounts. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%.",
+            "estimated_hours": 6,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/AccountInquiryService.java", "src/main/java/com/cbsa/migration/controller/AccountController.java", "INQACCCU_migration_notes.md"]
+        },
+        {
+            "id": "migrate_008",
+            "title": "Migrate CREACC - Create Account",
+            "content": "Migrate CREACC.cbl to Java Spring Boot including account creation with validation, customer verification, and transaction logging.",
+            "depends_on": ["setup_001", "setup_002", "validator_004", "migrate_003"],
+            "prompt": "Migrate CREACC.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Create AccountCreationService.java and extend AccountController.java. Implement: 1) Account creation for existing customer, 2) Customer existence validation before creating account, 3) Account type validation (checking, savings, loan, mortgage, etc.), 4) Opening balance validation (can be zero or positive), 5) Account number generation or assignment, 6) Opened date in YYYYMMDD format (convert to/from LocalDate), 7) Transaction boundary management, 8) PROCTRAN record write on success, 9) Composite key creation (sortcode + account_number), 10) Initial account status setting. Run AccountCrudIntegrationTest continuously. Achieve coverage thresholds.",
+            "definition_of_done": "AccountCreationService implemented. REST endpoint POST /api/accounts creates accounts. Customer validation works. AccountCrudIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=AccountCrudIntegrationTest`. All tests pass. Manual API test creates account successfully. Attempt with non-existent customer returns error. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%.",
+            "estimated_hours": 10,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/AccountCreationService.java", "src/main/java/com/cbsa/migration/controller/AccountController.java", "CREACC_migration_notes.md"]
+        },
+        {
+            "id": "migrate_009",
+            "title": "Migrate UPDACC - Update Account",
+            "content": "Migrate UPDACC.cbl to Java Spring Boot including account update operations with validation, transaction handling, and PROCTRAN logging.",
+            "depends_on": ["setup_001", "setup_002", "validator_004", "migrate_006"],
+            "prompt": "Migrate UPDACC.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Create AccountUpdateService.java and extend AccountController.java. Implement: 1) Account update by account number, 2) Updateable fields (account type, status, etc. - NOT balance, which is updated via transactions), 3) Existence check before update, 4) Transaction boundary management with rollback, 5) PROCTRAN record write on success, 6) Optimistic locking for concurrent updates, 7) Audit trail of changes, 8) Update timestamp tracking. Run AccountCrudIntegrationTest continuously. Achieve coverage thresholds.",
+            "definition_of_done": "AccountUpdateService implemented. REST endpoint PUT /api/accounts/{accountNumber} updates accounts. Transaction handling correct. AccountCrudIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=AccountCrudIntegrationTest`. All tests pass. Manual API test updates account successfully. Concurrent update test validates locking. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%.",
+            "estimated_hours": 8,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/AccountUpdateService.java", "src/main/java/com/cbsa/migration/controller/AccountController.java", "UPDACC_migration_notes.md"]
+        },
+        {
+            "id": "migrate_010",
+            "title": "Migrate DELACC - Delete Account",
+            "content": "Migrate DELACC.cbl to Java Spring Boot including account deletion with balance validation, transaction logging, and cascading considerations.",
+            "depends_on": ["setup_001", "setup_002", "validator_004", "migrate_006"],
+            "prompt": "Migrate DELACC.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Create AccountDeletionService.java and extend AccountController.java. Implement: 1) Account deletion by account number, 2) Pre-deletion validation (balance must be zero), 3) Transaction boundary management, 4) PROCTRAN record write on successful deletion, 5) Soft delete vs hard delete (recommend soft delete with deleted_flag and deleted_date), 6) Transaction history preservation, 7) Audit trail of deletions, 8) Rollback on any error. Run AccountCrudIntegrationTest continuously. Achieve coverage thresholds.",
+            "definition_of_done": "AccountDeletionService implemented. REST endpoint DELETE /api/accounts/{accountNumber} deletes accounts with validation. Balance check works. AccountCrudIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=AccountCrudIntegrationTest`. All tests pass. Manual API test deletes account with zero balance successfully. Test with non-zero balance returns error. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%.",
+            "estimated_hours": 8,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/AccountDeletionService.java", "src/main/java/com/cbsa/migration/controller/AccountController.java", "DELACC_migration_notes.md"]
+        },
+        {
+            "id": "migrate_011",
+            "title": "Migrate BNK1CCA - List Accounts for Customer (BMS)",
+            "content": "Migrate BNK1CCA.cbl BMS interface to REST API for listing customer accounts including pagination and formatting patterns from BMS screens.",
+            "depends_on": ["setup_001", "setup_002", "validator_006", "migrate_007"],
+            "prompt": "Migrate BNK1CCA.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Extend AccountController.java with BMS-style list endpoint. Implement: 1) Customer account listing (reuse AccountInquiryService from migrate_007), 2) Pagination matching BMS screen capacity (10-20 accounts per page), 3) Account data formatting similar to BMS display, 4) Navigation support (next/previous page), 5) Account summary with formatted balance display, 6) REST API contract that can replace BMS functionality. Run BmsIntegrationTest continuously. Document BMS to REST API mapping. Achieve coverage thresholds.",
+            "definition_of_done": "BNK1CCA functionality available via REST API. Pagination works. BmsIntegrationTest tests pass. API contract documented. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=BmsIntegrationTest`. All tests pass. Manual API test lists accounts with pagination successfully. API contract documented in bms_api_contracts.md. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%.",
+            "estimated_hours": 6,
+            "deliverables": ["src/main/java/com/cbsa/migration/controller/AccountController.java", "BNK1CCA_migration_notes.md", "bms_api_contracts.md"]
+        },
+        {
+            "id": "migrate_012",
+            "title": "Migrate DBCRFUN - Debit/Credit Function",
+            "content": "Migrate DBCRFUN.cbl to Java Spring Boot including cash deposit/withdrawal operations with balance updates, transaction logging, and zero-tolerance financial accuracy.",
+            "depends_on": ["setup_001", "setup_002", "validator_005", "migrate_006"],
+            "prompt": "Migrate DBCRFUN.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Create TransactionService.java and TransactionController.java. Implement: 1) Debit operation (pay in cash - increase balance), 2) Credit operation (withdrawal - decrease balance), 3) Amount validation (must be positive), 4) Balance validation for withdrawals (sufficient funds), 5) Balance update with ZERO-TOLERANCE accuracy using BigDecimal, 6) PROCTRAN transaction logging with full details, 7) Transaction timestamp, 8) Transaction boundary management with rollback, 9) Concurrent transaction handling (pessimistic locking on account), 10) Audit trail creation. Use BigDecimal for ALL monetary calculations. Run TransactionProcessingIntegrationTest continuously. Achieve coverage thresholds.",
+            "definition_of_done": "TransactionService implemented with debit/credit operations. REST endpoints POST /api/transactions/debit and POST /api/transactions/credit work correctly. BigDecimal used throughout. TransactionProcessingIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=TransactionProcessingIntegrationTest`. All tests pass. Verify BigDecimal usage in code review. Manual API test performs debit/credit successfully. Financial accuracy tests validate zero discrepancy. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%. Performance test shows latency within 110% of baseline.",
+            "estimated_hours": 12,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/TransactionService.java", "src/main/java/com/cbsa/migration/controller/TransactionController.java", "src/main/java/com/cbsa/migration/repository/TransactionRepository.java", "DBCRFUN_migration_notes.md"]
+        },
+        {
+            "id": "migrate_013",
+            "title": "Migrate XFRFUN - Transfer Funds",
+            "content": "Migrate XFRFUN.cbl to Java Spring Boot including fund transfer between accounts with validation, dual balance updates, transaction logging, and zero-tolerance financial accuracy.",
+            "depends_on": ["setup_001", "setup_002", "validator_005", "migrate_012"],
+            "prompt": "Migrate XFRFUN.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Extend TransactionService.java and TransactionController.java. Implement: 1) Transfer from source account to destination account, 2) Same-customer transfers, 3) Different-customer transfers, 4) Same-bank vs external transfer indicators, 5) Amount validation (must be positive), 6) Source account balance validation (sufficient funds), 7) Dual balance updates (debit source, credit destination) with ZERO-TOLERANCE accuracy using BigDecimal, 8) PROCTRAN logging for both accounts, 9) Transaction boundary management (atomic operation with rollback), 10) Concurrent transaction handling (lock both accounts), 11) Transfer timestamp and reference number. Use BigDecimal for ALL monetary calculations. Handle edge cases like same account transfer. Run TransactionProcessingIntegrationTest continuously. Achieve coverage thresholds.",
+            "definition_of_done": "TransactionService extended with transfer operation. REST endpoint POST /api/transactions/transfer works correctly. BigDecimal used throughout. Atomic transaction handling verified. TransactionProcessingIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=TransactionProcessingIntegrationTest`. All tests pass. Verify BigDecimal usage. Manual API test performs transfer successfully. Rollback test validates atomicity. Financial accuracy tests validate zero discrepancy. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%. Performance test shows latency within 110% of baseline.",
+            "estimated_hours": 14,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/TransactionService.java", "src/main/java/com/cbsa/migration/controller/TransactionController.java", "XFRFUN_migration_notes.md"]
+        },
+        {
+            "id": "migrate_014",
+            "title": "Migrate BNK1TFN - Transfer (BMS Interface)",
+            "content": "Migrate BNK1TFN.cbl BMS interface to REST API for fund transfers including BMS validation patterns and user experience flows.",
+            "depends_on": ["setup_001", "setup_002", "validator_006", "migrate_013"],
+            "prompt": "Migrate BNK1TFN.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Extend TransactionController.java with BMS-style transfer endpoint. Implement: 1) Transfer initiation (reuse TransactionService from migrate_013), 2) BMS screen validation patterns (account format, amount format), 3) Transfer confirmation workflow, 4) Success/error message formatting similar to BMS, 5) Transfer receipt generation, 6) REST API contract replacing BMS functionality. Run BmsIntegrationTest continuously. Document BMS to REST API mapping. Achieve coverage thresholds.",
+            "definition_of_done": "BNK1TFN functionality available via REST API. Transfer workflow complete. BmsIntegrationTest tests pass. API contract documented. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=BmsIntegrationTest`. All tests pass. Manual API test initiates transfer successfully. API contract documented in bms_api_contracts.md. JaCoCo report shows: Service >80%, Repository >70%, Controller >60%.",
+            "estimated_hours": 6,
+            "deliverables": ["src/main/java/com/cbsa/migration/controller/TransactionController.java", "BNK1TFN_migration_notes.md"]
+        },
+        {
+            "id": "migrate_015",
+            "title": "Migrate BNKMENU - Main Menu (BMS Interface)",
+            "content": "Migrate BNKMENU.cbl BMS main menu to REST API endpoints providing navigation structure and available operations discovery.",
+            "depends_on": ["setup_001", "setup_002", "validator_006"],
+            "prompt": "Migrate BNKMENU.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Create MenuController.java. Implement: 1) Menu structure endpoint listing available operations, 2) Operation metadata (name, description, endpoint URL), 3) Hierarchical menu structure matching BMS, 4) Operation categorization (Customer, Account, Transaction, Reports), 5) Permission-based menu filtering (if applicable), 6) OpenAPI/Swagger integration for API discovery. Run BmsIntegrationTest continuously. Document BMS to REST API mapping. Achieve coverage thresholds.",
+            "definition_of_done": "MenuController implemented. REST endpoint GET /api/menu returns menu structure. BmsIntegrationTest tests pass. API contract documented. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=BmsIntegrationTest`. All tests pass. Manual API test retrieves menu structure successfully. Swagger UI displays menu correctly. JaCoCo report shows: Controller >60%.",
+            "estimated_hours": 4,
+            "deliverables": ["src/main/java/com/cbsa/migration/controller/MenuController.java", "BNKMENU_migration_notes.md"]
+        },
+        {
+            "id": "migrate_016",
+            "title": "Migrate BNK1CAC - Create Account (BMS Interface)",
+            "content": "Migrate BNK1CAC.cbl BMS interface to REST API for account creation including BMS validation patterns and screen flow.",
+            "depends_on": ["setup_001", "setup_002", "validator_006", "migrate_008"],
+            "prompt": "Migrate BNK1CAC.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Extend AccountController.java with BMS-style create endpoint. Implement: 1) Account creation (reuse AccountCreationService from migrate_008), 2) BMS screen validation patterns (customer number format, account type, opening balance), 3) Confirmation workflow, 4) Success message with new account number, 5) Error message formatting similar to BMS, 6) REST API contract replacing BMS functionality. Run BmsIntegrationTest continuously. Document BMS to REST API mapping. Achieve coverage thresholds.",
+            "definition_of_done": "BNK1CAC functionality available via REST API. Account creation workflow complete. BmsIntegrationTest tests pass. API contract documented. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=BmsIntegrationTest`. All tests pass. Manual API test creates account successfully via BMS-style endpoint. API contract documented in bms_api_contracts.md. JaCoCo report shows: Controller >60%.",
+            "estimated_hours": 5,
+            "deliverables": ["src/main/java/com/cbsa/migration/controller/AccountController.java", "BNK1CAC_migration_notes.md"]
+        },
+        {
+            "id": "migrate_017",
+            "title": "Migrate BNK1CCS - Customer Services (BMS Interface)",
+            "content": "Migrate BNK1CCS.cbl BMS interface to REST API for customer services operations including inquiry and navigation.",
+            "depends_on": ["setup_001", "setup_002", "validator_006", "migrate_003"],
+            "prompt": "Migrate BNK1CCS.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Extend CustomerController.java with BMS-style customer services endpoint. Implement: 1) Customer services hub endpoint, 2) Customer search/inquiry (reuse CustomerInquiryService from migrate_003), 3) BMS screen navigation patterns, 4) Customer information display formatting, 5) Operation links (update, delete, list accounts), 6) REST API contract replacing BMS functionality. Run BmsIntegrationTest continuously. Document BMS to REST API mapping. Achieve coverage thresholds.",
+            "definition_of_done": "BNK1CCS functionality available via REST API. Customer services hub working. BmsIntegrationTest tests pass. API contract documented. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=BmsIntegrationTest`. All tests pass. Manual API test accesses customer services successfully. API contract documented in bms_api_contracts.md. JaCoCo report shows: Controller >60%.",
+            "estimated_hours": 5,
+            "deliverables": ["src/main/java/com/cbsa/migration/controller/CustomerController.java", "BNK1CCS_migration_notes.md"]
+        },
+        {
+            "id": "migrate_018",
+            "title": "Migrate BNK1CRA - Create Account (BMS Interface - Variant)",
+            "content": "Migrate BNK1CRA.cbl BMS interface to REST API, consolidating with BNK1CAC if functionality is identical or providing variant implementation.",
+            "depends_on": ["setup_001", "setup_002", "validator_006", "migrate_016"],
+            "prompt": "Migrate BNK1CRA.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. First, analyze BNK1CRA.cbl to determine if it differs from BNK1CAC.cbl. If identical or very similar, document consolidation with BNK1CAC (from migrate_016) and ensure API supports both use cases. If different, extend AccountController.java with BNK1CRA-specific endpoint implementing its unique functionality. Run BmsIntegrationTest continuously. Document analysis and decision. Achieve coverage thresholds.",
+            "definition_of_done": "BNK1CRA analyzed and either consolidated with BNK1CAC or implemented separately. BmsIntegrationTest tests pass. Decision documented. JaCoCo coverage meets thresholds if new code added.",
+            "validation_mechanism": "Run `mvn test -Dtest=BmsIntegrationTest`. All tests pass. Manual testing confirms BNK1CRA functionality available. Documentation explains relationship with BNK1CAC. JaCoCo report shows: Controller >60%.",
+            "estimated_hours": 5,
+            "deliverables": ["src/main/java/com/cbsa/migration/controller/AccountController.java", "BNK1CRA_migration_notes.md", "BNK1CAC_vs_BNK1CRA_analysis.md"]
+        },
+        {
+            "id": "migrate_019",
+            "title": "Migrate BNK1DAC - Delete Account (BMS Interface)",
+            "content": "Migrate BNK1DAC.cbl BMS interface to REST API for account deletion including BMS validation patterns and confirmation workflow.",
+            "depends_on": ["setup_001", "setup_002", "validator_006", "migrate_010"],
+            "prompt": "Migrate BNK1DAC.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Extend AccountController.java with BMS-style delete endpoint. Implement: 1) Account deletion (reuse AccountDeletionService from migrate_010), 2) BMS screen validation (account number format), 3) Balance check confirmation display, 4) Deletion confirmation workflow (two-step: request + confirm), 5) Success/error message formatting similar to BMS, 6) REST API contract replacing BMS functionality. Run BmsIntegrationTest continuously. Document BMS to REST API mapping. Achieve coverage thresholds.",
+            "definition_of_done": "BNK1DAC functionality available via REST API. Account deletion workflow with confirmation complete. BmsIntegrationTest tests pass. API contract documented. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=BmsIntegrationTest`. All tests pass. Manual API test deletes account successfully via BMS-style endpoint with confirmation. API contract documented in bms_api_contracts.md. JaCoCo report shows: Controller >60%.",
+            "estimated_hours": 5,
+            "deliverables": ["src/main/java/com/cbsa/migration/controller/AccountController.java", "BNK1DAC_migration_notes.md"]
+        },
+        {
+            "id": "migrate_020",
+            "title": "Migrate BNK1DCS - Delete Customer (BMS Interface)",
+            "content": "Migrate BNK1DCS.cbl BMS interface to REST API for customer deletion including BMS validation patterns and confirmation workflow.",
+            "depends_on": ["setup_001", "setup_002", "validator_006", "migrate_005"],
+            "prompt": "Migrate BNK1DCS.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Extend CustomerController.java with BMS-style delete endpoint. Implement: 1) Customer deletion (reuse CustomerDeletionService from migrate_005), 2) BMS screen validation (customer number format), 3) Account check confirmation display (must have no accounts), 4) Deletion confirmation workflow (two-step: request + confirm), 5) Success/error message formatting similar to BMS, 6) REST API contract replacing BMS functionality. Run BmsIntegrationTest continuously. Document BMS to REST API mapping. Achieve coverage thresholds.",
+            "definition_of_done": "BNK1DCS functionality available via REST API. Customer deletion workflow with confirmation complete. BmsIntegrationTest tests pass. API contract documented. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=BmsIntegrationTest`. All tests pass. Manual API test deletes customer successfully via BMS-style endpoint with confirmation. API contract documented in bms_api_contracts.md. JaCoCo report shows: Controller >60%.",
+            "estimated_hours": 5,
+            "deliverables": ["src/main/java/com/cbsa/migration/controller/CustomerController.java", "BNK1DCS_migration_notes.md"]
+        },
+        {
+            "id": "migrate_021",
+            "title": "Migrate BNK1UAC - Update Account (BMS Interface)",
+            "content": "Migrate BNK1UAC.cbl BMS interface to REST API for account updates including BMS validation patterns and screen flow.",
+            "depends_on": ["setup_001", "setup_002", "validator_006", "migrate_009"],
+            "prompt": "Migrate BNK1UAC.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Extend AccountController.java with BMS-style update endpoint. Implement: 1) Account update (reuse AccountUpdateService from migrate_009), 2) BMS screen validation patterns (account number format, updateable fields), 3) Current values display before update, 4) Confirmation workflow, 5) Success/error message formatting similar to BMS, 6) REST API contract replacing BMS functionality. Run BmsIntegrationTest continuously. Document BMS to REST API mapping. Achieve coverage thresholds.",
+            "definition_of_done": "BNK1UAC functionality available via REST API. Account update workflow complete. BmsIntegrationTest tests pass. API contract documented. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=BmsIntegrationTest`. All tests pass. Manual API test updates account successfully via BMS-style endpoint. API contract documented in bms_api_contracts.md. JaCoCo report shows: Controller >60%.",
+            "estimated_hours": 5,
+            "deliverables": ["src/main/java/com/cbsa/migration/controller/AccountController.java", "BNK1UAC_migration_notes.md"]
+        },
+        {
+            "id": "migrate_022",
+            "title": "Migrate ABNDPROC - Abend Processing and Error Handler",
+            "content": "Migrate ABNDPROC.cbl to Java Spring Boot including error logging, abend information capture, and integration with existing ErrorLoggingService.",
+            "depends_on": ["setup_001", "setup_002", "validator_007"],
+            "prompt": "Migrate ABNDPROC.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Review existing ErrorLoggingService and enhance if needed. Implement: 1) Centralized error handling similar to ABNDPROC patterns, 2) Error information capture (exception type, message, stack trace, correlation ID, timestamp), 3) ApplicationError record creation matching ABNDFILE structure, 4) Integration with ApplicationErrorRepository, 5) Error severity classification, 6) Logging with structured format, 7) Error notification/alerting hooks, 8) Global exception handler (@ControllerAdvice) for REST APIs. Run InfrastructureIntegrationTest continuously. Achieve coverage thresholds.",
+            "definition_of_done": "ABNDPROC functionality implemented via ErrorLoggingService and global exception handler. Error records written to database. InfrastructureIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=InfrastructureIntegrationTest`. All tests pass. Trigger test error and verify error record in database. Verify structured logging output. JaCoCo report shows: Service >80%, Repository >70%.",
+            "estimated_hours": 8,
+            "deliverables": ["src/main/java/com/cbsa/migration/service/ErrorLoggingService.java", "src/main/java/com/cbsa/migration/exception/GlobalExceptionHandler.java", "ABNDPROC_migration_notes.md"]
+        },
+        {
+            "id": "migrate_023",
+            "title": "Migrate BANKDATA - Bank Data Management",
+            "content": "Migrate BANKDATA.cbl to Java Spring Boot including data generation patterns and integration with existing BankDataGenerator for test data.",
+            "depends_on": ["setup_001", "setup_002", "validator_007"],
+            "prompt": "Migrate BANKDATA.cbl from taylor-curran/og-cics-cobol-app to taylor-curran/target-springboot-cics. Review existing BankDataGenerator and enhance if needed. Implement: 1) Bank data management patterns from BANKDATA.cbl, 2) Customer data generation (name, address, DOB with valid dates), 3) Account data generation (various types, balances, opened dates), 4) Transaction data generation (30 days history per account), 5) Data consistency rules (customers before accounts, accounts before transactions), 6) Configurable generation parameters (number of customers, accounts per customer, transactions per account), 7) Bank reference data (sort codes, bank names), 8) Data seeding for development/testing. Run InfrastructureIntegrationTest continuously. Achieve coverage thresholds.",
+            "definition_of_done": "BANKDATA functionality implemented via enhanced BankDataGenerator. Data generation works for all entities. InfrastructureIntegrationTest tests pass. JaCoCo coverage meets thresholds.",
+            "validation_mechanism": "Run `mvn test -Dtest=InfrastructureIntegrationTest`. All tests pass. Execute data generation and verify 100 customers, 1-5 accounts each, 30 days transactions created. JaCoCo report shows: Service >80%.",
+            "estimated_hours": 8,
+            "deliverables": ["src/main/java/com/cbsa/migration/data/BankDataGenerator.java", "BANKDATA_migration_notes.md"]
+        },
+        {
+            "id": "migrate_024",
+            "title": "End-to-End Integration Validation",
+            "content": "Execute comprehensive end-to-end integration testing across all migrated components to validate complete business workflows and cross-component interactions.",
+            "depends_on": ["validator_008", "migrate_002", "migrate_003", "migrate_004", "migrate_005", "migrate_006", "migrate_007", "migrate_008", "migrate_009", "migrate_010", "migrate_011", "migrate_012", "migrate_013", "migrate_014", "migrate_022", "migrate_023"],
+            "prompt": "Execute comprehensive end-to-end validation for taylor-curran/target-springboot-cics. Run EndToEndIntegrationTest from validator_008 against all migrated components. Test complete business workflows: 1) New customer onboarding (create customer with credit scoring → open account → initial deposit), 2) Customer banking session (inquiry → transfer → withdrawal), 3) Multi-account customer scenarios, 4) Cross-program interactions, 5) Data consistency validation, 6) Error recovery scenarios, 7) Performance under load. Execute performance tests from setup_003 and validate metrics against baseline from setup_001. Generate comprehensive validation report covering functionality, performance, and data accuracy. Address any issues found.",
+            "definition_of_done": "All EndToEndIntegrationTest tests pass. Performance tests show latency within 110% of baseline, throughput >90% of baseline, error rate <0.1%. Validation report generated showing all workflows successful.",
+            "validation_mechanism": "Run `mvn test -Dtest=EndToEndIntegrationTest`. All tests pass. Run performance test suite and verify metrics meet targets. Generate and review validation report. All issues resolved.",
+            "estimated_hours": 10,
+            "deliverables": ["end_to_end_validation_report.md", "performance_validation_results.json"]
+        },
+        {
+            "id": "migrate_025",
+            "title": "Performance Optimization and Tuning",
+            "content": "Analyze performance bottlenecks and optimize migrated code to meet or exceed legacy COBOL performance benchmarks.",
+            "depends_on": ["migrate_024"],
+            "prompt": "Perform performance optimization for taylor-curran/target-springboot-cics based on results from migrate_024. Profile application to identify bottlenecks. Optimize: 1) Database queries (add indexes, optimize SQL), 2) Connection pool configuration, 3) JVM heap settings, 4) Spring Boot configuration (async processing, connection pooling), 5) Caching strategies for reference data, 6) Transaction scope optimization, 7) API response time improvements. Re-run performance tests and validate improvements. Document optimization decisions and configuration changes. Target: latency within 100% of baseline, throughput ≥100% of baseline.",
+            "definition_of_done": "Performance optimizations applied. Performance tests show latency ≤100% of baseline, throughput ≥100% of baseline, error rate <0.1%. Optimization decisions documented.",
+            "validation_mechanism": "Run performance test suite. Verify metrics meet targets. Compare before/after metrics showing improvements. Review optimization documentation.",
+            "estimated_hours": 12,
+            "deliverables": ["performance_optimization_report.md", "application.properties", "jvm_config.md", "optimized_performance_results.json"]
+        },
+        {
+            "id": "migrate_026",
+            "title": "Final Migration Validation and Documentation",
+            "content": "Execute final comprehensive validation of all 29 migrated COBOL programs, generate migration completion report, and update all documentation.",
+            "depends_on": ["migrate_025"],
+            "prompt": "Perform final migration validation for taylor-curran/target-springboot-cics. Execute: 1) All integration test suites (validator_001 through validator_008), 2) All unit tests with coverage validation, 3) Performance test suite, 4) Database schema consistency test, 5) End-to-end workflow tests. Verify all 29 programs migrated (GETCOMPY, GETSCODE, CRDTAGY1-5, CRECUST, INQCUST, UPDCUST, DELCUS, CREACC, INQACC, INQACCCU, UPDACC, DELACC, BNK1CCA, DBCRFUN, XFRFUN, BNK1TFN, BNKMENU, BNK1CAC, BNK1CCS, BNK1CRA, BNK1DAC, BNK1DCS, BNK1UAC, ABNDPROC, BANKDATA). Update MIGRATION_PLAYBOOK.md showing 29/29 complete (100%). Generate final migration report covering: functionality coverage, test coverage, performance comparison, data accuracy validation, lessons learned, recommendations. Update README.md with complete list of migrated programs.",
+            "definition_of_done": "All tests pass. All 29 programs migrated and validated. MIGRATION_PLAYBOOK.md updated to 29/29 (100%). Final migration report generated. README.md updated.",
+            "validation_mechanism": "Run `mvn verify` - all tests pass, coverage thresholds met. Review migration report for completeness. Verify MIGRATION_PLAYBOOK.md and README.md updated correctly.",
+            "estimated_hours": 8,
+            "deliverables": ["final_migration_report.md", "MIGRATION_PLAYBOOK.md", "README.md", "migration_lessons_learned.md"]
+        }
+    ]
+}
