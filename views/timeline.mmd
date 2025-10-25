@@ -1,0 +1,78 @@
+gantt
+    title COBOL to Spring Boot Migration Timeline
+    dateFormat YYYY-MM-DD
+    
+    %% =========================================================================
+    %% PHASE 1: FOUNDATION
+    %% =========================================================================
+    section Foundation
+    GETCOMPY (Done)                 :done, getcompy, 2025-01-01, 0.5d
+    GETSCODE (Done)                 :done, getscode, 2025-01-01, 0.5d
+    ABNDPROC (In Progress)          :active, abndproc, 2025-10-20, 2d
+    CRDTAGY1-5 (In Progress)        :active, crdtagy, 2025-10-22, 3d
+    ✓ Foundation Complete           :milestone, checkpoint1, after crdtagy, 0.5d
+    
+    %% =========================================================================
+    %% PHASE 2: CORE SERVICES (QUERY OPERATIONS)
+    %% =========================================================================
+    section Core Services
+    INQCUST (711 lines)             :inqcust, after checkpoint1, 3d
+    INQACC (1002 lines)             :inqacc, after checkpoint1, 3d
+    INQACCCU (882 lines)            :inqacccu, after inqcust inqacc, 3d
+    ✓ Core Services Complete        :milestone, checkpoint2, after inqacccu, 0.5d
+    
+    %% =========================================================================
+    %% PHASE 3: CUSTOMER OPERATIONS
+    %% =========================================================================
+    section Customer Operations
+    CRECUST (1439 lines)            :crecust, after checkpoint2 crdtagy, 5d
+    UPDCUST (364 lines)             :updcust, after crecust, 2d
+    DELCUS (761 lines)              :delcus, after updcust inqacccu, 4d
+    ✓ Customer Ops Complete         :milestone, checkpoint3, after delcus, 0.5d
+    
+    %% =========================================================================
+    %% PHASE 4: ACCOUNT OPERATIONS
+    %% =========================================================================
+    section Account Operations
+    CREACC (1247 lines)             :creacc, after checkpoint2 inqcust inqacccu, 5d
+    UPDACC (406 lines)              :updacc, after creacc, 2d
+    DELACC (649 lines)              :delacc, after updacc, 2d
+    ✓ Account Ops Complete          :milestone, checkpoint4, after delacc, 0.5d
+    
+    %% =========================================================================
+    %% PHASE 5: TRANSACTION SERVICES
+    %% =========================================================================
+    section Transactions
+    DBCRFUN (861 lines)             :dbcrfun, after checkpoint4, 4d
+    XFRFUN (1924 lines)             :xfrfun, after dbcrfun, 5d
+    ✓ Transaction Services          :milestone, checkpoint5, after xfrfun, 0.5d
+    
+    %% =========================================================================
+    %% PHASE 6: BMS UI PROGRAMS (REST API BACKENDS)
+    %% =========================================================================
+    section BMS UI Programs
+    BNKMENU (1311 lines)            :bnkmenu, after checkpoint5, 3d
+    BNK1CCA (952 lines)             :bnk1cca, after inqacccu, 3d
+    BNK1CAC (1298 lines)            :bnk1cac, after creacc, 3d
+    BNK1UAC (1405 lines)            :bnk1uac, after updacc, 3d
+    BNK1CRA (1166 lines)            :bnk1cra, after crecust, 3d
+    BNK1DAC (1158 lines)            :bnk1dac, after delacc, 3d
+    BNK1CCS (1657 lines)            :bnk1ccs, after inqcust, 4d
+    BNK1DCS (2053 lines)            :bnk1dcs, after delcus, 4d
+    BNK1TFN (1224 lines)            :bnk1tfn, after xfrfun, 4d
+    
+    %% =========================================================================
+    %% PHASE 7: DATA INITIALIZATION
+    %% =========================================================================
+    section Data & Testing
+    BANKDATA (1463 lines)           :bankdata, after checkpoint4 checkpoint3, 3d
+    ✓ Integration Tests             :milestone, checkpoint6, after bnkmenu bnk1cca bnk1cac bnk1uac bnk1cra bnk1dac bnk1ccs bnk1dcs bnk1tfn bankdata, 3d
+    
+    %% =========================================================================
+    %% PHASE 8: TESTING & DEPLOYMENT
+    %% =========================================================================
+    section Testing & Deployment
+    Performance Baseline            :perf, after checkpoint6, 2d
+    Security Scan                   :security, after checkpoint6, 1d
+    Rollback Plan                   :rollback, after perf security, 1d
+    ✓ Cutover Readiness            :milestone, checkpoint7, after rollback, 0.5d

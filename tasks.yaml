@@ -1,0 +1,1863 @@
+version: 1
+context:
+  status: "100% - complete plan created with all 29 programs mapped"
+  summary: |
+    Complete migration plan for 29 COBOL programs to Spring Boot.
+    Foundation utilities complete (GETCOMPY, GETSCODE).
+    Error logging (ABNDPROC) and credit agencies (CRDTAGY*) in progress.
+    Remaining: 24 programs across 6 phases.
+    
+    Key findings:
+    - 4 programs already started (GETCOMPY✅, GETSCODE✅, ABNDPROC, CRDTAGY*)
+    - Complex dependencies: CREACC→INQCUST/INQACCCU, DELCUS→INQCUST/DELACC/INQACCCU
+    - BANKDATA is batch data initialization, not a runtime CICS program
+    - BMS UI programs will become REST APIs, not full UI migration
+    - CRDTAGY1-5 unified into single CreditAgencyService
+  
+  assumptions:
+    - "BMS UI programs (BNK1*) will be replaced with REST APIs, not migrated directly"
+    - "CRDTAGY1-5 unified into single CreditAgencyService (already in progress)"
+    - "BANKDATA batch program converted to Spring Boot @PostConstruct or separate migration script"
+    - "H2 for tests, SQLite for production (dual schema maintenance required)"
+    - "Coverage targets: Service 80%, Repository 70%, Controller 60%, Model 50%, DTO 40%"
+    - "All programs use ABNDPROC for error handling - centralized error service needed"
+    - "Date validation rules from COBOL must be preserved: min year 1601, max age 150, reject future dates"
+  
+  risks:
+    - id: "risk-001"
+      title: "Schema synchronization between H2 and SQLite"
+      mitigation: "Use DatabaseSchemaConsistencyTest, update both schemas together, automate sync checks"
+    
+    - id: "risk-002"
+      title: "Complex dependencies between programs"
+      mitigation: "Follow strict dependency order: INQCUST → INQACCCU → CREACC. Test each layer before proceeding."
+    
+    - id: "risk-003"
+      title: "BMS map complexity in UI programs (9 programs, ~1200 lines each)"
+      mitigation: "Focus on REST API backend first, defer full UI to separate effort. Document mapping."
+    
+    - id: "risk-004"
+      title: "Transaction isolation in XFRFUN (1924 lines, complex rollback logic)"
+      mitigation: "Use Spring @Transactional, test rollback scenarios thoroughly, preserve COBOL deadlock retry logic"
+    
+    - id: "risk-005"
+      title: "VSAM to SQLite data migration"
+      mitigation: "BANKDATA provides migration logic. Create parallel migration script with validation."
+    
+    - id: "risk-006"
+      title: "Async credit agency calls (CRDTAGY* with delays)"
+      mitigation: "Use Spring @Async, preserve delay simulation, test with CompletableFuture"
+    
+    - id: "risk-007"
+      title: "16 existing feature branches from previous attempts"
+      mitigation: "Review and consolidate learnings, ensure new plan addresses previous blockers"
+    
+    - id: "risk-008"
+      title: "Named counter generation (ENQUEUE/DEQUEUE for IDs)"
+      mitigation: "Use database sequences or synchronized ID generation service"
+  
+  checkpoints:
+    - architecture_review
+    - foundation_complete
+    - core_services_complete
+    - customer_operations_complete
+    - account_operations_complete
+    - transaction_services_complete
+    - integration_tests_complete
+    - cutover_readiness
+
+tasks:
+  
+  - id: foundation-getcompy
+    title: "GETCOMPY (43 lines) → CompanyInfoService"
+    state: done
+    depends_on: []
+    owner: "system"
+    estimate: "0.5d"
+    labels: [foundation, utility, done]
+    prompt: |
+      ALREADY COMPLETED - This task is done.
+      CompanyInfoService returns company name "CICS Bank Sample Application".
+      REST endpoint: GET /api/utility/company-name
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/CompanyInfoService.java"
+      - "src/main/java/com/cbsa/migration/controller/UtilityController.java"
+    definition_of_done:
+      - "✅ Service returns 'CICS Bank Sample Application'"
+      - "✅ REST endpoint GET /api/utility/company-name works"
+      - "✅ Unit tests pass with 80%+ coverage"
+
+  - id: foundation-getscode
+    title: "GETSCODE (46 lines) → SortCodeService"
+    state: done
+    depends_on: []
+    owner: "system"
+    estimate: "0.5d"
+    labels: [foundation, utility, done]
+    prompt: |
+      ALREADY COMPLETED - This task is done.
+      SortCodeService returns bank sort code "987654".
+      REST endpoint: GET /api/utility/sortcode
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/SortCodeService.java"
+      - "src/main/java/com/cbsa/migration/controller/UtilityController.java"
+    definition_of_done:
+      - "✅ Service returns '987654'"
+      - "✅ REST endpoint GET /api/utility/sortcode works"
+      - "✅ Unit tests pass with 80%+ coverage"
+
+  - id: foundation-abndproc
+    title: "ABNDPROC (176 lines) → ErrorLoggingService"
+    state: in_progress
+    depends_on: []
+    owner: "system"
+    estimate: "2d"
+    labels: [foundation, utility, error-handling, in-progress]
+    prompt: |
+      Complete migration of ABNDPROC.cbl (176 lines) to ErrorLoggingService.
+      
+      COBOL Behavior:
+      - Centralized error handler called by all 29 programs via EXEC CICS LINK
+      - Writes abend info to ABNDFILE (VSAM) with error details
+      - Uses eye-catcher field "ABND" for error records
+      
+      Java Implementation:
+      1. Create ApplicationError entity with fields: id, timestamp, program_name, error_code, error_message, stack_trace
+      2. Create ApplicationErrorRepository using JDBC for SQLite/H2
+      3. Create ErrorLoggingService with methods:
+         - logError(String programName, String errorCode, String errorMessage, String stackTrace)
+         - getRecentErrors(int limit)
+         - getErrorsByProgram(String programName)
+      4. Add REST endpoints:
+         - POST /api/errors (log error)
+         - GET /api/errors (list recent)
+         - GET /api/errors/program/{name} (filter by program)
+      5. Add schema to both H2 and SQLite:
+         CREATE TABLE application_error (
+           id INTEGER PRIMARY KEY AUTOINCREMENT,
+           timestamp TEXT NOT NULL,
+           program_name TEXT NOT NULL,
+           error_code TEXT,
+           error_message TEXT,
+           stack_trace TEXT
+         )
+      6. Write integration tests with H2 database
+      
+      Definition of Done:
+      - Error records successfully written to application_error table
+      - Service coverage ≥80%, Repository coverage ≥70%, Controller coverage ≥60%
+      - Integration tests verify database writes to both H2 and SQLite
+      - REST endpoint POST /api/errors returns 201 Created
+      - Can query errors by program name
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/ErrorLoggingService.java"
+      - "src/main/java/com/cbsa/migration/model/ApplicationError.java"
+      - "src/main/java/com/cbsa/migration/repository/ApplicationErrorRepository.java"
+      - "src/main/java/com/cbsa/migration/controller/ErrorController.java"
+      - "src/main/resources/schema-h2.sql"
+      - "src/main/resources/schema.sql"
+    definition_of_done:
+      - "Error records written to application_error table (SQLite and H2)"
+      - "Service coverage ≥80%, Repository coverage ≥70%, Controller coverage ≥60%"
+      - "Integration tests verify database writes"
+      - "REST endpoint POST /api/errors returns 201"
+      - "Can retrieve errors by program name"
+
+  - id: foundation-crdtagy-unified
+    title: "CRDTAGY1-5 (5×275 lines) → CreditAgencyService"
+    state: in_progress
+    depends_on: []
+    owner: "system"
+    estimate: "3d"
+    labels: [foundation, credit-check, async, in-progress]
+    prompt: |
+      Complete unified migration of CRDTAGY1-5.cbl (5 programs, ~275 lines each) to CreditAgencyService.
+      
+      COBOL Behavior:
+      - 5 separate async programs simulating credit agencies
+      - Each returns random credit score 1-999 after 0-3 second delay
+      - Called asynchronously via EXEC CICS START/RETRIEVE
+      - Use EXEC CICS DELAY to simulate processing time
+      - Put results in OUTPUT container
+      
+      Java Implementation:
+      1. Complete CreditAgencyService with @Async annotation
+      2. Create methods for each agency simulation:
+         - checkCreditAgency1Async(customerInfo) → CompletableFuture<Integer>
+         - checkCreditAgency2Async(customerInfo) → CompletableFuture<Integer>
+         - ... (5 total)
+      3. Implement aggregateCreditScores(List<CompletableFuture<Integer>>) → averageScore
+      4. Add random delay simulation (0-3 seconds) using Thread.sleep or reactive delay
+      5. Generate random credit scores 1-999
+      6. Add configuration for:
+         - Number of agencies to call (default 5)
+         - Min/max delay times
+         - Score range
+      7. Add REST endpoints:
+         - POST /api/credit-check (runs async check, returns aggregate)
+         - GET /api/credit-check/status/{id} (check async operation status)
+      8. Write unit tests with mocked async calls
+      9. Write integration tests verifying async behavior
+      
+      Definition of Done:
+      - Async credit checks return scores 1-999
+      - Configurable delay simulation (0-3 seconds)
+      - Aggregates multiple agency responses (average of 5 scores)
+      - Service coverage ≥80%
+      - Unit tests verify async behavior with CompletableFuture
+      - Integration tests confirm delays work correctly
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/CreditAgencyService.java"
+      - "src/main/java/com/cbsa/migration/controller/CreditController.java"
+      - "src/main/java/com/cbsa/migration/dto/CreditCheckRequest.java"
+      - "src/main/java/com/cbsa/migration/dto/CreditCheckResponse.java"
+    definition_of_done:
+      - "Async credit checks return scores 1-999"
+      - "Configurable delay simulation (0-3 seconds)"
+      - "Aggregates multiple agency responses (average)"
+      - "Service coverage ≥80%"
+      - "Unit tests verify async behavior"
+      - "Integration tests confirm timing behavior"
+
+  - id: checkpoint-foundation-complete
+    title: "CHECKPOINT: Foundation Complete"
+    state: ready
+    depends_on: [foundation-abndproc, foundation-crdtagy-unified]
+    estimate: "0.5d"
+    labels: [checkpoint, review]
+    prompt: |
+      Review foundation layer completion before proceeding to core services.
+      
+      Verification Steps:
+      1. Run all foundation tests: mvn test -Dtest="*Service*Test,*Repository*Test,*Controller*Test"
+      2. Verify coverage reports meet targets (Service ≥80%, Repository ≥70%, Controller ≥60%)
+      3. Test error logging endpoint manually: curl -X POST http://localhost:8080/api/errors
+      4. Test credit agency endpoint manually: curl -X POST http://localhost:8080/api/credit-check
+      5. Verify both H2 and SQLite schemas are in sync
+      6. Check that all foundation services are autowired correctly
+      7. Review code for any TODOs or placeholder comments
+      8. Document any deviations from COBOL behavior
+      
+      Sign-off Required:
+      - Technical lead review
+      - All tests passing
+      - Coverage targets met
+      - Documentation updated
+    artifacts: []
+    definition_of_done:
+      - "All foundation tasks complete (GETCOMPY✅, GETSCODE✅, ABNDPROC✅, CRDTAGY*✅)"
+      - "Error logging operational and tested"
+      - "Credit agency service operational and tested"
+      - "Unit tests pass with coverage targets met"
+      - "Integration tests pass for all foundation services"
+      - "Technical lead sign-off obtained"
+
+
+  - id: core-inqcust
+    title: "INQCUST (711 lines) → CustomerInquiryService"
+    state: ready
+    depends_on: [checkpoint-foundation-complete]
+    estimate: "3d"
+    labels: [core-services, customer, query]
+    prompt: |
+      Migrate INQCUST.cbl (711 lines) - customer inquiry from VSAM.
+      
+      COBOL Behavior:
+      - Reads CUSTOMER file (VSAM) by sortcode + customer number (composite key)
+      - Returns customer details: name, address, DOB, etc.
+      - Validates customer number format
+      - Calls ABNDPROC on errors
+      
+      Java Implementation:
+      1. Create CustomerInquiryService.getCustomer(String sortCode, String customerNumber)
+      2. Use existing Customer entity (verify fields match COBOL record layout)
+      3. Use existing CustomerRepository (extend if needed):
+         - findBySortCodeAndCustomerNumber(sortCode, customerNumber)
+      4. Add validation:
+         - Customer number format (10 digits)
+         - Sort code format (6 digits)
+      5. Throw CustomerNotFoundException if not found (use ErrorLoggingService)
+      6. Add REST endpoint: GET /api/customers/{sortCode}/{customerNumber}
+      7. Add CustomerDTO for response
+      8. Write unit tests with mocked repository
+      9. Write integration tests with H2 test data
+      
+      Test Data Setup:
+      - Use existing BankDataGenerator or create test customers
+      - Minimum 10 test customers with various attributes
+      
+      Definition of Done:
+      - Query returns customer by sortcode + customer number
+      - Returns 404 with proper error message if not found
+      - Service coverage ≥80%, Controller coverage ≥60%
+      - Integration tests verify database queries with H2
+      - REST endpoint documented in README or Swagger
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/CustomerInquiryService.java"
+      - "src/main/java/com/cbsa/migration/controller/CustomerController.java"
+      - "src/main/java/com/cbsa/migration/dto/CustomerDTO.java"
+      - "src/main/java/com/cbsa/migration/exception/CustomerNotFoundException.java"
+      - "src/test/java/com/cbsa/migration/service/CustomerInquiryServiceTest.java"
+      - "src/test/java/com/cbsa/migration/controller/CustomerControllerTest.java"
+    definition_of_done:
+      - "Query returns customer by sortcode + customer number"
+      - "Handles not found cases with 404 and proper error message"
+      - "Service coverage ≥80%, Controller coverage ≥60%"
+      - "Integration tests verify database queries"
+      - "REST API documented"
+
+  - id: core-inqacc
+    title: "INQACC (1002 lines) → AccountInquiryService"
+    state: ready
+    depends_on: [checkpoint-foundation-complete]
+    estimate: "3d"
+    labels: [core-services, account, query]
+    prompt: |
+      Migrate INQACC.cbl (1002 lines) - account inquiry from DB2.
+      
+      COBOL Behavior:
+      - Queries ACCOUNT table (DB2) by sortcode + account number (composite key)
+      - Returns account details: type, balances (available, actual), interest rate, overdraft
+      - Supports filtering by account type
+      - Calls ABNDPROC on errors
+      
+      Java Implementation:
+      1. Create AccountInquiryService.getAccount(String sortCode, String accountNumber)
+      2. Use existing Account entity (verify fields match DB2 table)
+      3. Use existing AccountRepository (extend if needed):
+         - findBySortCodeAndAccountNumber(sortCode, accountNumber)
+      4. Add methods for filtering:
+         - getAccountsByType(String accountType)
+         - getAccountsByCustomer(String sortCode, String customerNumber)
+      5. Calculate derived fields if needed (e.g., available balance = actual balance - overdraft used)
+      6. Add REST endpoint: GET /api/accounts/{sortCode}/{accountNumber}
+      7. Add AccountDTO for response with all balance fields
+      8. Write unit tests with mocked repository
+      9. Write integration tests with H2 test data
+      
+      Test Data Setup:
+      - Use existing BankDataGenerator or create test accounts
+      - Include various account types (savings, checking, ISA, mortgage, loan)
+      - Test with different balance scenarios (positive, negative, at overdraft limit)
+      
+      Definition of Done:
+      - Query returns account by sortcode + account number
+      - Returns available and actual balances correctly
+      - Service coverage ≥80%, Controller coverage ≥60%
+      - Integration tests verify account data retrieval
+      - REST endpoint documented
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/AccountInquiryService.java"
+      - "src/main/java/com/cbsa/migration/controller/AccountController.java"
+      - "src/main/java/com/cbsa/migration/dto/AccountDTO.java"
+      - "src/main/java/com/cbsa/migration/exception/AccountNotFoundException.java"
+      - "src/test/java/com/cbsa/migration/service/AccountInquiryServiceTest.java"
+      - "src/test/java/com/cbsa/migration/controller/AccountControllerTest.java"
+    definition_of_done:
+      - "Query returns account by sortcode + account number"
+      - "Returns available and actual balances"
+      - "Service coverage ≥80%, Controller coverage ≥60%"
+      - "Integration tests verify account data"
+      - "Handles various account types correctly"
+
+  - id: core-inqacccu
+    title: "INQACCCU (882 lines) → CustomerAccountsService"
+    state: ready
+    depends_on: [core-inqcust, core-inqacc]
+    estimate: "3d"
+    labels: [core-services, account, customer, query]
+    prompt: |
+      Migrate INQACCCU.cbl (882 lines) - list all accounts for a customer.
+      
+      COBOL Behavior:
+      - Links to INQCUST to validate customer exists (line 851)
+      - Queries all accounts for that customer from ACCOUNT table
+      - Returns paginated list of accounts
+      - Calls ABNDPROC on errors
+      
+      Java Implementation:
+      1. Create CustomerAccountsService.getCustomerAccounts(String sortCode, String customerNumber)
+      2. Inject and use CustomerInquiryService to validate customer exists first
+      3. Query all accounts for customer from AccountRepository:
+         - findAllBySortCodeAndCustomerNumber(sortCode, customerNumber)
+      4. Add pagination support with Spring Pageable
+      5. Sort accounts by account number or creation date
+      6. Calculate summary statistics (total balances, number of accounts by type)
+      7. Add REST endpoint: GET /api/customers/{sortCode}/{customerNumber}/accounts
+      8. Support query parameters: ?page=0&size=10&sort=accountNumber
+      9. Write unit tests with mocked services
+      10. Write integration tests with multiple accounts per customer
+      
+      Test Data Setup:
+      - Create test customers with 0, 1, 5, and 10 accounts
+      - Test pagination with customer having >10 accounts
+      - Include various account types per customer
+      
+      Definition of Done:
+      - Returns all accounts for a customer
+      - Validates customer exists first (throws CustomerNotFoundException if not)
+      - Supports pagination and sorting
+      - Service coverage ≥80%
+      - Integration tests verify multiple accounts returned correctly
+      - REST endpoint documented
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/CustomerAccountsService.java"
+      - "src/main/java/com/cbsa/migration/dto/CustomerAccountsDTO.java"
+      - "src/test/java/com/cbsa/migration/service/CustomerAccountsServiceTest.java"
+    definition_of_done:
+      - "Returns all accounts for a customer"
+      - "Validates customer exists first"
+      - "Supports pagination and sorting"
+      - "Service coverage ≥80%"
+      - "Integration tests verify multiple accounts returned"
+      - "Handles edge cases (0 accounts, many accounts)"
+
+  - id: checkpoint-core-services-complete
+    title: "CHECKPOINT: Core Services Complete"
+    state: backlog
+    depends_on: [core-inqcust, core-inqacc, core-inqacccu]
+    estimate: "0.5d"
+    labels: [checkpoint, review]
+    prompt: |
+      Review core query services before proceeding to customer operations.
+      
+      Verification Steps:
+      1. Run all core service tests: mvn test -Dtest="*InquiryService*Test,*AccountsService*Test"
+      2. Verify coverage reports meet targets
+      3. Test all inquiry endpoints manually with Postman/curl
+      4. Verify response times are acceptable (<100ms for single record queries)
+      5. Test with non-existent records (should return 404)
+      6. Test pagination with large datasets
+      7. Review code for proper exception handling
+      8. Document API endpoints and response formats
+      
+      Sign-off Required:
+      - Technical lead review
+      - All query operations working correctly
+      - Performance acceptable
+    artifacts: []
+    definition_of_done:
+      - "All query services operational (INQCUST✅, INQACC✅, INQACCCU✅)"
+      - "Customer and account inquiries work correctly"
+      - "Integration tests pass"
+      - "Coverage targets met"
+      - "API documentation complete"
+      - "Technical lead sign-off obtained"
+
+
+  - id: customer-crecust
+    title: "CRECUST (1439 lines) → CustomerCreationService"
+    state: backlog
+    depends_on: [checkpoint-core-services-complete, foundation-crdtagy-unified]
+    estimate: "5d"
+    labels: [customer, create, async, complex]
+    prompt: |
+      Migrate CRECUST.cbl (1439 lines) - create customer with credit check.
+      
+      COBOL Behavior:
+      - Enqueues CUSTOMER counter, increments, dequeues to generate unique customer number
+      - Runs async credit checks via CRDTAGY1-5 (EXEC CICS START)
+      - Validates DOB (see date validation rules below)
+      - Writes to CUSTOMER file (VSAM)
+      - Writes transaction record to PROCTRAN table (DB2)
+      - Calls ABNDPROC on errors
+      
+      Date Validation Rules (from COBOL tips):
+      - Minimum year: 1601 (COBOL CEEDAYS limitation)
+      - Maximum age: 150 years
+      - Reject future dates
+      - Fail codes: 'O' for year/age violations, 'Y' for future dates
+      
+      Java Implementation:
+      1. Create CustomerCreationService.createCustomer(CustomerRequest request)
+      2. Generate customer number using:
+         - Option A: Database sequence (CUSTOMER_SEQ)
+         - Option B: Synchronized ID generation service (mirrors ENQUEUE/DEQUEUE)
+      3. Validate DOB using DateValidationService:
+         - Check year >= 1601
+         - Calculate age, verify <= 150 years
+         - Verify date is not in future
+         - Throw appropriate exceptions with fail codes 'O' or 'Y'
+      4. Call CreditAgencyService.aggregateCreditScores() asynchronously
+      5. Create Customer entity with all fields
+      6. Save to customer table via CustomerRepository
+      7. Create transaction record in bank_transaction table
+      8. Add REST endpoint: POST /api/customers
+      9. Return CustomerDTO with generated customer number and credit score
+      10. Write unit tests with mocked credit service
+      11. Write integration tests with H2 database
+      
+      Test Cases:
+      - Valid customer creation
+      - Invalid DOB (year < 1601) → fail code 'O'
+      - Invalid DOB (age > 150) → fail code 'O'
+      - Future DOB → fail code 'Y'
+      - Concurrent customer creation (test ID generation)
+      - Credit check timeout/failure handling
+      
+      Definition of Done:
+      - Creates customer with generated customer number
+      - Performs async credit check and stores score
+      - DOB validation matches COBOL rules exactly
+      - Writes to customer and transaction tables
+      - Service coverage ≥80%, Repository coverage ≥70%
+      - Integration tests verify database writes
+      - REST endpoint returns 201 Created with customer details
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/CustomerCreationService.java"
+      - "src/main/java/com/cbsa/migration/service/DateValidationService.java"
+      - "src/main/java/com/cbsa/migration/dto/CustomerRequest.java"
+      - "src/main/java/com/cbsa/migration/dto/CustomerResponse.java"
+      - "src/test/java/com/cbsa/migration/service/CustomerCreationServiceTest.java"
+    definition_of_done:
+      - "Creates customer with generated customer number"
+      - "Performs async credit check"
+      - "DOB validation matches COBOL rules (year ≥1601, age ≤150, no future dates)"
+      - "Writes to customer and transaction tables"
+      - "Service coverage ≥80%, Repository coverage ≥70%"
+      - "Integration tests verify all validation rules"
+      - "Handles concurrent creation correctly"
+
+  - id: customer-updcust
+    title: "UPDCUST (364 lines) → CustomerUpdateService"
+    state: backlog
+    depends_on: [core-inqcust, customer-crecust]
+    estimate: "2d"
+    labels: [customer, update]
+    prompt: |
+      Migrate UPDCUST.cbl (364 lines) - update customer details.
+      
+      COBOL Behavior:
+      - Updates CUSTOMER VSAM file
+      - Allows updating: name, address, DOB
+      - Does NOT allow updating: customer number, sort code
+      - Validates DOB if changed (same rules as CRECUST)
+      - Calls ABNDPROC on errors
+      
+      Java Implementation:
+      1. Create CustomerUpdateService.updateCustomer(String sortCode, String customerNumber, CustomerUpdateRequest request)
+      2. Validate customer exists via CustomerInquiryService
+      3. If DOB is being changed, validate using DateValidationService (same rules as CRECUST)
+      4. Update allowed fields only:
+         - Customer name
+         - Address fields
+         - DOB (with validation)
+      5. Prevent updates to:
+         - Customer number
+         - Sort code
+         - Creation date
+      6. Save updated customer via CustomerRepository
+      7. Add REST endpoint: PUT /api/customers/{sortCode}/{customerNumber}
+      8. Write unit tests with mocked services
+      9. Write integration tests with H2 database
+      
+      Test Cases:
+      - Update name only
+      - Update address only
+      - Update DOB with valid date
+      - Update DOB with invalid date (should fail)
+      - Attempt to update customer number (should fail)
+      - Update non-existent customer (should return 404)
+      
+      Definition of Done:
+      - Updates customer record successfully
+      - Validates customer exists first
+      - DOB validation if changed (year ≥1601, age ≤150, no future dates)
+      - Prevents updates to immutable fields
+      - Service coverage ≥80%
+      - Integration tests verify updates persisted
+      - REST endpoint returns 200 OK with updated customer
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/CustomerUpdateService.java"
+      - "src/main/java/com/cbsa/migration/dto/CustomerUpdateRequest.java"
+      - "src/test/java/com/cbsa/migration/service/CustomerUpdateServiceTest.java"
+    definition_of_done:
+      - "Updates customer record"
+      - "Validates customer exists first"
+      - "DOB validation if changed"
+      - "Prevents updates to immutable fields"
+      - "Service coverage ≥80%"
+      - "Integration tests verify updates"
+
+  - id: customer-delcus
+    title: "DELCUS (761 lines) → CustomerDeletionService"
+    state: backlog
+    depends_on: [core-inqcust, core-inqacccu, account-delacc]
+    estimate: "4d"
+    labels: [customer, delete, cascade, complex]
+    prompt: |
+      Migrate DELCUS.cbl (761 lines) - delete customer and all accounts.
+      
+      COBOL Behavior:
+      - Links to INQCUST to validate customer exists (line 260)
+      - Links to INQACCCU to get all customer accounts (line 724)
+      - Links to DELACC for each account to delete them (line 312)
+      - Finally deletes customer from CUSTOMER file
+      - All operations must be atomic (rollback on any failure)
+      - Calls ABNDPROC on errors
+      
+      Java Implementation:
+      1. Create CustomerDeletionService.deleteCustomer(String sortCode, String customerNumber)
+      2. Use @Transactional to ensure atomic operation
+      3. Validate customer exists via CustomerInquiryService
+      4. Get all customer accounts via CustomerAccountsService
+      5. Delete each account by calling AccountDeletionService
+      6. Delete customer record via CustomerRepository
+      7. Add REST endpoint: DELETE /api/customers/{sortCode}/{customerNumber}
+      8. Return summary of deletion (customer + N accounts deleted)
+      9. Write unit tests with mocked services
+      10. Write integration tests with H2 database and multiple accounts
+      
+      Test Cases:
+      - Delete customer with 0 accounts
+      - Delete customer with 1 account
+      - Delete customer with multiple accounts (5+)
+      - Delete non-existent customer (should return 404)
+      - Partial failure scenario (account deletion fails) → should rollback
+      
+      Rollback Handling:
+      - If any account deletion fails, entire operation should rollback
+      - Customer should not be deleted if any accounts remain
+      - Test with @Transactional rollback scenarios
+      
+      Definition of Done:
+      - Deletes customer and all associated accounts atomically
+      - Validates customer exists
+      - Handles cascade deletion correctly (all accounts removed)
+      - Rolls back on any failure
+      - Service coverage ≥80%
+      - Integration tests verify cascade and rollback
+      - REST endpoint returns 200 OK with deletion summary
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/CustomerDeletionService.java"
+      - "src/main/java/com/cbsa/migration/dto/DeletionSummaryDTO.java"
+      - "src/test/java/com/cbsa/migration/service/CustomerDeletionServiceTest.java"
+    definition_of_done:
+      - "Deletes customer and all accounts atomically"
+      - "Validates customer exists"
+      - "Handles cascade deletion correctly"
+      - "Rolls back on any failure"
+      - "Service coverage ≥80%"
+      - "Integration tests verify cascade and rollback"
+
+  - id: checkpoint-customer-operations-complete
+    title: "CHECKPOINT: Customer Operations Complete"
+    state: backlog
+    depends_on: [customer-crecust, customer-updcust, customer-delcus]
+    estimate: "0.5d"
+    labels: [checkpoint, review]
+    prompt: |
+      Review customer CRUD operations before proceeding to account operations.
+      
+      Verification Steps:
+      1. Test complete customer lifecycle:
+         - Create customer → verify in database
+         - Query customer → verify all fields
+         - Update customer → verify changes persisted
+         - Delete customer → verify removed from database
+      2. Test date validation thoroughly with edge cases
+      3. Test cascade deletion with various account counts
+      4. Verify all transactions roll back correctly on failures
+      5. Test concurrent operations (multiple creates)
+      6. Review code for proper error handling
+      7. Verify all REST endpoints work correctly
+      8. Check coverage reports
+      
+      Sign-off Required:
+      - Technical lead review
+      - All customer operations working
+      - Transaction integrity verified
+    artifacts: []
+    definition_of_done:
+      - "All customer operations functional (CREATE✅, READ✅, UPDATE✅, DELETE✅)"
+      - "Integration tests pass"
+      - "Coverage targets met"
+      - "Transaction integrity verified"
+      - "Date validation working correctly"
+      - "Technical lead sign-off obtained"
+
+
+  - id: account-creacc
+    title: "CREACC (1247 lines) → AccountCreationService"
+    state: backlog
+    depends_on: [checkpoint-core-services-complete, core-inqcust, core-inqacccu]
+    estimate: "5d"
+    labels: [account, create, complex]
+    prompt: |
+      Migrate CREACC.cbl (1247 lines) - create account for customer.
+      
+      COBOL Behavior:
+      - Links to INQCUST to validate customer exists (line 304)
+      - Links to INQACCCU to check customer's existing accounts (line 1088)
+      - Enqueues ACCOUNT counter, increments, dequeues to generate account number
+      - Writes to ACCOUNT table (DB2)
+      - Writes transaction record to PROCTRAN table (DB2)
+      - Sets initial balances, interest rate, overdraft limit based on account type
+      - Calls ABNDPROC on errors
+      
+      Java Implementation:
+      1. Create AccountCreationService.createAccount(AccountRequest request)
+      2. Validate customer exists via CustomerInquiryService
+      3. Validate customer can have another account (business rules):
+         - Check max accounts per customer
+         - Verify customer in good standing (if credit score stored)
+      4. Generate account number using:
+         - Option A: Database sequence (ACCOUNT_SEQ)
+         - Option B: Synchronized ID generation service
+      5. Set account attributes based on type:
+         - Savings: interest rate, no overdraft
+         - Checking: overdraft limit, low/no interest
+         - ISA: tax advantages, limits
+         - Mortgage/Loan: negative balance, repayment terms
+      6. Create Account entity with all fields
+      7. Save to account table via AccountRepository
+      8. Create transaction record in bank_transaction table (opening balance)
+      9. Add REST endpoint: POST /api/accounts
+      10. Return AccountDTO with generated account number
+      11. Write unit tests with mocked services
+      12. Write integration tests with H2 database
+      
+      Test Cases:
+      - Create account for existing customer
+      - Create account for non-existent customer (should fail)
+      - Create various account types (savings, checking, ISA, etc.)
+      - Test account number generation (uniqueness)
+      - Test initial balance scenarios (positive, zero, negative for loans)
+      - Concurrent account creation
+      
+      Definition of Done:
+      - Creates account with generated account number
+      - Validates customer exists
+      - Writes to account and transaction tables
+      - Sets appropriate defaults based on account type
+      - Service coverage ≥80%, Repository coverage ≥70%
+      - Integration tests verify database writes
+      - REST endpoint returns 201 Created with account details
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/AccountCreationService.java"
+      - "src/main/java/com/cbsa/migration/dto/AccountRequest.java"
+      - "src/main/java/com/cbsa/migration/dto/AccountResponse.java"
+      - "src/test/java/com/cbsa/migration/service/AccountCreationServiceTest.java"
+    definition_of_done:
+      - "Creates account with generated account number"
+      - "Validates customer exists"
+      - "Writes to account and transaction tables"
+      - "Sets appropriate defaults by account type"
+      - "Service coverage ≥80%, Repository coverage ≥70%"
+      - "Integration tests verify all account types"
+      - "Handles concurrent creation correctly"
+
+  - id: account-updacc
+    title: "UPDACC (406 lines) → AccountUpdateService"
+    state: backlog
+    depends_on: [core-inqacc]
+    estimate: "2d"
+    labels: [account, update]
+    prompt: |
+      Migrate UPDACC.cbl (406 lines) - update account details (not balance).
+      
+      COBOL Behavior:
+      - Updates ACCOUNT table (DB2) fields:
+        - Account type
+        - Interest rate
+        - Overdraft limit
+        - Last statement date
+        - Next statement date
+      - Does NOT update balances (use transaction services for that)
+      - Does NOT allow changing account/customer numbers
+      - Calls ABNDPROC on errors
+      
+      Java Implementation:
+      1. Create AccountUpdateService.updateAccount(String sortCode, String accountNumber, AccountUpdateRequest request)
+      2. Validate account exists via AccountInquiryService
+      3. Update allowed fields only:
+         - Account type (with validation - can't change from loan to savings, etc.)
+         - Interest rate
+         - Overdraft limit
+         - Statement dates
+      4. Prevent updates to:
+         - Account number
+         - Customer number
+         - Sort code
+         - Balances (available, actual)
+         - Creation date
+      5. Validate business rules:
+         - Interest rate must be >= 0
+         - Overdraft limit must be >= 0
+         - Statement dates must be valid
+      6. Save updated account via AccountRepository
+      7. Add REST endpoint: PUT /api/accounts/{sortCode}/{accountNumber}
+      8. Write unit tests with mocked services
+      9. Write integration tests with H2 database
+      
+      Test Cases:
+      - Update interest rate
+      - Update overdraft limit
+      - Update statement dates
+      - Attempt to update balance (should fail)
+      - Attempt to update account number (should fail)
+      - Update non-existent account (should return 404)
+      - Invalid values (negative rates) should fail
+      
+      Definition of Done:
+      - Updates account details successfully
+      - Validates account exists first
+      - Prevents balance updates (enforced at service layer)
+      - Prevents updates to immutable fields
+      - Service coverage ≥80%
+      - Integration tests verify updates persisted
+      - REST endpoint returns 200 OK with updated account
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/AccountUpdateService.java"
+      - "src/main/java/com/cbsa/migration/dto/AccountUpdateRequest.java"
+      - "src/test/java/com/cbsa/migration/service/AccountUpdateServiceTest.java"
+    definition_of_done:
+      - "Updates account details (not balances)"
+      - "Validates account exists"
+      - "Prevents balance and immutable field updates"
+      - "Service coverage ≥80%"
+      - "Integration tests verify updates"
+
+  - id: account-delacc
+    title: "DELACC (649 lines) → AccountDeletionService"
+    state: backlog
+    depends_on: [core-inqacc]
+    estimate: "2d"
+    labels: [account, delete]
+    prompt: |
+      Migrate DELACC.cbl (649 lines) - delete account.
+      
+      COBOL Behavior:
+      - Deletes from ACCOUNT table (DB2)
+      - Business rule: may require zero balance before deletion
+      - Calls ABNDPROC on errors
+      
+      Java Implementation:
+      1. Create AccountDeletionService.deleteAccount(String sortCode, String accountNumber)
+      2. Validate account exists via AccountInquiryService
+      3. Check business rules:
+         - Option A: Require zero balance (actual_balance == 0)
+         - Option B: Allow deletion regardless (soft delete)
+         - Decide based on COBOL behavior analysis
+      4. Delete account record via AccountRepository
+      5. Consider soft delete (set deleted flag) vs hard delete
+      6. Add REST endpoint: DELETE /api/accounts/{sortCode}/{accountNumber}
+      7. Return deletion confirmation
+      8. Write unit tests with mocked services
+      9. Write integration tests with H2 database
+      
+      Test Cases:
+      - Delete account with zero balance
+      - Delete account with positive balance (should fail or warn)
+      - Delete account with negative balance (should fail or warn)
+      - Delete non-existent account (should return 404)
+      - Verify cascade implications (if deleting customer later)
+      
+      Definition of Done:
+      - Deletes account successfully
+      - Validates account exists
+      - Enforces business rules (zero balance requirement if applicable)
+      - Service coverage ≥80%
+      - Integration tests verify deletion
+      - REST endpoint returns 200 OK or 204 No Content
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/AccountDeletionService.java"
+      - "src/test/java/com/cbsa/migration/service/AccountDeletionServiceTest.java"
+    definition_of_done:
+      - "Deletes account"
+      - "Validates account exists"
+      - "Enforces business rules"
+      - "Service coverage ≥80%"
+      - "Integration tests verify deletion"
+
+  - id: checkpoint-account-operations-complete
+    title: "CHECKPOINT: Account Operations Complete"
+    state: backlog
+    depends_on: [account-creacc, account-updacc, account-delacc]
+    estimate: "0.5d"
+    labels: [checkpoint, review]
+    prompt: |
+      Review account CRUD operations before proceeding to transaction services.
+      
+      Verification Steps:
+      1. Test complete account lifecycle:
+         - Create account → verify in database
+         - Query account → verify all fields
+         - Update account → verify changes persisted
+         - Delete account → verify removed from database
+      2. Test various account types (savings, checking, ISA, loan, mortgage)
+      3. Test business rules (overdraft limits, interest rates, etc.)
+      4. Verify account number generation works correctly
+      5. Test relationship with customers (foreign key constraints)
+      6. Review code for proper error handling
+      7. Verify all REST endpoints work correctly
+      8. Check coverage reports
+      
+      Sign-off Required:
+      - Technical lead review
+      - All account operations working
+      - Business rules validated
+    artifacts: []
+    definition_of_done:
+      - "All account operations functional (CREATE✅, READ✅, UPDATE✅, DELETE✅)"
+      - "Integration tests pass"
+      - "Coverage targets met"
+      - "Business rules working correctly"
+      - "Account type handling verified"
+      - "Technical lead sign-off obtained"
+
+
+  - id: transaction-dbcrfun
+    title: "DBCRFUN (861 lines) → DebitCreditService"
+    state: backlog
+    depends_on: [checkpoint-account-operations-complete]
+    estimate: "4d"
+    labels: [transaction, debit-credit, complex]
+    prompt: |
+      Migrate DBCRFUN.cbl (861 lines) - debit or credit an account.
+      
+      COBOL Behavior:
+      - Updates ACCOUNT table balance (available and actual)
+      - Writes transaction record to PROCTRAN table (DB2)
+      - Validates overdraft limits on debit operations
+      - Uses DB2 transactions for atomicity
+      - Calls ABNDPROC on errors
+      
+      Java Implementation:
+      1. Create DebitCreditService with two main methods:
+         - debit(String sortCode, String accountNumber, BigDecimal amount, String description)
+         - credit(String sortCode, String accountNumber, BigDecimal amount, String description)
+      2. Use @Transactional to ensure atomic updates
+      3. Validate account exists via AccountInquiryService
+      4. For debit operations:
+         - Check available balance >= amount
+         - Check overdraft limit not exceeded
+         - Update available_balance and actual_balance
+      5. For credit operations:
+         - Simply increase available_balance and actual_balance
+      6. Write transaction record to bank_transaction table:
+         - Transaction type (DEBIT or CREDIT)
+         - Amount
+         - Timestamp
+         - Description
+         - New balance
+      7. Add REST endpoints:
+         - POST /api/accounts/{sortCode}/{accountNumber}/debit
+         - POST /api/accounts/{sortCode}/{accountNumber}/credit
+      8. Write unit tests with mocked repository
+      9. Write integration tests with rollback scenarios
+      
+      Test Cases:
+      - Debit with sufficient balance
+      - Debit with insufficient balance (should fail)
+      - Debit at overdraft limit
+      - Debit exceeding overdraft limit (should fail)
+      - Credit operation (always succeeds)
+      - Concurrent debit operations (test race conditions)
+      - Rollback on transaction write failure
+      
+      Definition of Done:
+      - Debit and credit operations update balances correctly
+      - Transaction records written to bank_transaction table
+      - Overdraft validation enforced on debits
+      - Uses @Transactional for atomicity
+      - Service coverage ≥80%
+      - Rollback tests verify transaction integrity
+      - REST endpoints return updated balance
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/DebitCreditService.java"
+      - "src/main/java/com/cbsa/migration/dto/DebitRequest.java"
+      - "src/main/java/com/cbsa/migration/dto/CreditRequest.java"
+      - "src/main/java/com/cbsa/migration/dto/TransactionResponse.java"
+      - "src/test/java/com/cbsa/migration/service/DebitCreditServiceTest.java"
+    definition_of_done:
+      - "Debit and credit operations update balances"
+      - "Transaction records written"
+      - "Overdraft validation enforced"
+      - "Service coverage ≥80%"
+      - "Rollback tests verify atomicity"
+      - "Handles concurrent operations correctly"
+
+  - id: transaction-xfrfun
+    title: "XFRFUN (1924 lines) → TransferService"
+    state: backlog
+    depends_on: [transaction-dbcrfun]
+    estimate: "5d"
+    labels: [transaction, transfer, complex, high-priority]
+    prompt: |
+      Migrate XFRFUN.cbl (1924 lines) - transfer funds between accounts.
+      
+      COBOL Behavior:
+      - Debits amount from source account
+      - Credits amount to destination account
+      - Writes two PROCTRAN records (one debit, one credit)
+      - Handles same-bank and cross-bank transfers
+      - Uses DB2 deadlock retry logic (up to 3 attempts)
+      - Rolls back on any failure
+      - Calls ABNDPROC on errors
+      
+      Java Implementation:
+      1. Create TransferService.transfer(TransferRequest request)
+      2. Use @Transactional(isolation = Isolation.SERIALIZABLE) for highest isolation
+      3. Validate both accounts exist:
+         - Source account via AccountInquiryService
+         - Destination account via AccountInquiryService
+      4. Perform transfer:
+         - Debit from source account (use DebitCreditService.debit internally)
+         - Credit to destination account (use DebitCreditService.credit internally)
+      5. Write two transaction records:
+         - DEBIT record for source account
+         - CREDIT record for destination account
+         - Link them with transfer_id or reference number
+      6. Handle transfer types:
+         - Internal transfer (same bank, same customer)
+         - External transfer (different customer or bank)
+      7. Add retry logic for deadlocks (Spring @Retryable):
+         - Max 3 attempts
+         - Exponential backoff
+      8. Add REST endpoint: POST /api/transfers
+      9. Write unit tests with mocked services
+      10. Write integration tests with rollback scenarios and concurrent transfers
+      
+      Test Cases:
+      - Successful transfer (sufficient balance)
+      - Transfer with insufficient balance (should fail, no changes)
+      - Transfer to same account (should fail or warn)
+      - Transfer with non-existent source/destination (should fail)
+      - Concurrent transfers from same account (test deadlock handling)
+      - Large transfer amounts (test decimal precision)
+      - Rollback on transaction write failure (should restore original balances)
+      
+      Deadlock Handling:
+      - Use Spring @Retryable with RetryableException
+      - Log retry attempts
+      - Test with concurrent transfers to trigger deadlocks
+      
+      Definition of Done:
+      - Transfers funds atomically between accounts
+      - Both accounts updated correctly (debit source, credit destination)
+      - Two transaction records written and linked
+      - Handles same-bank and cross-bank transfers
+      - Implements deadlock retry logic (max 3 attempts)
+      - Service coverage ≥80%
+      - Rollback tests verify atomicity (on failure, no changes persist)
+      - Integration tests verify concurrent transfer handling
+      - REST endpoint returns transfer confirmation with reference number
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/TransferService.java"
+      - "src/main/java/com/cbsa/migration/dto/TransferRequest.java"
+      - "src/main/java/com/cbsa/migration/dto/TransferResponse.java"
+      - "src/main/java/com/cbsa/migration/controller/TransferController.java"
+      - "src/test/java/com/cbsa/migration/service/TransferServiceTest.java"
+    definition_of_done:
+      - "Transfers funds atomically between accounts"
+      - "Both accounts updated correctly"
+      - "Two transaction records written"
+      - "Deadlock retry logic implemented (max 3 attempts)"
+      - "Service coverage ≥80%"
+      - "Rollback tests verify atomicity"
+      - "Concurrent transfer tests pass"
+
+  - id: checkpoint-transaction-services-complete
+    title: "CHECKPOINT: Transaction Services Complete"
+    state: backlog
+    depends_on: [transaction-dbcrfun, transaction-xfrfun]
+    estimate: "0.5d"
+    labels: [checkpoint, review]
+    prompt: |
+      Review transaction services before proceeding to BMS UI migration.
+      
+      Verification Steps:
+      1. Test all transaction operations:
+         - Debit → verify balance decreased
+         - Credit → verify balance increased
+         - Transfer → verify both accounts updated
+      2. Test transaction integrity:
+         - Rollback scenarios (all or nothing)
+         - Concurrent operations
+         - Deadlock handling (retry logic)
+      3. Verify transaction records written correctly:
+         - Check bank_transaction table
+         - Verify debit/credit pairs for transfers
+         - Check timestamps and amounts
+      4. Test edge cases:
+         - Zero amount transactions
+         - Large amounts (decimal precision)
+         - Overdraft scenarios
+      5. Performance testing:
+         - Measure transaction throughput
+         - Test with high concurrency
+      6. Review code for proper error handling
+      7. Check coverage reports
+      
+      Sign-off Required:
+      - Technical lead review
+      - All transaction operations working
+      - Transaction integrity verified
+      - Performance acceptable
+    artifacts: []
+    definition_of_done:
+      - "All transaction services operational (DEBIT✅, CREDIT✅, TRANSFER✅)"
+      - "Transaction integrity verified with rollback tests"
+      - "Integration tests pass"
+      - "Coverage targets met"
+      - "Deadlock handling works correctly"
+      - "Performance acceptable"
+      - "Technical lead sign-off obtained"
+
+
+  - id: ui-bnkmenu
+    title: "BNKMENU (1311 lines) → MenuService"
+    state: backlog
+    depends_on: [checkpoint-transaction-services-complete]
+    estimate: "3d"
+    labels: [ui, menu]
+    prompt: |
+      Migrate BNKMENU.cbl (1311 lines) - main menu routing.
+      
+      COBOL Behavior:
+      - BMS menu screen that routes to other transactions
+      - Displays available operations
+      - Handles user selection and navigation
+      
+      Java Implementation:
+      1. Create MenuService that returns available operations
+      2. Define menu structure with operations and endpoints:
+         - Customer operations (create, update, delete, search)
+         - Account operations (create, update, delete, list)
+         - Transaction operations (debit, credit, transfer)
+         - Utility operations (company info, sort code)
+      3. Add REST endpoint: GET /api/menu
+      4. Return menu structure as JSON with:
+         - Operation name
+         - Operation description
+         - REST endpoint URL
+         - HTTP method
+      5. Add role-based filtering (if authentication is implemented)
+      6. Write unit tests
+      
+      Definition of Done:
+      - Returns complete menu structure as JSON
+      - All migrated operations included
+      - Service coverage ≥80%
+      - REST endpoint documented
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/MenuService.java"
+      - "src/main/java/com/cbsa/migration/controller/MenuController.java"
+      - "src/main/java/com/cbsa/migration/dto/MenuDTO.java"
+    definition_of_done:
+      - "Returns menu options with endpoints"
+      - "Service coverage ≥80%"
+      - "REST endpoint works"
+
+  - id: ui-bnk1cca
+    title: "BNK1CCA (952 lines) → CustomerAccountListService"
+    state: backlog
+    depends_on: [core-inqacccu]
+    estimate: "3d"
+    labels: [ui, customer, account]
+    prompt: |
+      Migrate BNK1CCA.cbl (952 lines) - list accounts for customer (BMS UI).
+      
+      COBOL Behavior:
+      - BMS screen that displays list of accounts for a customer
+      - Links to INQACCCU for account data
+      - Paginates results on screen
+      
+      Java Implementation:
+      1. Reuse CustomerAccountsService (already implemented)
+      2. Add UI-specific endpoint: GET /api/ui/customers/{sortCode}/{customerNumber}/accounts
+      3. Add pagination support with query parameters
+      4. Format response for UI consumption (flattened structure)
+      5. Add sorting options (by account number, balance, type)
+      6. Write unit tests with CustomerController
+      
+      Definition of Done:
+      - Returns paginated account list for UI
+      - Supports sorting and filtering
+      - Controller coverage ≥60%
+      - REST endpoint documented
+    artifacts:
+      - "src/main/java/com/cbsa/migration/controller/UICustomerController.java"
+      - "src/main/java/com/cbsa/migration/dto/UIAccountListDTO.java"
+    definition_of_done:
+      - "Returns paginated account list"
+      - "Controller coverage ≥60%"
+      - "Sorting and filtering work"
+
+  - id: ui-bnk1cac
+    title: "BNK1CAC (1298 lines) → AccountCreationUIService"
+    state: backlog
+    depends_on: [account-creacc]
+    estimate: "3d"
+    labels: [ui, account, create]
+    prompt: |
+      Migrate BNK1CAC.cbl (1298 lines) - create account UI.
+      
+      COBOL Behavior:
+      - BMS form for account creation
+      - Validates input fields
+      - Calls account creation logic
+      
+      Java Implementation:
+      1. Reuse AccountCreationService (already implemented)
+      2. Add UI-specific endpoint: POST /api/ui/accounts
+      3. Add UI-specific validation (field lengths, formats)
+      4. Return UI-friendly response with new account details
+      5. Add field-level error messages
+      6. Write unit tests with AccountController
+      
+      Definition of Done:
+      - Creates account via UI endpoint
+      - Returns UI-friendly response
+      - Controller coverage ≥60%
+      - Field validation working
+    artifacts:
+      - "src/main/java/com/cbsa/migration/controller/UIAccountController.java"
+      - "src/main/java/com/cbsa/migration/dto/UIAccountRequest.java"
+    definition_of_done:
+      - "Creates account via UI endpoint"
+      - "Controller coverage ≥60%"
+      - "UI-friendly error messages"
+
+  - id: ui-bnk1uac
+    title: "BNK1UAC (1405 lines) → AccountUpdateUIService"
+    state: backlog
+    depends_on: [account-updacc]
+    estimate: "3d"
+    labels: [ui, account, update]
+    prompt: |
+      Migrate BNK1UAC.cbl (1405 lines) - update account UI.
+      
+      COBOL Behavior:
+      - BMS form for account updates
+      - Pre-fills current values
+      - Validates changes
+      
+      Java Implementation:
+      1. Reuse AccountUpdateService (already implemented)
+      2. Add UI-specific endpoint: PUT /api/ui/accounts/{sortCode}/{accountNumber}
+      3. Add field-level validation
+      4. Return UI-friendly response
+      5. Write unit tests
+      
+      Definition of Done:
+      - Updates account via UI endpoint
+      - Controller coverage ≥60%
+      - Field validation working
+    artifacts:
+      - "src/main/java/com/cbsa/migration/controller/UIAccountController.java"
+    definition_of_done:
+      - "Updates account via UI endpoint"
+      - "Controller coverage ≥60%"
+
+  - id: ui-bnk1cra
+    title: "BNK1CRA (1166 lines) → CustomerCreationUIService"
+    state: backlog
+    depends_on: [customer-crecust]
+    estimate: "3d"
+    labels: [ui, customer, create]
+    prompt: |
+      Migrate BNK1CRA.cbl (1166 lines) - create customer UI.
+      
+      COBOL Behavior:
+      - BMS form for customer creation
+      - Validates input fields
+      - Calls customer creation logic with credit check
+      
+      Java Implementation:
+      1. Reuse CustomerCreationService (already implemented)
+      2. Add UI-specific endpoint: POST /api/ui/customers
+      3. Add UI-specific validation (field lengths, DOB format)
+      4. Return UI-friendly response with credit score
+      5. Add field-level error messages
+      6. Write unit tests
+      
+      Definition of Done:
+      - Creates customer via UI endpoint
+      - Returns UI-friendly response
+      - Controller coverage ≥60%
+      - DOB validation working with proper error codes
+    artifacts:
+      - "src/main/java/com/cbsa/migration/controller/UICustomerController.java"
+      - "src/main/java/com/cbsa/migration/dto/UICustomerRequest.java"
+    definition_of_done:
+      - "Creates customer via UI endpoint"
+      - "Controller coverage ≥60%"
+      - "DOB validation with fail codes 'O'/'Y'"
+
+  - id: ui-bnk1dac
+    title: "BNK1DAC (1158 lines) → AccountDeletionUIService"
+    state: backlog
+    depends_on: [account-delacc]
+    estimate: "3d"
+    labels: [ui, account, delete]
+    prompt: |
+      Migrate BNK1DAC.cbl (1158 lines) - delete account UI.
+      
+      COBOL Behavior:
+      - BMS confirmation screen for account deletion
+      - Shows account details before deletion
+      - Requires confirmation
+      
+      Java Implementation:
+      1. Reuse AccountDeletionService (already implemented)
+      2. Add UI-specific endpoints:
+         - GET /api/ui/accounts/{sortCode}/{accountNumber}/confirm-delete (show details)
+         - DELETE /api/ui/accounts/{sortCode}/{accountNumber} (perform deletion)
+      3. Add confirmation step
+      4. Return deletion summary
+      5. Write unit tests
+      
+      Definition of Done:
+      - Deletes account via UI endpoint
+      - Confirmation step implemented
+      - Controller coverage ≥60%
+    artifacts:
+      - "src/main/java/com/cbsa/migration/controller/UIAccountController.java"
+    definition_of_done:
+      - "Deletes account via UI endpoint"
+      - "Controller coverage ≥60%"
+
+  - id: ui-bnk1ccs
+    title: "BNK1CCS (1657 lines) → CustomerSearchUIService"
+    state: backlog
+    depends_on: [core-inqcust]
+    estimate: "4d"
+    labels: [ui, customer, search, complex]
+    prompt: |
+      Migrate BNK1CCS.cbl (1657 lines) - customer search UI.
+      
+      COBOL Behavior:
+      - BMS search form with multiple criteria
+      - Searches by: name, address, customer number, DOB
+      - Returns paginated results
+      
+      Java Implementation:
+      1. Create CustomerSearchService with search methods:
+         - searchByName(String name, Pageable pageable)
+         - searchByAddress(String address, Pageable pageable)
+         - searchByCriteria(SearchCriteria criteria, Pageable pageable)
+      2. Use Spring Data JPA query methods or specifications
+      3. Support wildcards and partial matches
+      4. Add pagination and sorting
+      5. Add REST endpoint: GET /api/ui/customers/search?name=...&address=...
+      6. Write unit tests with various search scenarios
+      7. Write integration tests with H2 test data
+      
+      Test Cases:
+      - Search by name (exact and partial)
+      - Search by address
+      - Search by multiple criteria
+      - Search with no results
+      - Pagination with large result sets
+      
+      Definition of Done:
+      - Searches customers by multiple criteria
+      - Returns paginated results
+      - Service coverage ≥80%, Controller coverage ≥60%
+      - Wildcard search works
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/CustomerSearchService.java"
+      - "src/main/java/com/cbsa/migration/controller/UICustomerController.java"
+      - "src/main/java/com/cbsa/migration/dto/CustomerSearchCriteria.java"
+    definition_of_done:
+      - "Searches customers by criteria"
+      - "Returns paginated results"
+      - "Service coverage ≥80%, Controller coverage ≥60%"
+      - "Wildcard and partial matches work"
+
+  - id: ui-bnk1dcs
+    title: "BNK1DCS (2053 lines) → CustomerDeletionUIService"
+    state: backlog
+    depends_on: [customer-delcus]
+    estimate: "4d"
+    labels: [ui, customer, delete, complex]
+    prompt: |
+      Migrate BNK1DCS.cbl (2053 lines) - delete customer UI.
+      
+      COBOL Behavior:
+      - BMS confirmation screen for customer deletion with cascade
+      - Shows customer details and all accounts to be deleted
+      - Requires confirmation
+      - Displays deletion summary
+      
+      Java Implementation:
+      1. Reuse CustomerDeletionService (already implemented)
+      2. Add UI-specific endpoints:
+         - GET /api/ui/customers/{sortCode}/{customerNumber}/confirm-delete
+           (shows customer + all accounts)
+         - DELETE /api/ui/customers/{sortCode}/{customerNumber}
+           (performs deletion)
+      3. Add confirmation step with account list
+      4. Return deletion summary (customer + N accounts deleted)
+      5. Write unit tests
+      
+      Definition of Done:
+      - Deletes customer via UI endpoint
+      - Shows accounts to be deleted before confirmation
+      - Returns deletion summary
+      - Controller coverage ≥60%
+    artifacts:
+      - "src/main/java/com/cbsa/migration/controller/UICustomerController.java"
+      - "src/main/java/com/cbsa/migration/dto/UIDeletionConfirmDTO.java"
+    definition_of_done:
+      - "Deletes customer via UI endpoint"
+      - "Shows accounts to be deleted"
+      - "Controller coverage ≥60%"
+
+  - id: ui-bnk1tfn
+    title: "BNK1TFN (1224 lines) → TransferUIService"
+    state: backlog
+    depends_on: [transaction-xfrfun]
+    estimate: "4d"
+    labels: [ui, transaction, transfer]
+    prompt: |
+      Migrate BNK1TFN.cbl (1224 lines) - transfer funds UI.
+      
+      COBOL Behavior:
+      - BMS form for fund transfers
+      - Validates source/destination accounts
+      - Shows confirmation before transfer
+      - Displays transfer result
+      
+      Java Implementation:
+      1. Reuse TransferService (already implemented)
+      2. Add UI-specific endpoints:
+         - POST /api/ui/transfers/validate (validates accounts before transfer)
+         - POST /api/ui/transfers (performs transfer)
+      3. Add UI-specific validation
+      4. Add confirmation step showing:
+         - Source account details and balance
+         - Destination account details
+         - Transfer amount
+      5. Return transfer confirmation with reference number
+      6. Write unit tests
+      
+      Definition of Done:
+      - Transfers funds via UI endpoint
+      - Validation step before transfer
+      - Returns transfer confirmation
+      - Controller coverage ≥60%
+    artifacts:
+      - "src/main/java/com/cbsa/migration/controller/UITransferController.java"
+      - "src/main/java/com/cbsa/migration/dto/UITransferRequest.java"
+    definition_of_done:
+      - "Transfers funds via UI endpoint"
+      - "Validation step implemented"
+      - "Controller coverage ≥60%"
+
+
+  - id: data-bankdata
+    title: "BANKDATA (1463 lines) → DataInitializationService"
+    state: backlog
+    depends_on: [checkpoint-account-operations-complete, checkpoint-customer-operations-complete]
+    estimate: "3d"
+    labels: [data, batch, initialization]
+    prompt: |
+      Migrate BANKDATA.cbl (1463 lines) - batch data initialization.
+      
+      COBOL Behavior:
+      - Batch program that populates CUSTOMER (VSAM) and ACCOUNT (DB2) with test data
+      - Takes input parameters for number of customers to generate
+      - Generates realistic customer names, addresses, DOBs
+      - Creates 1-5 accounts per customer with random balances
+      - Outputs populated files
+      
+      Java Implementation:
+      1. Create DataInitializationService with methods:
+         - initializeTestData(int numCustomers)
+         - clearAllData() (for testing)
+      2. Generate customers:
+         - Random names from list of first/last names
+         - Random addresses (street, city, state, zip)
+         - Random DOBs (respecting validation rules: year ≥1601, age ≤150)
+      3. Generate accounts for each customer (1-5 accounts):
+         - Random account types
+         - Random initial balances (positive for savings/checking, negative for loans)
+         - Random interest rates and overdraft limits
+      4. Use existing BankDataGenerator as reference (already in codebase)
+      5. Add CLI command using Spring Boot CommandLineRunner:
+         - java -jar app.jar --init-data --num-customers=100
+      6. Add @PostConstruct option for development (controlled by property):
+         - application.properties: bank.init-data-on-startup=true/false
+      7. Add configuration:
+         - Number of customers
+         - Number of accounts per customer (min/max)
+         - Balance ranges by account type
+      8. Write integration tests verifying data generated correctly
+      
+      Test Cases:
+      - Generate small dataset (10 customers)
+      - Generate large dataset (1000 customers)
+      - Verify customer data validity (DOB rules, etc.)
+      - Verify account data validity (balances, types)
+      - Verify relationships (accounts belong to customers)
+      
+      Definition of Done:
+      - Generates test customers and accounts
+      - Configurable via application.properties
+      - Can be run as CLI command or on startup
+      - Matches COBOL data generation logic
+      - Service coverage ≥80%
+      - Integration tests verify generated data
+    artifacts:
+      - "src/main/java/com/cbsa/migration/service/DataInitializationService.java"
+      - "src/main/java/com/cbsa/migration/cli/DataInitializationCommand.java"
+      - "src/test/java/com/cbsa/migration/service/DataInitializationServiceTest.java"
+    definition_of_done:
+      - "Generates test customers and accounts"
+      - "Configurable via application.properties"
+      - "Can be run as CLI command or on startup"
+      - "Service coverage ≥80%"
+      - "Generated data passes validation"
+
+
+  - id: checkpoint-integration-tests-complete
+    title: "CHECKPOINT: Integration Tests Complete"
+    state: backlog
+    depends_on: [ui-bnkmenu, ui-bnk1cca, ui-bnk1cac, ui-bnk1uac, ui-bnk1cra, ui-bnk1dac, ui-bnk1ccs, ui-bnk1dcs, ui-bnk1tfn, data-bankdata]
+    estimate: "3d"
+    labels: [checkpoint, testing, integration]
+    prompt: |
+      Complete end-to-end integration tests for all migrated services.
+      
+      Test Suites:
+      1. Customer Lifecycle Tests:
+         - Create customer → verify in DB
+         - Query customer → verify data
+         - Update customer → verify changes
+         - Delete customer → verify cascade deletion
+      
+      2. Account Lifecycle Tests:
+         - Create account → verify in DB
+         - Query account → verify data
+         - Update account → verify changes
+         - Delete account → verify deletion
+      
+      3. Transaction Flow Tests:
+         - Debit → verify balance decreased
+         - Credit → verify balance increased
+         - Transfer → verify both accounts updated atomically
+      
+      4. Error Scenario Tests:
+         - Invalid customer/account numbers
+         - Insufficient balance
+         - Overdraft exceeded
+         - Concurrent operations
+         - Rollback scenarios
+      
+      5. UI Endpoint Tests:
+         - All UI endpoints return proper responses
+         - Pagination works correctly
+         - Validation errors are user-friendly
+      
+      6. Performance Tests:
+         - Response times < 100ms for queries
+         - Response times < 500ms for transactions
+         - Handle 100 concurrent requests
+      
+      Verification:
+      - Run full test suite: mvn verify
+      - Generate coverage report: mvn jacoco:report
+      - Verify coverage targets:
+         - Service ≥80%
+         - Repository ≥70%
+         - Controller ≥60%
+         - Model ≥50%
+         - DTO ≥40%
+      - All tests must pass
+      - No flaky tests
+      
+      Sign-off Required:
+      - Technical lead review
+      - QA team sign-off
+      - All tests passing
+      - Coverage targets met
+    artifacts:
+      - "coverage-report.html"
+      - "integration-test-results.xml"
+    definition_of_done:
+      - "All integration tests pass"
+      - "Coverage targets met: Service ≥80%, Repository ≥70%, Controller ≥60%"
+      - "mvn verify succeeds"
+      - "No flaky tests"
+      - "Performance tests pass"
+      - "QA sign-off obtained"
+
+  - id: test-performance-baseline
+    title: "Performance Baseline Testing"
+    state: backlog
+    depends_on: [checkpoint-integration-tests-complete]
+    estimate: "2d"
+    labels: [testing, performance]
+    prompt: |
+      Establish performance baseline for migrated services.
+      
+      Test Scenarios:
+      1. Single Request Latency:
+         - Customer query: target < 50ms
+         - Account query: target < 50ms
+         - Debit/Credit: target < 200ms
+         - Transfer: target < 500ms
+      
+      2. Throughput Testing:
+         - 100 concurrent customer queries
+         - 50 concurrent transactions
+         - Measure requests per second
+      
+      3. Load Testing with Realistic Data:
+         - 100 customers with 500 accounts total
+         - 1000 transactions
+         - Measure database query performance
+      
+      4. Identify Bottlenecks:
+         - Slow queries (check query plans)
+         - N+1 query problems
+         - Missing indexes
+      
+      Tools:
+      - JMeter or Gatling for load testing
+      - Spring Boot Actuator for metrics
+      - Database query profiling
+      
+      Deliverables:
+      - Performance test report with baseline metrics
+      - List of identified bottlenecks
+      - Recommendations for optimization
+      
+      Definition of Done:
+      - Performance metrics documented for all key operations
+      - No critical bottlenecks identified
+      - Response times acceptable (meet targets)
+      - Throughput acceptable for expected load
+      - Report reviewed by technical lead
+    artifacts:
+      - "performance-test-report.pdf"
+      - "performance-baseline-metrics.json"
+    definition_of_done:
+      - "Performance metrics documented"
+      - "No critical bottlenecks identified"
+      - "Response times acceptable for all operations"
+      - "Throughput meets requirements"
+      - "Technical lead review complete"
+
+  - id: test-security-scan
+    title: "Security Scan & Vulnerability Assessment"
+    state: backlog
+    depends_on: [checkpoint-integration-tests-complete]
+    estimate: "1d"
+    labels: [testing, security]
+    prompt: |
+      Run security scans on migrated application.
+      
+      Security Checks:
+      1. OWASP Dependency Check:
+         - Run: mvn org.owasp:dependency-check-maven:check
+         - Review report for critical/high vulnerabilities
+         - Update vulnerable dependencies
+      
+      2. Code Security:
+         - No hardcoded secrets or credentials
+         - Proper input validation (SQL injection prevention)
+         - No sensitive data in logs
+         - Proper exception handling (no stack traces to client)
+      
+      3. Authentication/Authorization (if implemented):
+         - Test unauthorized access
+         - Verify role-based access control
+         - Test session management
+      
+      4. Data Protection:
+         - Sensitive data encrypted at rest (if required)
+         - Sensitive data encrypted in transit (HTTPS)
+         - No PII in logs
+      
+      5. SQL Injection Testing:
+         - Test all user inputs with SQL injection payloads
+         - Verify parameterized queries used everywhere
+      
+      Tools:
+      - OWASP Dependency Check
+      - SonarQube (security hotspots)
+      - Manual code review
+      
+      Deliverables:
+      - Security scan report
+      - List of vulnerabilities (if any)
+      - Remediation plan
+      
+      Definition of Done:
+      - No critical security vulnerabilities
+      - All dependencies up to date (or exceptions documented)
+      - No secrets in code
+      - Input validation implemented
+      - Security scan report reviewed by security team
+    artifacts:
+      - "dependency-check-report.html"
+      - "security-scan-report.pdf"
+    definition_of_done:
+      - "No critical security vulnerabilities"
+      - "All dependencies up to date"
+      - "No secrets in code"
+      - "Input validation verified"
+      - "Security team sign-off obtained"
+
+  - id: deploy-rollback-plan
+    title: "Create Rollback Plan & Documentation"
+    state: backlog
+    depends_on: [test-performance-baseline, test-security-scan]
+    estimate: "1d"
+    labels: [deployment, documentation]
+    prompt: |
+      Document rollback procedures and deployment plan.
+      
+      Rollback Plan:
+      1. Database Rollback:
+         - Create database backup before migration
+         - Document rollback SQL scripts
+         - Test restore procedure
+      
+      2. Application Rollback:
+         - Document previous version details
+         - Keep previous deployment artifacts
+         - Document rollback steps
+      
+      3. Data Migration Rollback:
+         - If VSAM data migrated to SQLite, document reverse migration
+         - Verify data integrity after rollback
+      
+      Deployment Plan:
+      1. Pre-Deployment:
+         - Backup COBOL application
+         - Backup VSAM files and DB2 data
+         - Schedule maintenance window
+         - Notify stakeholders
+      
+      2. Deployment Steps:
+         - Deploy Spring Boot application
+         - Migrate data (if needed)
+         - Run smoke tests
+         - Verify all services operational
+      
+      3. Post-Deployment:
+         - Monitor application logs
+         - Monitor performance metrics
+         - Run acceptance tests
+         - Obtain stakeholder sign-off
+      
+      4. Rollback Triggers:
+         - Critical bugs discovered
+         - Performance degradation > 50%
+         - Data integrity issues
+         - Security vulnerabilities
+      
+      Configuration Changes:
+      - Document all application.properties changes
+      - Document database schema changes
+      - Document API endpoint changes
+      
+      Deliverables:
+      - Deployment checklist (step-by-step)
+      - Rollback procedure document
+      - Configuration change log
+      - Risk assessment
+      
+      Definition of Done:
+      - Rollback plan documented and tested
+      - Deployment checklist created
+      - Configuration changes documented
+      - Database backup/restore tested
+      - Technical lead review complete
+    artifacts:
+      - "DEPLOYMENT_PLAN.md"
+      - "ROLLBACK_PROCEDURE.md"
+      - "CONFIGURATION_CHANGES.md"
+    definition_of_done:
+      - "Rollback plan documented"
+      - "Deployment checklist created"
+      - "Configuration changes documented"
+      - "Backup/restore procedure tested"
+      - "Technical lead sign-off obtained"
+
+  - id: checkpoint-cutover-readiness
+    title: "CHECKPOINT: Cutover Readiness Review"
+    state: backlog
+    depends_on: [deploy-rollback-plan]
+    estimate: "0.5d"
+    labels: [checkpoint, deployment, go-nogo]
+    prompt: |
+      Final review before production cutover - GO/NO-GO decision.
+      
+      Go/No-Go Criteria:
+      1. All Tests Passing:
+         ✓ Unit tests (100%)
+         ✓ Integration tests (100%)
+         ✓ Performance tests (pass)
+         ✓ Security tests (pass)
+      
+      2. Coverage Targets Met:
+         ✓ Service ≥80%
+         ✓ Repository ≥70%
+         ✓ Controller ≥60%
+      
+      3. Documentation Complete:
+         ✓ API documentation
+         ✓ Deployment plan
+         ✓ Rollback plan
+         ✓ Configuration guide
+      
+      4. Performance Acceptable:
+         ✓ Response times within targets
+         ✓ No critical bottlenecks
+         ✓ Throughput acceptable
+      
+      5. Security Verified:
+         ✓ No critical vulnerabilities
+         ✓ Dependencies up to date
+         ✓ No secrets in code
+      
+      6. Rollback Plan Ready:
+         ✓ Backup procedures tested
+         ✓ Rollback scripts ready
+         ✓ Rollback tested in staging
+      
+      7. Stakeholder Approvals:
+         ✓ Technical lead sign-off
+         ✓ QA sign-off
+         ✓ Security sign-off
+         ✓ Business owner sign-off
+      
+      Review Meeting Agenda:
+      1. Review test results
+      2. Review performance metrics
+      3. Review security scan results
+      4. Review rollback plan
+      5. Discuss risks and mitigations
+      6. Make GO/NO-GO decision
+      
+      If NO-GO:
+      - Document blockers
+      - Create remediation plan
+      - Schedule follow-up review
+      
+      If GO:
+      - Schedule cutover date/time
+      - Finalize communication plan
+      - Confirm resource availability
+      
+      Definition of Done:
+      - All checkpoints complete
+      - All tests passing
+      - All sign-offs obtained
+      - GO decision made with stakeholder approval
+      - Cutover scheduled
+    artifacts:
+      - "CUTOVER_READINESS_REPORT.md"
+      - "GO_NOGO_DECISION.md"
+    definition_of_done:
+      - "All checkpoints complete"
+      - "All tests passing"
+      - "Stakeholder approvals obtained"
+      - "GO/NO-GO decision documented"
+      - "Ready for production deployment"

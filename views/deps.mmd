@@ -1,0 +1,144 @@
+graph TD
+    %% =============================================================================
+    %% COBOL to Spring Boot Migration - Task Dependency Graph
+    %% =============================================================================
+    %% This is a detailed, renderable Mermaid dependency DAG showing all tasks
+    %% and their dependencies for the migration of 29 COBOL programs.
+    %% =============================================================================
+    
+    %% PHASE 1: FOUNDATION
+    foundation-getcompy[GETCOMPY<br/>CompanyInfoService<br/>✅ Done]
+    foundation-getscode[GETSCODE<br/>SortCodeService<br/>✅ Done]
+    foundation-abndproc[ABNDPROC<br/>ErrorLoggingService<br/>🟡 In Progress]
+    foundation-crdtagy[CRDTAGY1-5<br/>CreditAgencyService<br/>🟡 In Progress]
+    checkpoint-foundation[🚦 CHECKPOINT<br/>Foundation Complete]
+    
+    foundation-abndproc --> checkpoint-foundation
+    foundation-crdtagy --> checkpoint-foundation
+    
+    %% PHASE 2: CORE SERVICES
+    core-inqcust[INQCUST<br/>CustomerInquiryService<br/>711 lines]
+    core-inqacc[INQACC<br/>AccountInquiryService<br/>1002 lines]
+    core-inqacccu[INQACCCU<br/>CustomerAccountsService<br/>882 lines]
+    checkpoint-core[🚦 CHECKPOINT<br/>Core Services Complete]
+    
+    checkpoint-foundation --> core-inqcust
+    checkpoint-foundation --> core-inqacc
+    core-inqcust --> core-inqacccu
+    core-inqacc --> core-inqacccu
+    core-inqcust --> checkpoint-core
+    core-inqacc --> checkpoint-core
+    core-inqacccu --> checkpoint-core
+    
+    %% PHASE 3: CUSTOMER OPERATIONS
+    customer-crecust[CRECUST<br/>CustomerCreationService<br/>1439 lines]
+    customer-updcust[UPDCUST<br/>CustomerUpdateService<br/>364 lines]
+    customer-delcus[DELCUS<br/>CustomerDeletionService<br/>761 lines]
+    checkpoint-customer[🚦 CHECKPOINT<br/>Customer Ops Complete]
+    
+    checkpoint-core --> customer-crecust
+    foundation-crdtagy --> customer-crecust
+    core-inqcust --> customer-updcust
+    customer-crecust --> customer-updcust
+    core-inqcust --> customer-delcus
+    core-inqacccu --> customer-delcus
+    customer-crecust --> checkpoint-customer
+    customer-updcust --> checkpoint-customer
+    customer-delcus --> checkpoint-customer
+    
+    %% PHASE 4: ACCOUNT OPERATIONS
+    account-creacc[CREACC<br/>AccountCreationService<br/>1247 lines]
+    account-updacc[UPDACC<br/>AccountUpdateService<br/>406 lines]
+    account-delacc[DELACC<br/>AccountDeletionService<br/>649 lines]
+    checkpoint-account[🚦 CHECKPOINT<br/>Account Ops Complete]
+    
+    checkpoint-core --> account-creacc
+    core-inqcust --> account-creacc
+    core-inqacccu --> account-creacc
+    core-inqacc --> account-updacc
+    core-inqacc --> account-delacc
+    account-delacc --> customer-delcus
+    account-creacc --> checkpoint-account
+    account-updacc --> checkpoint-account
+    account-delacc --> checkpoint-account
+    
+    %% PHASE 5: TRANSACTION SERVICES
+    transaction-dbcrfun[DBCRFUN<br/>DebitCreditService<br/>861 lines]
+    transaction-xfrfun[XFRFUN<br/>TransferService<br/>1924 lines]
+    checkpoint-transaction[🚦 CHECKPOINT<br/>Transaction Services Complete]
+    
+    checkpoint-account --> transaction-dbcrfun
+    transaction-dbcrfun --> transaction-xfrfun
+    transaction-dbcrfun --> checkpoint-transaction
+    transaction-xfrfun --> checkpoint-transaction
+    
+    %% PHASE 6: BMS UI PROGRAMS
+    ui-bnkmenu[BNKMENU<br/>MenuService<br/>1311 lines]
+    ui-bnk1cca[BNK1CCA<br/>CustomerAccountListService<br/>952 lines]
+    ui-bnk1cac[BNK1CAC<br/>AccountCreationUIService<br/>1298 lines]
+    ui-bnk1uac[BNK1UAC<br/>AccountUpdateUIService<br/>1405 lines]
+    ui-bnk1cra[BNK1CRA<br/>CustomerCreationUIService<br/>1166 lines]
+    ui-bnk1dac[BNK1DAC<br/>AccountDeletionUIService<br/>1158 lines]
+    ui-bnk1ccs[BNK1CCS<br/>CustomerSearchUIService<br/>1657 lines]
+    ui-bnk1dcs[BNK1DCS<br/>CustomerDeletionUIService<br/>2053 lines]
+    ui-bnk1tfn[BNK1TFN<br/>TransferUIService<br/>1224 lines]
+    
+    checkpoint-transaction --> ui-bnkmenu
+    core-inqacccu --> ui-bnk1cca
+    account-creacc --> ui-bnk1cac
+    account-updacc --> ui-bnk1uac
+    customer-crecust --> ui-bnk1cra
+    account-delacc --> ui-bnk1dac
+    core-inqcust --> ui-bnk1ccs
+    customer-delcus --> ui-bnk1dcs
+    transaction-xfrfun --> ui-bnk1tfn
+    
+    %% PHASE 7: DATA INITIALIZATION
+    data-bankdata[BANKDATA<br/>DataInitializationService<br/>1463 lines]
+    
+    checkpoint-account --> data-bankdata
+    checkpoint-customer --> data-bankdata
+    
+    %% PHASE 8: TESTING & DEPLOYMENT
+    checkpoint-integration[🚦 CHECKPOINT<br/>Integration Tests Complete]
+    test-performance[Performance Baseline<br/>Testing]
+    test-security[Security Scan &<br/>Vulnerability Assessment]
+    deploy-rollback[Create Rollback Plan<br/>& Documentation]
+    checkpoint-cutover[🚦 CHECKPOINT<br/>Cutover Readiness]
+    
+    ui-bnkmenu --> checkpoint-integration
+    ui-bnk1cca --> checkpoint-integration
+    ui-bnk1cac --> checkpoint-integration
+    ui-bnk1uac --> checkpoint-integration
+    ui-bnk1cra --> checkpoint-integration
+    ui-bnk1dac --> checkpoint-integration
+    ui-bnk1ccs --> checkpoint-integration
+    ui-bnk1dcs --> checkpoint-integration
+    ui-bnk1tfn --> checkpoint-integration
+    data-bankdata --> checkpoint-integration
+    
+    checkpoint-integration --> test-performance
+    checkpoint-integration --> test-security
+    test-performance --> deploy-rollback
+    test-security --> deploy-rollback
+    deploy-rollback --> checkpoint-cutover
+    
+    %% =============================================================================
+    %% STYLING
+    %% =============================================================================
+    
+    classDef done fill:#90EE90,stroke:#2E8B57,stroke-width:2px,color:#000
+    classDef inProgress fill:#FFD700,stroke:#DAA520,stroke-width:2px,color:#000
+    classDef ready fill:#87CEEB,stroke:#4682B4,stroke-width:2px,color:#000
+    classDef backlog fill:#F0F0F0,stroke:#808080,stroke-width:1px,color:#000
+    classDef checkpoint fill:#FF6B6B,stroke:#C92A2A,stroke-width:3px,color:#FFF
+    
+    class foundation-getcompy,foundation-getscode done
+    class foundation-abndproc,foundation-crdtagy inProgress
+    class checkpoint-foundation,core-inqcust,core-inqacc,core-inqacccu ready
+    class customer-crecust,customer-updcust,customer-delcus,account-creacc,account-updacc,account-delacc backlog
+    class transaction-dbcrfun,transaction-xfrfun,ui-bnkmenu,ui-bnk1cca,ui-bnk1cac,ui-bnk1uac backlog
+    class ui-bnk1cra,ui-bnk1dac,ui-bnk1ccs,ui-bnk1dcs,ui-bnk1tfn,data-bankdata backlog
+    class test-performance,test-security,deploy-rollback backlog
+    class checkpoint-core,checkpoint-customer,checkpoint-account,checkpoint-transaction checkpoint
+    class checkpoint-integration,checkpoint-cutover checkpoint
