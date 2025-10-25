@@ -54,6 +54,7 @@ public class DtoMapper {
     
     public AccountResponseDto toAccountResponseDto(Account account) {
         return AccountResponseDto.builder()
+                .eyeCatcher(account.getEyeCatcher())
                 .accountNumber(account.getAccountNumber())
                 .sortCode(account.getSortCode())
                 .accountType(account.getAccountType())

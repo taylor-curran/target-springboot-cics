@@ -18,6 +18,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class AccountResponseDto {
     
+    private String eyeCatcher;
+    
+
     /**
      * Account number (business identifier)
      */
