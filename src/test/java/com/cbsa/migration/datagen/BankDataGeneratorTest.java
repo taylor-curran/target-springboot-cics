@@ -175,6 +175,7 @@ class BankDataGeneratorTest {
         String address1 = customer1.getAddress();
         
         // Clear and regenerate with same seed
+        jdbcTemplate.update("DELETE FROM bank_transaction");
         jdbcTemplate.update("DELETE FROM account");
         jdbcTemplate.update("DELETE FROM customer");
         jdbcTemplate.update("DELETE FROM control");
