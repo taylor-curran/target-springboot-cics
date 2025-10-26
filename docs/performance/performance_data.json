@@ -1,0 +1,722 @@
+{
+  "baseline_metadata": {
+    "generated_date": "2025-10-26T00:48:32Z",
+    "environment": "sandbox",
+    "methodology": "synthetic_analysis",
+    "total_programs": 29,
+    "migrated_programs": 4,
+    "pending_programs": 25,
+    "data_source": "og-cics-cobol-app COBOL source analysis",
+    "version": "1.0"
+  },
+  "programs": [
+    {
+      "name": "GETCOMPY",
+      "description": "Get Company Information",
+      "lines_of_code": 43,
+      "complexity_tier": "Simple",
+      "transaction_type": "utility",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 8,
+        "p95": 15,
+        "p99": 35
+      },
+      "request_volume": {
+        "hourly": 2000,
+        "daily": 48000
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 20,
+        "avg_response_size_bytes": 60
+      },
+      "migration_status": "migrated",
+      "java_service": "CompanyInfoService"
+    },
+    {
+      "name": "GETSCODE",
+      "description": "Get Sort Code",
+      "lines_of_code": 46,
+      "complexity_tier": "Simple",
+      "transaction_type": "utility",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 7,
+        "p95": 18,
+        "p99": 40
+      },
+      "request_volume": {
+        "hourly": 1800,
+        "daily": 43200
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 15,
+        "avg_response_size_bytes": 25
+      },
+      "migration_status": "migrated",
+      "java_service": "SortCodeService"
+    },
+    {
+      "name": "ABNDPROC",
+      "description": "Error/Abend Handling Routine",
+      "lines_of_code": 176,
+      "complexity_tier": "Small",
+      "transaction_type": "error",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 25,
+        "p95": 65,
+        "p99": 130
+      },
+      "request_volume": {
+        "hourly": 50,
+        "daily": 1200
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 300,
+        "avg_response_size_bytes": 450
+      },
+      "migration_status": "migrated",
+      "java_service": "ErrorLoggingService"
+    },
+    {
+      "name": "CRDTAGY1",
+      "description": "Credit Check Agency 1",
+      "lines_of_code": 273,
+      "complexity_tier": "Small",
+      "transaction_type": "credit_check",
+      "transaction_code": "OCR1",
+      "latency_ms": {
+        "p50": 1520,
+        "p95": 2080,
+        "p99": 3050
+      },
+      "request_volume": {
+        "hourly": 400,
+        "daily": 9600
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 500,
+        "avg_response_size_bytes": 600
+      },
+      "migration_status": "migrated",
+      "java_service": "CreditAgencyService",
+      "notes": "Includes 1000-3000ms simulated credit agency delay"
+    },
+    {
+      "name": "CRDTAGY2",
+      "description": "Credit Check Agency 2",
+      "lines_of_code": 273,
+      "complexity_tier": "Small",
+      "transaction_type": "credit_check",
+      "transaction_code": "OCR2",
+      "latency_ms": {
+        "p50": 1580,
+        "p95": 2150,
+        "p99": 3100
+      },
+      "request_volume": {
+        "hourly": 350,
+        "daily": 8400
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 500,
+        "avg_response_size_bytes": 600
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "CRDTAGY3",
+      "description": "Credit Check Agency 3",
+      "lines_of_code": 272,
+      "complexity_tier": "Small",
+      "transaction_type": "credit_check",
+      "transaction_code": "OCR3",
+      "latency_ms": {
+        "p50": 1450,
+        "p95": 2020,
+        "p99": 2980
+      },
+      "request_volume": {
+        "hourly": 380,
+        "daily": 9120
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 500,
+        "avg_response_size_bytes": 600
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "CRDTAGY4",
+      "description": "Credit Check Agency 4",
+      "lines_of_code": 275,
+      "complexity_tier": "Small",
+      "transaction_type": "credit_check",
+      "transaction_code": "OCR4",
+      "latency_ms": {
+        "p50": 1610,
+        "p95": 2200,
+        "p99": 3180
+      },
+      "request_volume": {
+        "hourly": 320,
+        "daily": 7680
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 500,
+        "avg_response_size_bytes": 600
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "CRDTAGY5",
+      "description": "Credit Check Agency 5",
+      "lines_of_code": 275,
+      "complexity_tier": "Small",
+      "transaction_type": "credit_check",
+      "transaction_code": "OCR5",
+      "latency_ms": {
+        "p50": 1550,
+        "p95": 2100,
+        "p99": 3050
+      },
+      "request_volume": {
+        "hourly": 360,
+        "daily": 8640
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 500,
+        "avg_response_size_bytes": 600
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "UPDCUST",
+      "description": "Update Customer",
+      "lines_of_code": 364,
+      "complexity_tier": "Medium",
+      "transaction_type": "update",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 45,
+        "p95": 95,
+        "p99": 185
+      },
+      "request_volume": {
+        "hourly": 350,
+        "daily": 8400
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 550,
+        "avg_response_size_bytes": 600
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "UPDACC",
+      "description": "Update Account",
+      "lines_of_code": 406,
+      "complexity_tier": "Medium",
+      "transaction_type": "update",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 48,
+        "p95": 105,
+        "p99": 210
+      },
+      "request_volume": {
+        "hourly": 400,
+        "daily": 9600
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 320,
+        "avg_response_size_bytes": 350
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "DELACC",
+      "description": "Delete Account",
+      "lines_of_code": 649,
+      "complexity_tier": "Medium",
+      "transaction_type": "delete",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 52,
+        "p95": 115,
+        "p99": 230
+      },
+      "request_volume": {
+        "hourly": 45,
+        "daily": 1080
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 150,
+        "avg_response_size_bytes": 100
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "INQCUST",
+      "description": "Inquire Customer",
+      "lines_of_code": 711,
+      "complexity_tier": "Medium",
+      "transaction_type": "inquiry",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 38,
+        "p95": 85,
+        "p99": 170
+      },
+      "request_volume": {
+        "hourly": 1200,
+        "daily": 28800
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 50,
+        "avg_response_size_bytes": 600
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "DELCUS",
+      "description": "Delete Customer",
+      "lines_of_code": 761,
+      "complexity_tier": "Medium",
+      "transaction_type": "delete",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 55,
+        "p95": 125,
+        "p99": 250
+      },
+      "request_volume": {
+        "hourly": 35,
+        "daily": 840
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 150,
+        "avg_response_size_bytes": 100
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "DBCRFUN",
+      "description": "Debit/Credit Function",
+      "lines_of_code": 861,
+      "complexity_tier": "Medium",
+      "transaction_type": "transfer",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 50,
+        "p95": 110,
+        "p99": 220
+      },
+      "request_volume": {
+        "hourly": 600,
+        "daily": 14400
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 200,
+        "avg_response_size_bytes": 350
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "INQACCCU",
+      "description": "Inquire Account by Customer",
+      "lines_of_code": 882,
+      "complexity_tier": "Medium",
+      "transaction_type": "inquiry",
+      "transaction_code": "OCCA",
+      "latency_ms": {
+        "p50": 42,
+        "p95": 92,
+        "p99": 185
+      },
+      "request_volume": {
+        "hourly": 800,
+        "daily": 19200
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 80,
+        "avg_response_size_bytes": 600
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "BNK1CCA",
+      "description": "Online Inquire Account for Customer",
+      "lines_of_code": 952,
+      "complexity_tier": "Large",
+      "transaction_type": "inquiry",
+      "transaction_code": "OCCA",
+      "latency_ms": {
+        "p50": 85,
+        "p95": 180,
+        "p99": 360
+      },
+      "request_volume": {
+        "hourly": 450,
+        "daily": 10800
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 1200,
+        "avg_response_size_bytes": 1800
+      },
+      "migration_status": "pending",
+      "java_service": null,
+      "notes": "3270 screen program with BMS map processing"
+    },
+    {
+      "name": "INQACC",
+      "description": "Inquire Account",
+      "lines_of_code": 1002,
+      "complexity_tier": "Large",
+      "transaction_type": "inquiry",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 75,
+        "p95": 165,
+        "p99": 330
+      },
+      "request_volume": {
+        "hourly": 1100,
+        "daily": 26400
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 80,
+        "avg_response_size_bytes": 350
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "BNK1DAC",
+      "description": "Online Display Account",
+      "lines_of_code": 1158,
+      "complexity_tier": "Large",
+      "transaction_type": "inquiry",
+      "transaction_code": "ODAC",
+      "latency_ms": {
+        "p50": 95,
+        "p95": 205,
+        "p99": 410
+      },
+      "request_volume": {
+        "hourly": 950,
+        "daily": 22800
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 1200,
+        "avg_response_size_bytes": 1800
+      },
+      "migration_status": "pending",
+      "java_service": null,
+      "notes": "3270 screen program with BMS map processing"
+    },
+    {
+      "name": "BNK1CRA",
+      "description": "Online Credit/Debit Account",
+      "lines_of_code": 1166,
+      "complexity_tier": "Large",
+      "transaction_type": "transfer",
+      "transaction_code": "OCRA",
+      "latency_ms": {
+        "p50": 98,
+        "p95": 210,
+        "p99": 420
+      },
+      "request_volume": {
+        "hourly": 550,
+        "daily": 13200
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 1200,
+        "avg_response_size_bytes": 1500
+      },
+      "migration_status": "pending",
+      "java_service": null,
+      "notes": "3270 screen program with BMS map processing"
+    },
+    {
+      "name": "BNK1TFN",
+      "description": "Online Transfer Funds",
+      "lines_of_code": 1224,
+      "complexity_tier": "Large",
+      "transaction_type": "transfer",
+      "transaction_code": "OTFN",
+      "latency_ms": {
+        "p50": 105,
+        "p95": 225,
+        "p99": 450
+      },
+      "request_volume": {
+        "hourly": 480,
+        "daily": 11520
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 1200,
+        "avg_response_size_bytes": 1500
+      },
+      "migration_status": "pending",
+      "java_service": null,
+      "notes": "3270 screen program with BMS map processing"
+    },
+    {
+      "name": "CREACC",
+      "description": "Create Account",
+      "lines_of_code": 1247,
+      "complexity_tier": "Large",
+      "transaction_type": "create",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 110,
+        "p95": 235,
+        "p99": 470
+      },
+      "request_volume": {
+        "hourly": 120,
+        "daily": 2880
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 350,
+        "avg_response_size_bytes": 380
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "BNK1CAC",
+      "description": "Online Create Account",
+      "lines_of_code": 1298,
+      "complexity_tier": "Large",
+      "transaction_type": "create",
+      "transaction_code": "OCAC",
+      "latency_ms": {
+        "p50": 115,
+        "p95": 245,
+        "p99": 490
+      },
+      "request_volume": {
+        "hourly": 110,
+        "daily": 2640
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 1200,
+        "avg_response_size_bytes": 1500
+      },
+      "migration_status": "pending",
+      "java_service": null,
+      "notes": "3270 screen program with BMS map processing"
+    },
+    {
+      "name": "BNKMENU",
+      "description": "Main Menu",
+      "lines_of_code": 1311,
+      "complexity_tier": "Large",
+      "transaction_type": "menu",
+      "transaction_code": "OMEN",
+      "latency_ms": {
+        "p50": 70,
+        "p95": 155,
+        "p99": 310
+      },
+      "request_volume": {
+        "hourly": 2500,
+        "daily": 60000
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 800,
+        "avg_response_size_bytes": 1500
+      },
+      "migration_status": "pending",
+      "java_service": null,
+      "notes": "3270 BMS main menu program"
+    },
+    {
+      "name": "BNK1UAC",
+      "description": "Online Update Account",
+      "lines_of_code": 1405,
+      "complexity_tier": "VeryLarge",
+      "transaction_type": "update",
+      "transaction_code": "OUAC",
+      "latency_ms": {
+        "p50": 145,
+        "p95": 315,
+        "p99": 630
+      },
+      "request_volume": {
+        "hourly": 380,
+        "daily": 9120
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 1200,
+        "avg_response_size_bytes": 1500
+      },
+      "migration_status": "pending",
+      "java_service": null,
+      "notes": "3270 screen program with BMS map processing"
+    },
+    {
+      "name": "CRECUST",
+      "description": "Create Customer",
+      "lines_of_code": 1439,
+      "complexity_tier": "VeryLarge",
+      "transaction_type": "create",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 155,
+        "p95": 335,
+        "p99": 670
+      },
+      "request_volume": {
+        "hourly": 95,
+        "daily": 2280
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 600,
+        "avg_response_size_bytes": 650
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "BANKDATA",
+      "description": "Banking Data Structures",
+      "lines_of_code": 1463,
+      "complexity_tier": "VeryLarge",
+      "transaction_type": "utility",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 125,
+        "p95": 270,
+        "p99": 540
+      },
+      "request_volume": {
+        "hourly": 100,
+        "daily": 2400
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 800,
+        "avg_response_size_bytes": 1200
+      },
+      "migration_status": "pending",
+      "java_service": null,
+      "notes": "Data structure definitions and batch processing"
+    },
+    {
+      "name": "BNK1CCS",
+      "description": "Online Create Customer",
+      "lines_of_code": 1657,
+      "complexity_tier": "VeryLarge",
+      "transaction_type": "create",
+      "transaction_code": "OCCS",
+      "latency_ms": {
+        "p50": 175,
+        "p95": 380,
+        "p99": 760
+      },
+      "request_volume": {
+        "hourly": 85,
+        "daily": 2040
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 1200,
+        "avg_response_size_bytes": 1800
+      },
+      "migration_status": "pending",
+      "java_service": null,
+      "notes": "3270 screen program with BMS map processing"
+    },
+    {
+      "name": "XFRFUN",
+      "description": "Transfer Funds Function",
+      "lines_of_code": 1924,
+      "complexity_tier": "VeryLarge",
+      "transaction_type": "transfer",
+      "transaction_code": null,
+      "latency_ms": {
+        "p50": 185,
+        "p95": 405,
+        "p99": 810
+      },
+      "request_volume": {
+        "hourly": 520,
+        "daily": 12480
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 250,
+        "avg_response_size_bytes": 400
+      },
+      "migration_status": "pending",
+      "java_service": null
+    },
+    {
+      "name": "BNK1DCS",
+      "description": "Online Display Customer",
+      "lines_of_code": 2053,
+      "complexity_tier": "VeryLarge",
+      "transaction_type": "inquiry",
+      "transaction_code": "ODCS",
+      "latency_ms": {
+        "p50": 195,
+        "p95": 425,
+        "p99": 850
+      },
+      "request_volume": {
+        "hourly": 780,
+        "daily": 18720
+      },
+      "data_characteristics": {
+        "avg_request_size_bytes": 1200,
+        "avg_response_size_bytes": 2000
+      },
+      "migration_status": "pending",
+      "java_service": null,
+      "notes": "3270 screen program with BMS map processing"
+    }
+  ],
+  "summary_statistics": {
+    "total_programs": 29,
+    "migrated_count": 4,
+    "pending_count": 25,
+    "complexity_distribution": {
+      "Simple": 2,
+      "Small": 6,
+      "Medium": 7,
+      "Large": 8,
+      "VeryLarge": 6
+    },
+    "transaction_type_distribution": {
+      "inquiry": 8,
+      "update": 4,
+      "create": 6,
+      "delete": 2,
+      "transfer": 5,
+      "utility": 3,
+      "menu": 1,
+      "credit_check": 5,
+      "error": 1
+    },
+    "average_latency_ms": {
+      "p50_excluding_credit": 82,
+      "p95_excluding_credit": 178,
+      "p99_excluding_credit": 356
+    },
+    "total_estimated_daily_requests": 524160,
+    "total_estimated_hourly_requests": 21840
+  }
+}
