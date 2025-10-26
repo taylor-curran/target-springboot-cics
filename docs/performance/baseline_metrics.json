@@ -1,0 +1,788 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "date": "2025-10-26T00:52:00Z",
+    "task_id": "setup_001",
+    "methodology": "complexity-based-simulation",
+    "environment": "sandbox",
+    "total_programs": 29,
+    "migrated_count": 5,
+    "remaining_count": 24,
+    "migration_percentage": 17.24
+  },
+  "programs": [
+    {
+      "name": "GETCOMPY",
+      "category": "simple_utility",
+      "loc": 47,
+      "description": "Returns company name constant",
+      "io_operations": "none",
+      "migration_status": "migrated",
+      "java_service": "CompanyInfoService",
+      "performance": {
+        "latency_ms": {
+          "p50": 1,
+          "p95": 3,
+          "p99": 8
+        },
+        "request_volume": {
+          "requests_per_minute": 2000,
+          "frequency": "high"
+        },
+        "data_sizes": {
+          "request_bytes": 0,
+          "response_bytes": 10
+        }
+      }
+    },
+    {
+      "name": "GETSCODE",
+      "category": "simple_utility",
+      "loc": 47,
+      "description": "Returns sort code constant",
+      "io_operations": "none",
+      "migration_status": "migrated",
+      "java_service": "SortCodeService",
+      "performance": {
+        "latency_ms": {
+          "p50": 1,
+          "p95": 3,
+          "p99": 8
+        },
+        "request_volume": {
+          "requests_per_minute": 2000,
+          "frequency": "high"
+        },
+        "data_sizes": {
+          "request_bytes": 0,
+          "response_bytes": 6
+        }
+      }
+    },
+    {
+      "name": "CRDTAGY1",
+      "category": "credit_agency",
+      "loc": 150,
+      "description": "Credit agency lookup simulator",
+      "io_operations": "external_stub",
+      "migration_status": "migrated",
+      "java_service": "CreditAgencyService",
+      "performance": {
+        "latency_ms": {
+          "p50": 8,
+          "p95": 20,
+          "p99": 50
+        },
+        "request_volume": {
+          "requests_per_minute": 800,
+          "frequency": "high"
+        },
+        "data_sizes": {
+          "request_bytes": 50,
+          "response_bytes": 100
+        }
+      }
+    },
+    {
+      "name": "CRDTAGY2",
+      "category": "credit_agency",
+      "loc": 150,
+      "description": "Credit agency lookup simulator",
+      "io_operations": "external_stub",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 8,
+          "p95": 20,
+          "p99": 50
+        },
+        "request_volume": {
+          "requests_per_minute": 600,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 50,
+          "response_bytes": 100
+        }
+      }
+    },
+    {
+      "name": "CRDTAGY3",
+      "category": "credit_agency",
+      "loc": 150,
+      "description": "Credit agency lookup simulator",
+      "io_operations": "external_stub",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 8,
+          "p95": 20,
+          "p99": 50
+        },
+        "request_volume": {
+          "requests_per_minute": 600,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 50,
+          "response_bytes": 100
+        }
+      }
+    },
+    {
+      "name": "CRDTAGY4",
+      "category": "credit_agency",
+      "loc": 150,
+      "description": "Credit agency lookup simulator",
+      "io_operations": "external_stub",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 8,
+          "p95": 20,
+          "p99": 50
+        },
+        "request_volume": {
+          "requests_per_minute": 500,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 50,
+          "response_bytes": 100
+        }
+      }
+    },
+    {
+      "name": "CRDTAGY5",
+      "category": "credit_agency",
+      "loc": 150,
+      "description": "Credit agency lookup simulator",
+      "io_operations": "external_stub",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 8,
+          "p95": 20,
+          "p99": 50
+        },
+        "request_volume": {
+          "requests_per_minute": 500,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 50,
+          "response_bytes": 100
+        }
+      }
+    },
+    {
+      "name": "ABNDPROC",
+      "category": "special_purpose",
+      "loc": 200,
+      "description": "Abend handler - logs errors, formats messages",
+      "io_operations": "write_log",
+      "migration_status": "migrated",
+      "java_service": "ErrorLoggingService",
+      "performance": {
+        "latency_ms": {
+          "p50": 10,
+          "p95": 30,
+          "p99": 80
+        },
+        "request_volume": {
+          "requests_per_minute": 100,
+          "frequency": "low"
+        },
+        "data_sizes": {
+          "request_bytes": 200,
+          "response_bytes": 100
+        }
+      }
+    },
+    {
+      "name": "BANKDATA",
+      "category": "special_purpose",
+      "loc": 500,
+      "description": "Test data generator - creates sample records",
+      "io_operations": "multiple_writes",
+      "migration_status": "migrated",
+      "java_service": "BankDataGenerator",
+      "performance": {
+        "latency_ms": {
+          "p50": 15,
+          "p95": 45,
+          "p99": 120
+        },
+        "request_volume": {
+          "requests_per_minute": 10,
+          "frequency": "low"
+        },
+        "data_sizes": {
+          "request_bytes": 100,
+          "response_bytes": 500
+        }
+      }
+    },
+    {
+      "name": "BNKMENU",
+      "category": "menu_navigation",
+      "loc": 1312,
+      "description": "Main menu - displays options, validates selection",
+      "io_operations": "bms_screen",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 20,
+          "p95": 60,
+          "p99": 150
+        },
+        "request_volume": {
+          "requests_per_minute": 500,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 100,
+          "response_bytes": 500
+        }
+      }
+    },
+    {
+      "name": "INQACC",
+      "category": "inquiry",
+      "loc": 1003,
+      "description": "Account inquiry - reads ACCOUNT table",
+      "io_operations": "single_db2_read",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 15,
+          "p95": 40,
+          "p99": 100
+        },
+        "request_volume": {
+          "requests_per_minute": 1200,
+          "frequency": "high"
+        },
+        "data_sizes": {
+          "request_bytes": 200,
+          "response_bytes": 800
+        }
+      }
+    },
+    {
+      "name": "INQACCCU",
+      "category": "inquiry",
+      "loc": 800,
+      "description": "Account inquiry with customer - joins ACCOUNT/CUSTOMER",
+      "io_operations": "multiple_db2_reads",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 20,
+          "p95": 50,
+          "p99": 120
+        },
+        "request_volume": {
+          "requests_per_minute": 800,
+          "frequency": "high"
+        },
+        "data_sizes": {
+          "request_bytes": 300,
+          "response_bytes": 1500
+        }
+      }
+    },
+    {
+      "name": "INQCUST",
+      "category": "inquiry",
+      "loc": 600,
+      "description": "Customer inquiry - reads CUSTOMER table",
+      "io_operations": "single_db2_read",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 15,
+          "p95": 40,
+          "p99": 100
+        },
+        "request_volume": {
+          "requests_per_minute": 1000,
+          "frequency": "high"
+        },
+        "data_sizes": {
+          "request_bytes": 200,
+          "response_bytes": 600
+        }
+      }
+    },
+    {
+      "name": "CREACC",
+      "category": "create",
+      "loc": 1248,
+      "description": "Create account - writes ACCOUNT, PROCTRAN, manages counter",
+      "io_operations": "multiple_db2_writes",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 35,
+          "p95": 90,
+          "p99": 220
+        },
+        "request_volume": {
+          "requests_per_minute": 300,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 600,
+          "response_bytes": 200
+        }
+      }
+    },
+    {
+      "name": "CRECUST",
+      "category": "create",
+      "loc": 900,
+      "description": "Create customer - writes CUSTOMER table",
+      "io_operations": "db2_write",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 30,
+          "p95": 80,
+          "p99": 200
+        },
+        "request_volume": {
+          "requests_per_minute": 200,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 600,
+          "response_bytes": 100
+        }
+      }
+    },
+    {
+      "name": "UPDACC",
+      "category": "update",
+      "loc": 380,
+      "description": "Update account - modifies ACCOUNT table",
+      "io_operations": "db2_update",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 25,
+          "p95": 65,
+          "p99": 160
+        },
+        "request_volume": {
+          "requests_per_minute": 400,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 500,
+          "response_bytes": 100
+        }
+      }
+    },
+    {
+      "name": "UPDCUST",
+      "category": "update",
+      "loc": 365,
+      "description": "Update customer - modifies CUSTOMER table",
+      "io_operations": "vsam_update",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 25,
+          "p95": 65,
+          "p99": 160
+        },
+        "request_volume": {
+          "requests_per_minute": 300,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 600,
+          "response_bytes": 100
+        }
+      }
+    },
+    {
+      "name": "DELACC",
+      "category": "delete",
+      "loc": 350,
+      "description": "Delete account - removes from ACCOUNT table",
+      "io_operations": "db2_delete",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 20,
+          "p95": 55,
+          "p99": 140
+        },
+        "request_volume": {
+          "requests_per_minute": 50,
+          "frequency": "low"
+        },
+        "data_sizes": {
+          "request_bytes": 100,
+          "response_bytes": 50
+        }
+      }
+    },
+    {
+      "name": "DELCUS",
+      "category": "delete",
+      "loc": 320,
+      "description": "Delete customer - removes from CUSTOMER table",
+      "io_operations": "vsam_delete",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 20,
+          "p95": 55,
+          "p99": 140
+        },
+        "request_volume": {
+          "requests_per_minute": 30,
+          "frequency": "low"
+        },
+        "data_sizes": {
+          "request_bytes": 100,
+          "response_bytes": 50
+        }
+      }
+    },
+    {
+      "name": "XFRFUN",
+      "category": "complex_transaction",
+      "loc": 1925,
+      "description": "Fund transfer - updates 2 accounts, writes PROCTRAN",
+      "io_operations": "multi_table_transaction",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 80,
+          "p95": 240,
+          "p99": 600
+        },
+        "request_volume": {
+          "requests_per_minute": 400,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 400,
+          "response_bytes": 300
+        }
+      }
+    },
+    {
+      "name": "DBCRFUN",
+      "category": "complex_transaction",
+      "loc": 1500,
+      "description": "Debit/Credit processing - account balance updates",
+      "io_operations": "multi_table_transaction",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 70,
+          "p95": 210,
+          "p99": 550
+        },
+        "request_volume": {
+          "requests_per_minute": 350,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 300,
+          "response_bytes": 200
+        }
+      }
+    },
+    {
+      "name": "BNK1CAC",
+      "category": "bms_screen",
+      "loc": 850,
+      "description": "Account create screen handler",
+      "io_operations": "bms_screen",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 25,
+          "p95": 70,
+          "p99": 170
+        },
+        "request_volume": {
+          "requests_per_minute": 300,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 500,
+          "response_bytes": 800
+        }
+      }
+    },
+    {
+      "name": "BNK1CCA",
+      "category": "bms_screen",
+      "loc": 800,
+      "description": "Customer create screen handler",
+      "io_operations": "bms_screen",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 25,
+          "p95": 70,
+          "p99": 170
+        },
+        "request_volume": {
+          "requests_per_minute": 200,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 500,
+          "response_bytes": 800
+        }
+      }
+    },
+    {
+      "name": "BNK1CCS",
+      "category": "bms_screen",
+      "loc": 750,
+      "description": "Customer list screen handler",
+      "io_operations": "bms_screen",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 20,
+          "p95": 60,
+          "p99": 150
+        },
+        "request_volume": {
+          "requests_per_minute": 250,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 300,
+          "response_bytes": 1000
+        }
+      }
+    },
+    {
+      "name": "BNK1CRA",
+      "category": "bms_screen",
+      "loc": 800,
+      "description": "Account read screen handler",
+      "io_operations": "bms_screen",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 20,
+          "p95": 60,
+          "p99": 150
+        },
+        "request_volume": {
+          "requests_per_minute": 400,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 300,
+          "response_bytes": 800
+        }
+      }
+    },
+    {
+      "name": "BNK1DAC",
+      "category": "bms_screen",
+      "loc": 850,
+      "description": "Account delete screen handler",
+      "io_operations": "bms_screen",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 25,
+          "p95": 70,
+          "p99": 170
+        },
+        "request_volume": {
+          "requests_per_minute": 50,
+          "frequency": "low"
+        },
+        "data_sizes": {
+          "request_bytes": 300,
+          "response_bytes": 500
+        }
+      }
+    },
+    {
+      "name": "BNK1DCS",
+      "category": "bms_screen",
+      "loc": 800,
+      "description": "Customer delete screen handler",
+      "io_operations": "bms_screen",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 25,
+          "p95": 70,
+          "p99": 170
+        },
+        "request_volume": {
+          "requests_per_minute": 30,
+          "frequency": "low"
+        },
+        "data_sizes": {
+          "request_bytes": 300,
+          "response_bytes": 500
+        }
+      }
+    },
+    {
+      "name": "BNK1TFN",
+      "category": "bms_screen",
+      "loc": 900,
+      "description": "Transfer screen handler",
+      "io_operations": "bms_screen",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 30,
+          "p95": 80,
+          "p99": 190
+        },
+        "request_volume": {
+          "requests_per_minute": 400,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 400,
+          "response_bytes": 800
+        }
+      }
+    },
+    {
+      "name": "BNK1UAC",
+      "category": "bms_screen",
+      "loc": 850,
+      "description": "Account update screen handler",
+      "io_operations": "bms_screen",
+      "migration_status": "remaining",
+      "java_service": null,
+      "performance": {
+        "latency_ms": {
+          "p50": 25,
+          "p95": 70,
+          "p99": 170
+        },
+        "request_volume": {
+          "requests_per_minute": 400,
+          "frequency": "medium"
+        },
+        "data_sizes": {
+          "request_bytes": 500,
+          "response_bytes": 800
+        }
+      }
+    }
+  ],
+  "category_summary": {
+    "simple_utility": {
+      "count": 2,
+      "avg_latency_p50_ms": 1,
+      "avg_latency_p95_ms": 3,
+      "avg_latency_p99_ms": 8,
+      "total_requests_per_minute": 4000
+    },
+    "credit_agency": {
+      "count": 5,
+      "avg_latency_p50_ms": 8,
+      "avg_latency_p95_ms": 20,
+      "avg_latency_p99_ms": 50,
+      "total_requests_per_minute": 3000
+    },
+    "menu_navigation": {
+      "count": 1,
+      "avg_latency_p50_ms": 20,
+      "avg_latency_p95_ms": 60,
+      "avg_latency_p99_ms": 150,
+      "total_requests_per_minute": 500
+    },
+    "inquiry": {
+      "count": 3,
+      "avg_latency_p50_ms": 17,
+      "avg_latency_p95_ms": 43,
+      "avg_latency_p99_ms": 107,
+      "total_requests_per_minute": 3000
+    },
+    "create": {
+      "count": 2,
+      "avg_latency_p50_ms": 33,
+      "avg_latency_p95_ms": 85,
+      "avg_latency_p99_ms": 210,
+      "total_requests_per_minute": 500
+    },
+    "update": {
+      "count": 2,
+      "avg_latency_p50_ms": 25,
+      "avg_latency_p95_ms": 65,
+      "avg_latency_p99_ms": 160,
+      "total_requests_per_minute": 700
+    },
+    "delete": {
+      "count": 2,
+      "avg_latency_p50_ms": 20,
+      "avg_latency_p95_ms": 55,
+      "avg_latency_p99_ms": 140,
+      "total_requests_per_minute": 80
+    },
+    "complex_transaction": {
+      "count": 2,
+      "avg_latency_p50_ms": 75,
+      "avg_latency_p95_ms": 225,
+      "avg_latency_p99_ms": 575,
+      "total_requests_per_minute": 750
+    },
+    "bms_screen": {
+      "count": 8,
+      "avg_latency_p50_ms": 24,
+      "avg_latency_p95_ms": 68,
+      "avg_latency_p99_ms": 166,
+      "total_requests_per_minute": 2030
+    },
+    "special_purpose": {
+      "count": 2,
+      "avg_latency_p50_ms": 13,
+      "avg_latency_p95_ms": 38,
+      "avg_latency_p99_ms": 100,
+      "total_requests_per_minute": 110
+    }
+  },
+  "system_capacity": {
+    "total_requests_per_minute": 14670,
+    "peak_capacity_multiplier": 1.5,
+    "estimated_peak_requests_per_minute": 22005
+  }
+}
