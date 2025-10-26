@@ -1,0 +1,50 @@
+name: Validate Migration Plan Graph
+
+on:
+  push:
+    paths:
+      - 'migration_plan.py'
+  pull_request:
+    paths:
+      - 'migration_plan.py'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Copy validation script to target location
+      run: |
+        # Assuming validate_graph.py is in the migration-orchestration repo
+        # and migration_plan.py is in the target repo
+        # For now, we'll validate the migration_plan.py in the current repo
+        
+        if [ -f "migration_plan.py" ]; then
+          echo "Found migration_plan.py, running validation..."
+        else
+          echo "No migration_plan.py found, skipping validation"
+          exit 0
+        fi
+    
+    - name: Run validation script
+      run: |
+        if [ -f "migration_plan.py" ]; then
+          python src/utils/validate_graph.py migration_plan.py
+        fi
+    
+    - name: Upload validation results
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: validation-errors
+        path: |
+          migration_plan.py
+          validation_errors.log
