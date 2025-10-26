@@ -27,67 +27,139 @@ migration_plan = {
         },
         
         {
+            "id": "validator_001",
+            "title": "Create Database Schema Tests",
+            "content": "Build tests to verify all tables created correctly. Check constraints, indexes, and foreign keys. Test database connections and basic CRUD operations on all entities (Customer, Account, Transaction, PROCTRAN).",
+            "status": "not-complete",
+            "depends_on": ["setup_002"],
+            "estimated_hours": 6
+        },
+        {
+            "id": "validator_002",
+            "title": "Create Customer Read Test Suite",
+            "content": "Build unit tests for INQCUST customer retrieval operations. Create at least one integration test covering the main success path. Test composite key lookups (sort code + customer number), VSAM record mapping, and error handling for missing customers.",
+            "status": "not-complete",
+            "depends_on": ["setup_002", "validator_001"],
+            "estimated_hours": 8
+        },
+        {
             "id": "migrate_001",
             "title": "Migrate Customer Read Operations",
             "content": "Port INQCUST to Spring Boot REST endpoint for customer retrieval. Map COBOL records to DTOs and implement repository with composite key support.",
             "status": "not-complete",
-            "depends_on": ["setup_002"],
+            "depends_on": ["validator_002"],
             "estimated_hours": 8
+        },
+        {
+            "id": "validator_003",
+            "title": "Create Customer Create Test Suite",
+            "content": "Build unit tests for CRECUST customer creation operations. Create at least one integration test for the complete creation flow. Test Named Counter generation, async credit agency integration with mocks, VSAM/DB2 writes, PROCTRAN audit logging, and rollback scenarios.",
+            "status": "not-complete",
+            "depends_on": ["setup_002", "validator_001"],
+            "estimated_hours": 10
         },
         {
             "id": "migrate_002",
             "title": "Migrate Customer Create Operations",
             "content": "Port CRECUST to Spring Boot customer creation endpoint with async credit agency integration. Implement Named Counter with distributed locks for customer numbers. Handle DB2/VSAM writes and PROCTRAN audit logging.",
             "status": "not-complete",
-            "depends_on": ["migrate_001"],
+            "depends_on": ["validator_003", "migrate_001"],
             "estimated_hours": 12
+        },
+        {
+            "id": "validator_004",
+            "title": "Create Customer Update/Delete Test Suite",
+            "content": "Build unit tests for UPDCUST and DELCUS operations. Create integration tests for cascade delete (customer → accounts). Test limited field updates in UPDCUST, cascade delete logic in DELCUS with PROCTRAN logging, and error handling.",
+            "status": "not-complete",
+            "depends_on": ["setup_002", "validator_001"],
+            "estimated_hours": 8
         },
         {
             "id": "migrate_003",
             "title": "Migrate Customer Update Delete",
             "content": "Port UPDCUST and DELCUS to update/delete endpoints. UPDCUST modifies limited fields without PROCTRAN. DELCUS cascades to delete all customer accounts then customer record with PROCTRAN logging.",
             "status": "not-complete",
-            "depends_on": ["migrate_001", "migrate_002"],
+            "depends_on": ["validator_004", "migrate_001", "migrate_002"],
             "estimated_hours": 10
+        },
+        {
+            "id": "validator_005",
+            "title": "Create Account Read Test Suite",
+            "content": "Build unit tests for INQACC and INQACCCU account query operations. Create integration tests for pagination/cursor patterns. Test single account lookup by number, customer account listing with pagination, and DB2 cursor handling.",
+            "status": "not-complete",
+            "depends_on": ["setup_002", "validator_001"],
+            "estimated_hours": 8
         },
         {
             "id": "migrate_004",
             "title": "Migrate Account Read Operations",
             "content": "Port INQACC and INQACCCU to AccountService endpoints. INQACC queries by account number. INQACCCU queries all accounts for customer using cursor/pagination.",
             "status": "not-complete",
-            "depends_on": ["setup_002"],
+            "depends_on": ["validator_005"],
             "estimated_hours": 8
+        },
+        {
+            "id": "validator_006",
+            "title": "Create Account Create Test Suite",
+            "content": "Build unit tests for CREACC account creation operations. Create integration test for the complete creation flow. Test Named Counter generation for account numbers, enqueue/dequeue logic, DB2 writes, PROCTRAN logging, and rollback on failure.",
+            "status": "not-complete",
+            "depends_on": ["setup_002", "validator_001"],
+            "estimated_hours": 9
         },
         {
             "id": "migrate_005",
             "title": "Migrate Account Create Operations",
             "content": "Port CREACC to Spring Boot account creation endpoint. Implement Named Counter with enqueue/dequeue for account numbers. Handle DB2 writes, PROCTRAN logging, and rollback on failure.",
             "status": "not-complete",
-            "depends_on": ["migrate_002", "migrate_004"],
+            "depends_on": ["validator_006", "migrate_002", "migrate_004"],
             "estimated_hours": 10
+        },
+        {
+            "id": "validator_007",
+            "title": "Create Account Update/Delete Test Suite",
+            "content": "Build unit tests for UPDACC and DELACC operations. Create integration tests for update scenarios. Test field modifications (type, interest rate, overdraft, dates), account deletion with PROCTRAN logging, and validation of business rules.",
+            "status": "not-complete",
+            "depends_on": ["setup_002", "validator_001"],
+            "estimated_hours": 8
         },
         {
             "id": "migrate_006",
             "title": "Migrate Account Update Delete",
             "content": "Port UPDACC and DELACC to update/delete endpoints. UPDACC modifies type, interest rate, overdraft, statement dates. DELACC deletes account with PROCTRAN logging.",
             "status": "not-complete",
-            "depends_on": ["migrate_004", "migrate_005"],
+            "depends_on": ["validator_007", "migrate_004", "migrate_005"],
             "estimated_hours": 9
+        },
+        {
+            "id": "validator_008",
+            "title": "Create Transfer Funds Test Suite",
+            "content": "Build unit tests for XFRFUN transfer operations. Create integration tests for atomic dual-account updates. Test debit/credit balance updates, transaction rollback scenarios, PROCTRAN audit logging, insufficient funds handling, and atomicity guarantees.",
+            "status": "not-complete",
+            "depends_on": ["setup_002", "validator_001"],
+            "estimated_hours": 10
         },
         {
             "id": "migrate_007",
             "title": "Migrate Transfer Funds Operations",
             "content": "Port XFRFUN to Spring Boot transfer funds endpoint. Implement atomic debit/credit operations across both accounts. Handle transaction rollback on failure and PROCTRAN audit logging.",
             "status": "not-complete",
-            "depends_on": ["migrate_004", "migrate_005"],
+            "depends_on": ["validator_008", "migrate_004", "migrate_005"],
             "estimated_hours": 12
+        },
+        {
+            "id": "validator_009",
+            "title": "Create Debit/Credit Test Suite",
+            "content": "Build unit tests for DBCRFUN deposit and withdrawal operations. Create integration tests for cash transactions. Test account balance updates (available and actual), transaction logging to PROCTRAN, proper transaction type codes, and error scenarios.",
+            "status": "not-complete",
+            "depends_on": ["setup_002", "validator_001"],
+            "estimated_hours": 8
         },
         {
             "id": "migrate_008",
             "title": "Migrate Debit Credit Operations",
             "content": "Port DBCRFUN to TransactionService for cash deposits/withdrawals. Update account balances (available and actual). Log transactions to PROCTRAN with proper transaction types.",
             "status": "not-complete",
-            "depends_on": ["migrate_004", "migrate_005"],
+            "depends_on": ["validator_009", "migrate_004", "migrate_005"],
             "estimated_hours": 8
         },
         
@@ -125,11 +197,12 @@ migration_plan = {
             "migrated_utilities": 5   # CRDTAGY1-5 (1 service), GETCOMPY, GETSCODE, ABNDPROC, BANKDATA
         },
         "remaining_to_migrate": 11,  # Business logic programs
-        "total_tasks": 14,
+        "total_tasks": 23,
         "setup_tasks": 3,
+        "validator_tasks": 9,
         "migration_tasks": 8,
         "integration_tasks": 3,
-        "estimated_total_hours": 117  # Sum of all task estimates
+        "estimated_total_hours": 190  # Sum of all task estimates
     },
     
     "completed_programs": [
