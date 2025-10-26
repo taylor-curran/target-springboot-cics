@@ -6,6 +6,7 @@ migration_plan = {
             "title": "Create Performance Baselines",
             "content": "Measure current COBOL program performance for key operations. Document P50/P95/P99 latencies for customer, account, and transaction operations. Establish success criteria for migration validation.",
             "status": "not-complete",
+            "depends_on": [],
             "estimated_hours": 8
         },
         {
@@ -13,6 +14,7 @@ migration_plan = {
             "title": "Setup Local SQLite Database",
             "content": "Create SQLite schema matching COBOL data structures. Load test data fixtures for customers, accounts, and transactions. Configure Spring datasource for local development.",
             "status": "not-complete",
+            "depends_on": [],
             "estimated_hours": 6
         },
         {
@@ -20,6 +22,7 @@ migration_plan = {
             "title": "Configure Local Monitoring",
             "content": "Set up local logging and metrics collection. Configure Spring Boot Actuator for health checks. Implement basic request/response logging for debugging.",
             "status": "not-complete",
+            "depends_on": [],
             "estimated_hours": 6
         },
         
@@ -28,6 +31,7 @@ migration_plan = {
             "title": "Migrate Customer Read Operations",
             "content": "Port INQCUST to Spring Boot REST endpoint for customer retrieval. Map COBOL records to DTOs and implement repository with composite key support.",
             "status": "not-complete",
+            "depends_on": ["setup_002"],
             "estimated_hours": 8
         },
         {
@@ -35,6 +39,7 @@ migration_plan = {
             "title": "Migrate Customer Create Operations",
             "content": "Port CRECUST to Spring Boot customer creation endpoint with async credit agency integration. Implement Named Counter with distributed locks for customer numbers. Handle DB2/VSAM writes and PROCTRAN audit logging.",
             "status": "not-complete",
+            "depends_on": ["migrate_001"],
             "estimated_hours": 12
         },
         {
@@ -42,6 +47,7 @@ migration_plan = {
             "title": "Migrate Customer Update Delete",
             "content": "Port UPDCUST and DELCUS to update/delete endpoints. UPDCUST modifies limited fields without PROCTRAN. DELCUS cascades to delete all customer accounts then customer record with PROCTRAN logging.",
             "status": "not-complete",
+            "depends_on": ["migrate_001", "migrate_002"],
             "estimated_hours": 10
         },
         {
@@ -49,6 +55,7 @@ migration_plan = {
             "title": "Migrate Account Read Operations",
             "content": "Port INQACC and INQACCCU to AccountService endpoints. INQACC queries by account number. INQACCCU queries all accounts for customer using cursor/pagination.",
             "status": "not-complete",
+            "depends_on": ["setup_002"],
             "estimated_hours": 8
         },
         {
@@ -56,6 +63,7 @@ migration_plan = {
             "title": "Migrate Account Create Operations",
             "content": "Port CREACC to Spring Boot account creation endpoint. Implement Named Counter with enqueue/dequeue for account numbers. Handle DB2 writes, PROCTRAN logging, and rollback on failure.",
             "status": "not-complete",
+            "depends_on": ["migrate_002", "migrate_004"],
             "estimated_hours": 10
         },
         {
@@ -63,6 +71,7 @@ migration_plan = {
             "title": "Migrate Account Update Delete",
             "content": "Port UPDACC and DELACC to update/delete endpoints. UPDACC modifies type, interest rate, overdraft, statement dates. DELACC deletes account with PROCTRAN logging.",
             "status": "not-complete",
+            "depends_on": ["migrate_004", "migrate_005"],
             "estimated_hours": 9
         },
         {
@@ -70,6 +79,7 @@ migration_plan = {
             "title": "Migrate Transfer Funds Operations",
             "content": "Port XFRFUN to Spring Boot transfer funds endpoint. Implement atomic debit/credit operations across both accounts. Handle transaction rollback on failure and PROCTRAN audit logging.",
             "status": "not-complete",
+            "depends_on": ["migrate_004", "migrate_005"],
             "estimated_hours": 12
         },
         {
@@ -77,6 +87,7 @@ migration_plan = {
             "title": "Migrate Debit Credit Operations",
             "content": "Port DBCRFUN to TransactionService for cash deposits/withdrawals. Update account balances (available and actual). Log transactions to PROCTRAN with proper transaction types.",
             "status": "not-complete",
+            "depends_on": ["migrate_004", "migrate_005"],
             "estimated_hours": 8
         },
         
@@ -85,6 +96,7 @@ migration_plan = {
             "title": "Integrate Customer Workflows",
             "content": "Test end-to-end customer lifecycle flows. Validate create, read, update, delete operations. Verify credit agency integration and PROCTRAN logging consistency.",
             "status": "not-complete",
+            "depends_on": ["migrate_001", "migrate_002", "migrate_003"],
             "estimated_hours": 8
         },
         {
@@ -92,6 +104,7 @@ migration_plan = {
             "title": "Integrate Account Workflows",
             "content": "Test end-to-end account lifecycle flows. Validate account creation with counter management. Verify cascade delete when customer deleted and PROCTRAN audit trail.",
             "status": "not-complete",
+            "depends_on": ["migrate_004", "migrate_005", "migrate_006"],
             "estimated_hours": 8
         },
         {
@@ -99,6 +112,7 @@ migration_plan = {
             "title": "Integrate Transaction Workflows",
             "content": "Test end-to-end transaction processing flows. Validate transfer funds, debit, and credit operations. Verify balance updates, rollback handling, and PROCTRAN consistency.",
             "status": "not-complete",
+            "depends_on": ["migrate_007", "migrate_008"],
             "estimated_hours": 10
         }
     ],
