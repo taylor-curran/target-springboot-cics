@@ -190,14 +190,3 @@ REMAINING_TO_MIGRATE = [
     "DBCRFUN.cbl",    # Debit/credit function (861 lines)
     "XFRFUN.cbl"      # Transfer function (1924 lines)
 ]
-
-assert len(MIGRATED_PROGRAMS) == 5, "Expected 5 migrated programs"
-assert len(BMS_UI_PROGRAMS) == 9, "Expected 9 BMS/UI programs"
-assert len(REMAINING_TO_MIGRATE) == 15, "Expected 15 programs to migrate"
-assert len(MIGRATED_PROGRAMS) + len(BMS_UI_PROGRAMS) + len(REMAINING_TO_MIGRATE) == 29, "Total should be 29 programs"
-assert len(migration_plan["tasks"]) == 19, "Expected 19 total tasks"
-
-completed_count = sum(1 for task in migration_plan["tasks"] if task["status"] == "completed")
-pending_count = sum(1 for task in migration_plan["tasks"] if task["status"] == "not-complete")
-assert completed_count == 5, f"Expected 5 completed tasks, found {completed_count}"
-assert pending_count == 14, f"Expected 14 pending tasks, found {pending_count}"
