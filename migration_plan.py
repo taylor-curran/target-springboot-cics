@@ -26,14 +26,14 @@ migration_plan = {
         {
             "id": "migrate_001",
             "title": "Migrate Customer Read Operations",
-            "content": "Port INQCUST to CustomerService.getCustomer() REST endpoint. Map COBOL customer records to Customer DTOs. Implement JdbcCustomerRepository queries with composite key support.",
+            "content": "Port INQCUST to Spring Boot REST endpoint for customer retrieval. Map COBOL records to DTOs and implement repository with composite key support.",
             "status": "not-complete",
             "estimated_hours": 8
         },
         {
             "id": "migrate_002",
             "title": "Migrate Customer Create Operations",
-            "content": "Port CRECUST to CustomerService.createCustomer(). Implement async credit agency integration using CreditAgencyService. Handle Named Counter enqueue/dequeue with distributed locks, DB2/VSAM writes, and PROCTRAN logging.",
+            "content": "Port CRECUST to Spring Boot customer creation endpoint with async credit agency integration. Implement Named Counter with distributed locks for customer numbers. Handle DB2/VSAM writes and PROCTRAN audit logging.",
             "status": "not-complete",
             "estimated_hours": 12
         },
@@ -54,7 +54,7 @@ migration_plan = {
         {
             "id": "migrate_005",
             "title": "Migrate Account Create Operations",
-            "content": "Port CREACC to AccountService.createAccount(). Handle Named Counter for account numbers with enqueue/dequeue. Implement DB2 account writes and PROCTRAN logging with rollback on failure.",
+            "content": "Port CREACC to Spring Boot account creation endpoint. Implement Named Counter with enqueue/dequeue for account numbers. Handle DB2 writes, PROCTRAN logging, and rollback on failure.",
             "status": "not-complete",
             "estimated_hours": 10
         },
@@ -68,7 +68,7 @@ migration_plan = {
         {
             "id": "migrate_007",
             "title": "Migrate Transfer Funds Operations",
-            "content": "Port XFRFUN to TransactionService.transferFunds(). Implement debit from source account and credit to target account. Handle transaction rollback on failure and PROCTRAN logging for both accounts.",
+            "content": "Port XFRFUN to Spring Boot transfer funds endpoint. Implement atomic debit/credit operations across both accounts. Handle transaction rollback on failure and PROCTRAN audit logging.",
             "status": "not-complete",
             "estimated_hours": 12
         },
