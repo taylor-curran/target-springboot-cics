@@ -1,0 +1,754 @@
+{
+  "metadata": {
+    "created_date": "2024-10-26",
+    "environment": "sandbox",
+    "methodology": "code_complexity_analysis",
+    "total_programs": 29,
+    "notes": "Synthetic baseline - no live CICS system available for actual measurements"
+  },
+  "programs": [
+    {
+      "name": "GETCOMPY",
+      "loc": 43,
+      "type": "utility",
+      "complexity": "simple",
+      "status": "migrated",
+      "java_equivalent": "CompanyInfoService",
+      "database_operations": 0,
+      "cics_commands": 1,
+      "latency": {
+        "p50_ms": 5,
+        "p95_ms": 10,
+        "p99_ms": 20
+      },
+      "volume": {
+        "estimated_requests_per_minute": 2000,
+        "peak_multiplier": 2.0
+      },
+      "data_size": {
+        "request_bytes": 0,
+        "response_bytes": 256,
+        "description": "Company name string"
+      }
+    },
+    {
+      "name": "GETSCODE",
+      "loc": 46,
+      "type": "utility",
+      "complexity": "simple",
+      "status": "migrated",
+      "java_equivalent": "SortCodeService",
+      "database_operations": 0,
+      "cics_commands": 1,
+      "latency": {
+        "p50_ms": 5,
+        "p95_ms": 10,
+        "p99_ms": 20
+      },
+      "volume": {
+        "estimated_requests_per_minute": 2000,
+        "peak_multiplier": 2.0
+      },
+      "data_size": {
+        "request_bytes": 0,
+        "response_bytes": 128,
+        "description": "Sort code string"
+      }
+    },
+    {
+      "name": "ABNDPROC",
+      "loc": 176,
+      "type": "support",
+      "complexity": "simple",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 1,
+      "cics_commands": 3,
+      "latency": {
+        "p50_ms": 10,
+        "p95_ms": 25,
+        "p99_ms": 50
+      },
+      "volume": {
+        "estimated_requests_per_minute": 10,
+        "peak_multiplier": 1.5,
+        "notes": "Low volume - error handling only"
+      },
+      "data_size": {
+        "request_bytes": 200,
+        "response_bytes": 681,
+        "description": "Abend record with error details"
+      }
+    },
+    {
+      "name": "CRDTAGY1",
+      "loc": 273,
+      "type": "credit_check",
+      "complexity": "simple",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 0,
+      "cics_commands": 2,
+      "latency": {
+        "p50_ms": 8,
+        "p95_ms": 20,
+        "p99_ms": 40
+      },
+      "volume": {
+        "estimated_requests_per_minute": 50,
+        "peak_multiplier": 1.5
+      },
+      "data_size": {
+        "request_bytes": 256,
+        "response_bytes": 512,
+        "description": "Credit score simulation"
+      }
+    },
+    {
+      "name": "CRDTAGY2",
+      "loc": 273,
+      "type": "credit_check",
+      "complexity": "simple",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 0,
+      "cics_commands": 2,
+      "latency": {
+        "p50_ms": 8,
+        "p95_ms": 20,
+        "p99_ms": 40
+      },
+      "volume": {
+        "estimated_requests_per_minute": 50,
+        "peak_multiplier": 1.5
+      },
+      "data_size": {
+        "request_bytes": 256,
+        "response_bytes": 512,
+        "description": "Credit score simulation"
+      }
+    },
+    {
+      "name": "CRDTAGY3",
+      "loc": 272,
+      "type": "credit_check",
+      "complexity": "simple",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 0,
+      "cics_commands": 2,
+      "latency": {
+        "p50_ms": 8,
+        "p95_ms": 20,
+        "p99_ms": 40
+      },
+      "volume": {
+        "estimated_requests_per_minute": 50,
+        "peak_multiplier": 1.5
+      },
+      "data_size": {
+        "request_bytes": 256,
+        "response_bytes": 512,
+        "description": "Credit score simulation"
+      }
+    },
+    {
+      "name": "CRDTAGY4",
+      "loc": 275,
+      "type": "credit_check",
+      "complexity": "simple",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 0,
+      "cics_commands": 2,
+      "latency": {
+        "p50_ms": 8,
+        "p95_ms": 20,
+        "p99_ms": 40
+      },
+      "volume": {
+        "estimated_requests_per_minute": 50,
+        "peak_multiplier": 1.5
+      },
+      "data_size": {
+        "request_bytes": 256,
+        "response_bytes": 512,
+        "description": "Credit score simulation"
+      }
+    },
+    {
+      "name": "CRDTAGY5",
+      "loc": 275,
+      "type": "credit_check",
+      "complexity": "simple",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 0,
+      "cics_commands": 2,
+      "latency": {
+        "p50_ms": 8,
+        "p95_ms": 20,
+        "p99_ms": 40
+      },
+      "volume": {
+        "estimated_requests_per_minute": 50,
+        "peak_multiplier": 1.5
+      },
+      "data_size": {
+        "request_bytes": 256,
+        "response_bytes": 512,
+        "description": "Credit score simulation"
+      }
+    },
+    {
+      "name": "UPDCUST",
+      "loc": 364,
+      "type": "business_logic",
+      "complexity": "medium",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 2,
+      "cics_commands": 4,
+      "latency": {
+        "p50_ms": 25,
+        "p95_ms": 60,
+        "p99_ms": 120
+      },
+      "volume": {
+        "estimated_requests_per_minute": 200,
+        "peak_multiplier": 2.0
+      },
+      "data_size": {
+        "request_bytes": 259,
+        "response_bytes": 259,
+        "description": "Customer record update"
+      }
+    },
+    {
+      "name": "UPDACC",
+      "loc": 406,
+      "type": "business_logic",
+      "complexity": "medium",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 2,
+      "cics_commands": 4,
+      "latency": {
+        "p50_ms": 25,
+        "p95_ms": 60,
+        "p99_ms": 120
+      },
+      "volume": {
+        "estimated_requests_per_minute": 300,
+        "peak_multiplier": 2.0
+      },
+      "data_size": {
+        "request_bytes": 200,
+        "response_bytes": 200,
+        "description": "Account record update"
+      }
+    },
+    {
+      "name": "DELACC",
+      "loc": 649,
+      "type": "business_logic",
+      "complexity": "medium",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 3,
+      "cics_commands": 5,
+      "latency": {
+        "p50_ms": 30,
+        "p95_ms": 75,
+        "p99_ms": 150
+      },
+      "volume": {
+        "estimated_requests_per_minute": 100,
+        "peak_multiplier": 1.5
+      },
+      "data_size": {
+        "request_bytes": 200,
+        "response_bytes": 200,
+        "description": "Account deletion"
+      }
+    },
+    {
+      "name": "INQCUST",
+      "loc": 711,
+      "type": "business_logic",
+      "complexity": "medium",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 1,
+      "cics_commands": 3,
+      "latency": {
+        "p50_ms": 20,
+        "p95_ms": 50,
+        "p99_ms": 100
+      },
+      "volume": {
+        "estimated_requests_per_minute": 500,
+        "peak_multiplier": 2.5
+      },
+      "data_size": {
+        "request_bytes": 20,
+        "response_bytes": 259,
+        "description": "Customer inquiry"
+      }
+    },
+    {
+      "name": "DELCUS",
+      "loc": 761,
+      "type": "business_logic",
+      "complexity": "medium",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 3,
+      "cics_commands": 5,
+      "latency": {
+        "p50_ms": 30,
+        "p95_ms": 75,
+        "p99_ms": 150
+      },
+      "volume": {
+        "estimated_requests_per_minute": 50,
+        "peak_multiplier": 1.5
+      },
+      "data_size": {
+        "request_bytes": 20,
+        "response_bytes": 259,
+        "description": "Customer deletion"
+      }
+    },
+    {
+      "name": "DBCRFUN",
+      "loc": 861,
+      "type": "business_logic",
+      "complexity": "medium",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 3,
+      "cics_commands": 6,
+      "latency": {
+        "p50_ms": 35,
+        "p95_ms": 85,
+        "p99_ms": 170
+      },
+      "volume": {
+        "estimated_requests_per_minute": 400,
+        "peak_multiplier": 3.0
+      },
+      "data_size": {
+        "request_bytes": 150,
+        "response_bytes": 300,
+        "description": "Debit/Credit transaction"
+      }
+    },
+    {
+      "name": "INQACCCU",
+      "loc": 882,
+      "type": "business_logic",
+      "complexity": "medium",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 2,
+      "cics_commands": 4,
+      "latency": {
+        "p50_ms": 35,
+        "p95_ms": 85,
+        "p99_ms": 170
+      },
+      "volume": {
+        "estimated_requests_per_minute": 400,
+        "peak_multiplier": 2.5
+      },
+      "data_size": {
+        "request_bytes": 20,
+        "response_bytes": 2000,
+        "description": "Multiple account records for customer"
+      }
+    },
+    {
+      "name": "BNK1CCA",
+      "loc": 952,
+      "type": "bms_ui",
+      "complexity": "medium",
+      "status": "not_migrated",
+      "java_equivalent": "GET /api/customers",
+      "database_operations": 1,
+      "cics_commands": 5,
+      "latency": {
+        "p50_ms": 100,
+        "p95_ms": 250,
+        "p99_ms": 500
+      },
+      "volume": {
+        "estimated_requests_per_minute": 100,
+        "peak_multiplier": 1.5,
+        "notes": "UI program - replaced by REST API"
+      },
+      "data_size": {
+        "request_bytes": 20,
+        "response_bytes": 259,
+        "description": "Customer lookup UI"
+      }
+    },
+    {
+      "name": "INQACC",
+      "loc": 1002,
+      "type": "business_logic",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 2,
+      "cics_commands": 5,
+      "latency": {
+        "p50_ms": 45,
+        "p95_ms": 110,
+        "p99_ms": 220
+      },
+      "volume": {
+        "estimated_requests_per_minute": 500,
+        "peak_multiplier": 2.5
+      },
+      "data_size": {
+        "request_bytes": 20,
+        "response_bytes": 200,
+        "description": "Account inquiry"
+      }
+    },
+    {
+      "name": "BNK1DAC",
+      "loc": 1158,
+      "type": "bms_ui",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": "GET /api/accounts/{id}",
+      "database_operations": 2,
+      "cics_commands": 6,
+      "latency": {
+        "p50_ms": 100,
+        "p95_ms": 250,
+        "p99_ms": 500
+      },
+      "volume": {
+        "estimated_requests_per_minute": 40,
+        "peak_multiplier": 1.5,
+        "notes": "UI program - replaced by REST API"
+      },
+      "data_size": {
+        "request_bytes": 20,
+        "response_bytes": 1280,
+        "description": "Account display UI"
+      }
+    },
+    {
+      "name": "BNK1CRA",
+      "loc": 1166,
+      "type": "bms_ui",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": "POST /api/transactions",
+      "database_operations": 3,
+      "cics_commands": 7,
+      "latency": {
+        "p50_ms": 110,
+        "p95_ms": 275,
+        "p99_ms": 550
+      },
+      "volume": {
+        "estimated_requests_per_minute": 30,
+        "peak_multiplier": 2.0,
+        "notes": "UI program - replaced by REST API"
+      },
+      "data_size": {
+        "request_bytes": 150,
+        "response_bytes": 1152,
+        "description": "Credit/Debit UI"
+      }
+    },
+    {
+      "name": "BNK1TFN",
+      "loc": 1224,
+      "type": "bms_ui",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": "POST /api/transfers",
+      "database_operations": 4,
+      "cics_commands": 8,
+      "latency": {
+        "p50_ms": 120,
+        "p95_ms": 300,
+        "p99_ms": 600
+      },
+      "volume": {
+        "estimated_requests_per_minute": 25,
+        "peak_multiplier": 2.0,
+        "notes": "UI program - replaced by REST API"
+      },
+      "data_size": {
+        "request_bytes": 200,
+        "response_bytes": 1280,
+        "description": "Transfer funds UI"
+      }
+    },
+    {
+      "name": "CREACC",
+      "loc": 1247,
+      "type": "business_logic",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 4,
+      "cics_commands": 8,
+      "latency": {
+        "p50_ms": 60,
+        "p95_ms": 150,
+        "p99_ms": 300
+      },
+      "volume": {
+        "estimated_requests_per_minute": 200,
+        "peak_multiplier": 2.0
+      },
+      "data_size": {
+        "request_bytes": 200,
+        "response_bytes": 200,
+        "description": "Account creation"
+      }
+    },
+    {
+      "name": "BNK1CAC",
+      "loc": 1298,
+      "type": "bms_ui",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": "POST /api/accounts",
+      "database_operations": 4,
+      "cics_commands": 8,
+      "latency": {
+        "p50_ms": 120,
+        "p95_ms": 300,
+        "p99_ms": 600
+      },
+      "volume": {
+        "estimated_requests_per_minute": 20,
+        "peak_multiplier": 1.5,
+        "notes": "UI program - replaced by REST API"
+      },
+      "data_size": {
+        "request_bytes": 200,
+        "response_bytes": 1280,
+        "description": "Create account UI"
+      }
+    },
+    {
+      "name": "BNKMENU",
+      "loc": 1311,
+      "type": "bms_ui",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": "REST API menu endpoints",
+      "database_operations": 0,
+      "cics_commands": 4,
+      "latency": {
+        "p50_ms": 100,
+        "p95_ms": 250,
+        "p99_ms": 500
+      },
+      "volume": {
+        "estimated_requests_per_minute": 50,
+        "peak_multiplier": 1.5,
+        "notes": "UI program - main menu"
+      },
+      "data_size": {
+        "request_bytes": 0,
+        "response_bytes": 1024,
+        "description": "Main menu UI"
+      }
+    },
+    {
+      "name": "BNK1UAC",
+      "loc": 1405,
+      "type": "bms_ui",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": "PUT /api/accounts/{id}",
+      "database_operations": 3,
+      "cics_commands": 7,
+      "latency": {
+        "p50_ms": 110,
+        "p95_ms": 275,
+        "p99_ms": 550
+      },
+      "volume": {
+        "estimated_requests_per_minute": 20,
+        "peak_multiplier": 1.5,
+        "notes": "UI program - replaced by REST API"
+      },
+      "data_size": {
+        "request_bytes": 200,
+        "response_bytes": 1280,
+        "description": "Update account UI"
+      }
+    },
+    {
+      "name": "CRECUST",
+      "loc": 1439,
+      "type": "business_logic",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 4,
+      "cics_commands": 8,
+      "latency": {
+        "p50_ms": 60,
+        "p95_ms": 150,
+        "p99_ms": 300
+      },
+      "volume": {
+        "estimated_requests_per_minute": 150,
+        "peak_multiplier": 2.0
+      },
+      "data_size": {
+        "request_bytes": 259,
+        "response_bytes": 259,
+        "description": "Customer creation"
+      }
+    },
+    {
+      "name": "BANKDATA",
+      "loc": 1463,
+      "type": "business_logic",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": "BankDataGenerator",
+      "database_operations": 10,
+      "cics_commands": 5,
+      "latency": {
+        "p50_ms": 80,
+        "p95_ms": 200,
+        "p99_ms": 400
+      },
+      "volume": {
+        "estimated_requests_per_minute": 10,
+        "peak_multiplier": 1.0,
+        "notes": "Batch data generation - low volume"
+      },
+      "data_size": {
+        "request_bytes": 100,
+        "response_bytes": 10000,
+        "description": "Bulk data generation"
+      }
+    },
+    {
+      "name": "BNK1CCS",
+      "loc": 1657,
+      "type": "bms_ui",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": "POST /api/customers",
+      "database_operations": 4,
+      "cics_commands": 9,
+      "latency": {
+        "p50_ms": 120,
+        "p95_ms": 300,
+        "p99_ms": 600
+      },
+      "volume": {
+        "estimated_requests_per_minute": 15,
+        "peak_multiplier": 1.5,
+        "notes": "UI program - replaced by REST API"
+      },
+      "data_size": {
+        "request_bytes": 259,
+        "response_bytes": 1536,
+        "description": "Create customer UI"
+      }
+    },
+    {
+      "name": "XFRFUN",
+      "loc": 1924,
+      "type": "business_logic",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": null,
+      "database_operations": 5,
+      "cics_commands": 10,
+      "latency": {
+        "p50_ms": 70,
+        "p95_ms": 175,
+        "p99_ms": 350
+      },
+      "volume": {
+        "estimated_requests_per_minute": 300,
+        "peak_multiplier": 3.0
+      },
+      "data_size": {
+        "request_bytes": 200,
+        "response_bytes": 400,
+        "description": "Transfer function - 2 accounts + transaction"
+      }
+    },
+    {
+      "name": "BNK1DCS",
+      "loc": 2053,
+      "type": "bms_ui",
+      "complexity": "complex",
+      "status": "not_migrated",
+      "java_equivalent": "GET /api/customers/{id}",
+      "database_operations": 3,
+      "cics_commands": 8,
+      "latency": {
+        "p50_ms": 110,
+        "p95_ms": 275,
+        "p99_ms": 550
+      },
+      "volume": {
+        "estimated_requests_per_minute": 35,
+        "peak_multiplier": 1.5,
+        "notes": "UI program - replaced by REST API"
+      },
+      "data_size": {
+        "request_bytes": 20,
+        "response_bytes": 1536,
+        "description": "Display customer UI"
+      }
+    }
+  ],
+  "summary": {
+    "total_programs": 29,
+    "by_status": {
+      "migrated": 2,
+      "not_migrated": 27
+    },
+    "by_type": {
+      "utility": 2,
+      "bms_ui": 9,
+      "credit_check": 5,
+      "business_logic": 12,
+      "support": 1
+    },
+    "by_complexity": {
+      "simple": 8,
+      "medium": 8,
+      "complex": 13
+    },
+    "latency_ranges": {
+      "simple": {
+        "p50_ms": "5-10",
+        "p95_ms": "10-25",
+        "p99_ms": "20-50"
+      },
+      "medium": {
+        "p50_ms": "20-35",
+        "p95_ms": "50-85",
+        "p99_ms": "100-170"
+      },
+      "complex": {
+        "p50_ms": "45-120",
+        "p95_ms": "110-300",
+        "p99_ms": "220-600"
+      }
+    }
+  }
+}
