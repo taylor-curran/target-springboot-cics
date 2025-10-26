@@ -1,0 +1,57 @@
+{
+  "dashboard": {
+    "title": "Banking App - Customer Domain",
+    "tags": ["banking", "customer", "cbsa"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Customer Count",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "banking_customers_count",
+            "legendFormat": "Total Customers"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Customer Operations Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*customer.*\"}[5m])",
+            "legendFormat": "{{method}} {{uri}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Customer Query Response Time (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri=~\".*customer.*\"}[5m]))",
+            "legendFormat": "{{uri}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Customer Operation Errors",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*customer.*\",status=~\"5..\"}[5m])",
+            "legendFormat": "{{method}} {{uri}} - {{status}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      }
+    ]
+  }
+}
