@@ -37,7 +37,7 @@ jobs:
     - name: Run validation script
       run: |
         if [ -f "migration_plan.py" ]; then
-          python src/utils/validate_graph.py migration_plan.py
+          python validate_graph.py migration_plan.py
         fi
     
     - name: Upload validation results
