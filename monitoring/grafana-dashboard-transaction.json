@@ -1,0 +1,166 @@
+{
+  "dashboard": {
+    "title": "CBSA Migration - Transaction Domain",
+    "tags": ["cbsa", "transaction", "banking"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Transaction Operations - Request Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*transaction.*\"}[5m])",
+            "legendFormat": "{{method}} {{uri}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 2,
+        "title": "Transaction Operations - Response Time (p95)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri=~\".*transaction.*\"}[5m]))",
+            "legendFormat": "{{method}} {{uri}} p95",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_server_requests_seconds_bucket{uri=~\".*transaction.*\"}[5m]))",
+            "legendFormat": "{{method}} {{uri}} p99",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_server_requests_seconds_bucket{uri=~\".*transaction.*\"}[5m]))",
+            "legendFormat": "{{method}} {{uri}} p50",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Response Time"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 3,
+        "title": "Transaction Repository - Throughput",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(jdbc_connections_active[5m])",
+            "legendFormat": "DB Operations/sec",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Operations"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 4,
+        "title": "Transaction Service - Error Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*transaction.*\",status=~\"5..\"}[5m])",
+            "legendFormat": "{{uri}} 5xx errors",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*transaction.*\",status=~\"4..\"}[5m])",
+            "legendFormat": "{{uri}} 4xx errors",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Errors/sec"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"},
+        "alert": {
+          "name": "High Transaction Error Rate",
+          "conditions": [
+            {
+              "evaluator": {"params": [0.05], "type": "gt"},
+              "operator": {"type": "and"},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"params": [], "type": "avg"},
+              "type": "query"
+            }
+          ],
+          "frequency": "60s",
+          "handler": 1,
+          "message": "Transaction domain error rate exceeds 5%",
+          "noDataState": "no_data",
+          "executionErrorState": "alerting"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Transaction Count",
+        "type": "singlestat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "cbsa_transaction_count",
+            "refId": "A"
+          }
+        ],
+        "format": "short",
+        "valueName": "current"
+      },
+      {
+        "id": 6,
+        "title": "Garbage Collection Activity",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 6, "y": 16},
+        "targets": [
+          {
+            "expr": "rate(jvm_gc_pause_seconds_count[5m])",
+            "legendFormat": "{{action}} {{cause}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "GC Count"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      },
+      {
+        "id": 7,
+        "title": "Credit Agency Operations - Response Time",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri=~\"/api/credit-agency.*\"}[5m]))",
+            "legendFormat": "{{method}} {{uri}} p95",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Response Time"},
+          {"format": "short"}
+        ],
+        "xaxis": {"mode": "time"}
+      }
+    ]
+  }
+}
