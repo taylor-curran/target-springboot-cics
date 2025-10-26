@@ -1,0 +1,42 @@
+{
+  "dashboard": {
+    "title": "Account Domain Monitoring",
+    "tags": ["account", "banking", "cbsa-migration"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Account Operations Response Time (p95)",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri=~\".*account.*\"}[5m]))",
+            "legendFormat": "{{uri}}"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "id": 2,
+        "title": "Account Operations Throughput",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*account.*\"}[5m])",
+            "legendFormat": "{{uri}} - {{method}}"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "id": 3,
+        "title": "Account Operations Error Rate",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*account.*\",status=~\"5..\"}[5m])",
+            "legendFormat": "{{uri}} - {{status}}"
+          }
+        ],
+        "type": "graph"
+      }
+    ]
+  }
+}
