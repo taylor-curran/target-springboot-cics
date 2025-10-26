@@ -7,7 +7,8 @@ migration_plan = {
             "content": "Measure current COBOL program performance for key operations. Document P50/P95/P99 latencies for customer, account, and transaction operations. Establish success criteria for migration validation.",
             "status": "not-complete",
             "depends_on": [],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "Performance metrics exported to performance_baseline.json containing P50/P95/P99 latencies for all 11 business logic programs. Each program measured under load with 100+ samples. Baseline dashboard displays metrics with timestamps."
         },
         {
             "id": "setup_002",
@@ -15,7 +16,8 @@ migration_plan = {
             "content": "Create SQLite schema matching COBOL data structures. Load test data fixtures for customers, accounts, and transactions. Configure Spring datasource for local development.",
             "status": "not-complete",
             "depends_on": [],
-            "estimated_hours": 6
+            "estimated_hours": 6,
+            "validation_mechanism": "SQLite database file exists with all 4 tables (Customer, Account, Transaction, PROCTRAN) containing test fixtures. Schema validation query confirms all constraints, indexes, and foreign keys. Spring Boot application starts successfully with datasource connected."
         },
         {
             "id": "setup_003",
@@ -23,7 +25,8 @@ migration_plan = {
             "content": "Set up local logging and metrics collection. Configure Spring Boot Actuator for health checks. Implement basic request/response logging for debugging.",
             "status": "not-complete",
             "depends_on": [],
-            "estimated_hours": 6
+            "estimated_hours": 6,
+            "validation_mechanism": "Spring Boot Actuator /health endpoint returns UP status. /metrics endpoint exposes request timing and JVM metrics. Log files contain structured request/response logging with correlation IDs for all API calls."
         },
         
         {
@@ -32,7 +35,8 @@ migration_plan = {
             "content": "Build tests to verify all tables created correctly. Check constraints, indexes, and foreign keys. Test database connections and basic CRUD operations on all entities (Customer, Account, Transaction, PROCTRAN).",
             "status": "not-complete",
             "depends_on": ["setup_002"],
-            "estimated_hours": 6
+            "estimated_hours": 6,
+            "validation_mechanism": "JUnit test suite with 15+ tests covering all 4 tables achieves 95%+ branch coverage via JaCoCo. All constraint, index, and foreign key validations pass. CRUD operations execute without errors on all entities."
         },
         {
             "id": "validator_002",
@@ -40,7 +44,8 @@ migration_plan = {
             "content": "Build unit tests for INQCUST customer retrieval operations. Create at least one integration test covering the main success path. Test composite key lookups (sort code + customer number), VSAM record mapping, and error handling for missing customers.",
             "status": "not-complete",
             "depends_on": ["setup_002", "validator_001"],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "JaCoCo reports 90%+ branch coverage on CustomerController and CustomerService. Test suite includes 20+ test cases covering composite key lookups, missing customer scenarios, and DTO mapping. All tests pass in CI pipeline."
         },
         {
             "id": "migrate_001",
@@ -48,7 +53,8 @@ migration_plan = {
             "content": "Port INQCUST to Spring Boot REST endpoint for customer retrieval. Map COBOL records to DTOs and implement repository with composite key support.",
             "status": "not-complete",
             "depends_on": ["validator_002"],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "validator_002 test suite passes with 90%+ branch coverage via JaCoCo. Integration tests verify REST endpoint returns correct customer data. Response times within 10% of performance baseline for customer lookups."
         },
         {
             "id": "validator_003",
@@ -56,7 +62,8 @@ migration_plan = {
             "content": "Build unit tests for CRECUST customer creation operations. Create at least one integration test for the complete creation flow. Test Named Counter generation, async credit agency integration with mocks, VSAM/DB2 writes, PROCTRAN audit logging, and rollback scenarios.",
             "status": "not-complete",
             "depends_on": ["setup_002", "validator_001"],
-            "estimated_hours": 10
+            "estimated_hours": 10,
+            "validation_mechanism": "JaCoCo reports 90%+ branch coverage on CustomerService and NamedCounterService. Test suite includes 25+ test cases covering async credit checks with mocks, counter generation, PROCTRAN logging, and rollback scenarios. All tests pass with proper transaction boundaries verified."
         },
         {
             "id": "migrate_002",
@@ -64,7 +71,8 @@ migration_plan = {
             "content": "Port CRECUST to Spring Boot customer creation endpoint with async credit agency integration. Implement Named Counter with distributed locks for customer numbers. Handle DB2/VSAM writes and PROCTRAN audit logging.",
             "status": "not-complete",
             "depends_on": ["validator_003", "migrate_001"],
-            "estimated_hours": 12
+            "estimated_hours": 12,
+            "validation_mechanism": "validator_003 test suite achieves 80%+ service coverage and 70%+ branch coverage via JaCoCo. Integration tests verify customer creation with unique counter-generated numbers. PROCTRAN audit records created for all operations. Response times within 15% of baseline."
         },
         {
             "id": "validator_004",
@@ -72,7 +80,8 @@ migration_plan = {
             "content": "Build unit tests for UPDCUST and DELCUS operations. Create integration tests for cascade delete (customer → accounts). Test limited field updates in UPDCUST, cascade delete logic in DELCUS with PROCTRAN logging, and error handling.",
             "status": "not-complete",
             "depends_on": ["setup_002", "validator_001"],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "JaCoCo reports 90%+ branch coverage on CustomerService update/delete methods. Test suite includes 20+ tests covering cascade deletes with account orphan verification, PROCTRAN audit for deletes only, and field update validation. All tests pass verifying no orphaned accounts."
         },
         {
             "id": "migrate_003",
@@ -80,7 +89,8 @@ migration_plan = {
             "content": "Port UPDCUST and DELCUS to update/delete endpoints. UPDCUST modifies limited fields without PROCTRAN. DELCUS cascades to delete all customer accounts then customer record with PROCTRAN logging.",
             "status": "not-complete",
             "depends_on": ["validator_004", "migrate_001", "migrate_002"],
-            "estimated_hours": 10
+            "estimated_hours": 10,
+            "validation_mechanism": "validator_004 test suite achieves 80%+ service coverage and 70%+ branch coverage via JaCoCo. Database queries confirm zero orphaned accounts after cascade deletes. PROCTRAN records exist only for delete operations, not updates. Response times within 10% of baseline."
         },
         {
             "id": "validator_005",
@@ -88,7 +98,8 @@ migration_plan = {
             "content": "Build unit tests for INQACC and INQACCCU account query operations. Create integration tests for pagination/cursor patterns. Test single account lookup by number, customer account listing with pagination, and DB2 cursor handling.",
             "status": "not-complete",
             "depends_on": ["setup_002", "validator_001"],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "JaCoCo reports 90%+ branch coverage on AccountController and AccountService. Test suite includes 22+ tests covering single account queries, paginated customer account lists, and cursor handling. All pagination edge cases verified with test data."
         },
         {
             "id": "migrate_004",
@@ -96,7 +107,8 @@ migration_plan = {
             "content": "Port INQACC and INQACCCU to AccountService endpoints. INQACC queries by account number. INQACCCU queries all accounts for customer using cursor/pagination.",
             "status": "not-complete",
             "depends_on": ["validator_005"],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "validator_005 test suite passes with 90%+ branch coverage via JaCoCo. Integration tests verify REST endpoints return correct account data with proper pagination. Response times within 10% of baseline for single and paginated queries."
         },
         {
             "id": "validator_006",
@@ -104,7 +116,8 @@ migration_plan = {
             "content": "Build unit tests for CREACC account creation operations. Create integration test for the complete creation flow. Test Named Counter generation for account numbers, enqueue/dequeue logic, DB2 writes, PROCTRAN logging, and rollback on failure.",
             "status": "not-complete",
             "depends_on": ["setup_002", "validator_001"],
-            "estimated_hours": 9
+            "estimated_hours": 9,
+            "validation_mechanism": "JaCoCo reports 90%+ branch coverage on AccountService and NamedCounterService. Test suite includes 23+ tests covering counter generation with enqueue/dequeue, PROCTRAN audit logging, and rollback scenarios. All tests verify proper transaction boundaries and counter consistency."
         },
         {
             "id": "migrate_005",
@@ -112,7 +125,8 @@ migration_plan = {
             "content": "Port CREACC to Spring Boot account creation endpoint. Implement Named Counter with enqueue/dequeue for account numbers. Handle DB2 writes, PROCTRAN logging, and rollback on failure.",
             "status": "not-complete",
             "depends_on": ["validator_006", "migrate_002", "migrate_004"],
-            "estimated_hours": 10
+            "estimated_hours": 10,
+            "validation_mechanism": "validator_006 test suite achieves 80%+ service coverage and 70%+ branch coverage via JaCoCo. Integration tests confirm unique account numbers generated via counter. PROCTRAN audit records created for all account creations. Response times within 15% of baseline."
         },
         {
             "id": "validator_007",
@@ -120,7 +134,8 @@ migration_plan = {
             "content": "Build unit tests for UPDACC and DELACC operations. Create integration tests for update scenarios. Test field modifications (type, interest rate, overdraft, dates), account deletion with PROCTRAN logging, and validation of business rules.",
             "status": "not-complete",
             "depends_on": ["setup_002", "validator_001"],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "JaCoCo reports 90%+ branch coverage on AccountService update/delete methods. Test suite includes 18+ tests covering field updates, business rule validation, and PROCTRAN audit for deletes. All tests pass verifying proper state transitions."
         },
         {
             "id": "migrate_006",
@@ -128,7 +143,8 @@ migration_plan = {
             "content": "Port UPDACC and DELACC to update/delete endpoints. UPDACC modifies type, interest rate, overdraft, statement dates. DELACC deletes account with PROCTRAN logging.",
             "status": "not-complete",
             "depends_on": ["validator_007", "migrate_004", "migrate_005"],
-            "estimated_hours": 9
+            "estimated_hours": 9,
+            "validation_mechanism": "validator_007 test suite achieves 80%+ service coverage and 70%+ branch coverage via JaCoCo. Integration tests verify field updates persist correctly. PROCTRAN records exist for delete operations. Response times within 10% of baseline for update and delete operations."
         },
         {
             "id": "validator_008",
@@ -136,7 +152,8 @@ migration_plan = {
             "content": "Build unit tests for XFRFUN transfer operations. Create integration tests for atomic dual-account updates. Test debit/credit balance updates, transaction rollback scenarios, PROCTRAN audit logging, insufficient funds handling, and atomicity guarantees.",
             "status": "not-complete",
             "depends_on": ["setup_002", "validator_001"],
-            "estimated_hours": 10
+            "estimated_hours": 10,
+            "validation_mechanism": "JaCoCo reports 90%+ branch coverage on TransactionService transfer methods. Test suite includes 28+ tests covering atomic dual-account updates, rollback scenarios, insufficient funds, and PROCTRAN logging. All tests verify atomicity with database state checks."
         },
         {
             "id": "migrate_007",
@@ -144,7 +161,8 @@ migration_plan = {
             "content": "Port XFRFUN to Spring Boot transfer funds endpoint. Implement atomic debit/credit operations across both accounts. Handle transaction rollback on failure and PROCTRAN audit logging.",
             "status": "not-complete",
             "depends_on": ["validator_008", "migrate_004", "migrate_005"],
-            "estimated_hours": 12
+            "estimated_hours": 12,
+            "validation_mechanism": "validator_008 test suite achieves 80%+ service coverage and 70%+ branch coverage via JaCoCo. Integration tests verify atomic balance updates across both accounts with proper rollback on failure. PROCTRAN audit trail complete for all transfers. Response times within 15% of baseline."
         },
         {
             "id": "validator_009",
@@ -152,7 +170,8 @@ migration_plan = {
             "content": "Build unit tests for DBCRFUN deposit and withdrawal operations. Create integration tests for cash transactions. Test account balance updates (available and actual), transaction logging to PROCTRAN, proper transaction type codes, and error scenarios.",
             "status": "not-complete",
             "depends_on": ["setup_002", "validator_001"],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "JaCoCo reports 90%+ branch coverage on TransactionService debit/credit methods. Test suite includes 20+ tests covering deposits, withdrawals, balance updates, transaction type codes, and PROCTRAN logging. All tests verify correct available and actual balance calculations."
         },
         {
             "id": "migrate_008",
@@ -160,7 +179,8 @@ migration_plan = {
             "content": "Port DBCRFUN to TransactionService for cash deposits/withdrawals. Update account balances (available and actual). Log transactions to PROCTRAN with proper transaction types.",
             "status": "not-complete",
             "depends_on": ["validator_009", "migrate_004", "migrate_005"],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "validator_009 test suite achieves 80%+ service coverage and 70%+ branch coverage via JaCoCo. Integration tests verify balance updates for both available and actual balances. PROCTRAN records contain correct transaction type codes. Response times within 10% of baseline."
         },
         
         {
@@ -169,7 +189,8 @@ migration_plan = {
             "content": "Test end-to-end customer lifecycle flows. Validate create, read, update, delete operations. Verify credit agency integration and PROCTRAN logging consistency.",
             "status": "not-complete",
             "depends_on": ["migrate_001", "migrate_002", "migrate_003"],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "End-to-end integration tests pass for complete customer lifecycle (create→read→update→delete). PROCTRAN audit trail verified for create and delete operations only. Credit agency async integration completes within 5 seconds. No data inconsistencies detected across 100+ test runs."
         },
         {
             "id": "integrate_002",
@@ -177,7 +198,8 @@ migration_plan = {
             "content": "Test end-to-end account lifecycle flows. Validate account creation with counter management. Verify cascade delete when customer deleted and PROCTRAN audit trail.",
             "status": "not-complete",
             "depends_on": ["migrate_004", "migrate_005", "migrate_006"],
-            "estimated_hours": 8
+            "estimated_hours": 8,
+            "validation_mechanism": "End-to-end integration tests pass for account lifecycle (create→read→update→delete). Database queries confirm zero orphaned accounts after customer cascade deletes. Named Counter generates unique sequential account numbers across 200+ test accounts. PROCTRAN audit complete for all create/delete operations."
         },
         {
             "id": "integrate_003",
@@ -185,7 +207,8 @@ migration_plan = {
             "content": "Test end-to-end transaction processing flows. Validate transfer funds, debit, and credit operations. Verify balance updates, rollback handling, and PROCTRAN consistency.",
             "status": "not-complete",
             "depends_on": ["migrate_007", "migrate_008"],
-            "estimated_hours": 10
+            "estimated_hours": 10,
+            "validation_mechanism": "End-to-end integration tests pass for all transaction types (transfer, debit, credit). Atomic transfer operations verified with intentional failures showing proper rollback. Balance reconciliation matches PROCTRAN audit records across 500+ transactions. Response times within 10% of baseline under load."
         }
     ],
     
