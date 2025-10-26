@@ -1,0 +1,1044 @@
+{
+  "baseline_metadata": {
+    "version": "1.0",
+    "created_date": "2024-10-26",
+    "created_by": "Devin AI",
+    "task_id": "setup_001",
+    "methodology": "synthetic_code_analysis",
+    "environment": "sandbox",
+    "cics_version": "6.1+",
+    "db2_version": "v12+",
+    "total_programs": 29,
+    "migrated_programs": 4,
+    "remaining_programs": 25,
+    "migration_percentage": 14,
+    "notes": "Baselines derived from code analysis due to sandbox environment constraints. Actual performance measurements should be conducted when live CICS access becomes available."
+  },
+  "estimation_methodology": {
+    "loc_factor_ms": 0.05,
+    "db_read_overhead_ms": 20,
+    "db_write_overhead_ms": 50,
+    "network_overhead_ms": 5,
+    "bms_processing_ms": 10,
+    "p95_multiplier": 2.1,
+    "p99_multiplier": 4.5
+  },
+  "programs": [
+    {
+      "name": "GETCOMPY",
+      "description": "Returns company information",
+      "lines_of_code": 43,
+      "complexity": "simple",
+      "category": "utility",
+      "migrated": true,
+      "java_service": "CompanyInfoService",
+      "migration_date": "2024-10-15",
+      "latency_ms": {
+        "p50": 5,
+        "p95": 12,
+        "p99": 25
+      },
+      "request_volume": {
+        "per_hour": 8000,
+        "category": "high_frequency",
+        "peak_per_hour": 12000
+      },
+      "data_size": {
+        "request_bytes": 50,
+        "response_bytes": 200,
+        "total_bytes": 250
+      },
+      "db_operations": {
+        "reads": 0,
+        "writes": 0,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": ["GETCOMPY"],
+        "db_tables": [],
+        "vsam_files": []
+      }
+    },
+    {
+      "name": "GETSCODE",
+      "description": "Returns bank sort code",
+      "lines_of_code": 46,
+      "complexity": "simple",
+      "category": "utility",
+      "migrated": true,
+      "java_service": "SortCodeService",
+      "migration_date": "2024-10-15",
+      "latency_ms": {
+        "p50": 5,
+        "p95": 12,
+        "p99": 28
+      },
+      "request_volume": {
+        "per_hour": 7500,
+        "category": "high_frequency",
+        "peak_per_hour": 11000
+      },
+      "data_size": {
+        "request_bytes": 50,
+        "response_bytes": 100,
+        "total_bytes": 150
+      },
+      "db_operations": {
+        "reads": 0,
+        "writes": 0,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": ["SORTCODE"],
+        "db_tables": [],
+        "vsam_files": []
+      }
+    },
+    {
+      "name": "ABNDPROC",
+      "description": "Abend handling routine",
+      "lines_of_code": 176,
+      "complexity": "simple",
+      "category": "utility",
+      "migrated": true,
+      "java_service": "ErrorLoggingService",
+      "migration_date": "2024-10-20",
+      "latency_ms": {
+        "p50": 12,
+        "p95": 25,
+        "p99": 60
+      },
+      "request_volume": {
+        "per_hour": 500,
+        "category": "low_frequency",
+        "peak_per_hour": 1000
+      },
+      "data_size": {
+        "request_bytes": 500,
+        "response_bytes": 300,
+        "total_bytes": 800
+      },
+      "db_operations": {
+        "reads": 0,
+        "writes": 1,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": ["ABNDINFO"],
+        "db_tables": [],
+        "vsam_files": ["ABNDFILE"]
+      }
+    },
+    {
+      "name": "CRDTAGY1",
+      "description": "Credit check program 1",
+      "lines_of_code": 273,
+      "complexity": "medium",
+      "category": "credit_check",
+      "migrated": true,
+      "java_service": "CreditAgencyService",
+      "migration_date": "2024-10-22",
+      "latency_ms": {
+        "p50": 35,
+        "p95": 75,
+        "p99": 150
+      },
+      "request_volume": {
+        "per_hour": 300,
+        "category": "medium_frequency",
+        "peak_per_hour": 500
+      },
+      "data_size": {
+        "request_bytes": 800,
+        "response_bytes": 600,
+        "total_bytes": 1400
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"]
+      }
+    },
+    {
+      "name": "CRDTAGY2",
+      "description": "Credit check program 2",
+      "lines_of_code": 273,
+      "complexity": "medium",
+      "category": "credit_check",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 35,
+        "p95": 75,
+        "p99": 150
+      },
+      "request_volume": {
+        "per_hour": 300,
+        "category": "medium_frequency",
+        "peak_per_hour": 500
+      },
+      "data_size": {
+        "request_bytes": 800,
+        "response_bytes": 600,
+        "total_bytes": 1400
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"]
+      }
+    },
+    {
+      "name": "CRDTAGY3",
+      "description": "Credit check program 3",
+      "lines_of_code": 272,
+      "complexity": "medium",
+      "category": "credit_check",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 35,
+        "p95": 75,
+        "p99": 150
+      },
+      "request_volume": {
+        "per_hour": 300,
+        "category": "medium_frequency",
+        "peak_per_hour": 500
+      },
+      "data_size": {
+        "request_bytes": 800,
+        "response_bytes": 600,
+        "total_bytes": 1400
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"]
+      }
+    },
+    {
+      "name": "CRDTAGY4",
+      "description": "Credit check program 4",
+      "lines_of_code": 275,
+      "complexity": "medium",
+      "category": "credit_check",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 35,
+        "p95": 75,
+        "p99": 155
+      },
+      "request_volume": {
+        "per_hour": 300,
+        "category": "medium_frequency",
+        "peak_per_hour": 500
+      },
+      "data_size": {
+        "request_bytes": 800,
+        "response_bytes": 600,
+        "total_bytes": 1400
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"]
+      }
+    },
+    {
+      "name": "CRDTAGY5",
+      "description": "Credit check program 5",
+      "lines_of_code": 275,
+      "complexity": "medium",
+      "category": "credit_check",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 35,
+        "p95": 75,
+        "p99": 155
+      },
+      "request_volume": {
+        "per_hour": 300,
+        "category": "medium_frequency",
+        "peak_per_hour": 500
+      },
+      "data_size": {
+        "request_bytes": 800,
+        "response_bytes": 600,
+        "total_bytes": 1400
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"]
+      }
+    },
+    {
+      "name": "UPDCUST",
+      "description": "Update customer details",
+      "lines_of_code": 364,
+      "complexity": "medium",
+      "category": "update",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 42,
+        "p95": 88,
+        "p99": 185
+      },
+      "request_volume": {
+        "per_hour": 300,
+        "category": "medium_frequency",
+        "peak_per_hour": 450
+      },
+      "data_size": {
+        "request_bytes": 1500,
+        "response_bytes": 500,
+        "total_bytes": 2000
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"]
+      }
+    },
+    {
+      "name": "UPDACC",
+      "description": "Update account details",
+      "lines_of_code": 406,
+      "complexity": "medium",
+      "category": "update",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 48,
+        "p95": 100,
+        "p99": 210
+      },
+      "request_volume": {
+        "per_hour": 400,
+        "category": "medium_frequency",
+        "peak_per_hour": 600
+      },
+      "data_size": {
+        "request_bytes": 1200,
+        "response_bytes": 500,
+        "total_bytes": 1700
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT"],
+        "db_tables": ["ACCOUNT"],
+        "vsam_files": []
+      }
+    },
+    {
+      "name": "DELACC",
+      "description": "Delete account",
+      "lines_of_code": 649,
+      "complexity": "medium",
+      "category": "delete",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 65,
+        "p95": 135,
+        "p99": 280
+      },
+      "request_volume": {
+        "per_hour": 50,
+        "category": "low_frequency",
+        "peak_per_hour": 100
+      },
+      "data_size": {
+        "request_bytes": 500,
+        "response_bytes": 300,
+        "total_bytes": 800
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT"],
+        "db_tables": ["ACCOUNT"],
+        "vsam_files": []
+      }
+    },
+    {
+      "name": "INQCUST",
+      "description": "Display customer details",
+      "lines_of_code": 711,
+      "complexity": "medium",
+      "category": "inquiry",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 38,
+        "p95": 80,
+        "p99": 170
+      },
+      "request_volume": {
+        "per_hour": 2500,
+        "category": "high_frequency",
+        "peak_per_hour": 4000
+      },
+      "data_size": {
+        "request_bytes": 500,
+        "response_bytes": 1500,
+        "total_bytes": 2000
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 0,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"]
+      }
+    },
+    {
+      "name": "DELCUS",
+      "description": "Delete customer",
+      "lines_of_code": 761,
+      "complexity": "medium",
+      "category": "delete",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 70,
+        "p95": 145,
+        "p99": 300
+      },
+      "request_volume": {
+        "per_hour": 30,
+        "category": "low_frequency",
+        "peak_per_hour": 60
+      },
+      "data_size": {
+        "request_bytes": 500,
+        "response_bytes": 300,
+        "total_bytes": 800
+      },
+      "db_operations": {
+        "reads": 2,
+        "writes": 2,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"]
+      }
+    },
+    {
+      "name": "DBCRFUN",
+      "description": "Debit/credit account",
+      "lines_of_code": 861,
+      "complexity": "medium",
+      "category": "transaction",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 80,
+        "p95": 165,
+        "p99": 340
+      },
+      "request_volume": {
+        "per_hour": 1500,
+        "category": "high_frequency",
+        "peak_per_hour": 2500
+      },
+      "data_size": {
+        "request_bytes": 800,
+        "response_bytes": 600,
+        "total_bytes": 1400
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 2,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT", "PROCTRAN"],
+        "db_tables": ["ACCOUNT", "PROCTRAN"],
+        "vsam_files": []
+      }
+    },
+    {
+      "name": "INQACCCU",
+      "description": "Inquire accounts for customer",
+      "lines_of_code": 882,
+      "complexity": "medium",
+      "category": "inquiry",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 55,
+        "p95": 115,
+        "p99": 240
+      },
+      "request_volume": {
+        "per_hour": 2000,
+        "category": "high_frequency",
+        "peak_per_hour": 3500
+      },
+      "data_size": {
+        "request_bytes": 500,
+        "response_bytes": 3000,
+        "total_bytes": 3500
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 0,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT"],
+        "db_tables": ["ACCOUNT"],
+        "vsam_files": []
+      }
+    },
+    {
+      "name": "BNK1CCA",
+      "description": "Online customer lookup UI",
+      "lines_of_code": 952,
+      "complexity": "high",
+      "category": "bms_interface",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 85,
+        "p95": 175,
+        "p99": 380
+      },
+      "request_volume": {
+        "per_hour": 1000,
+        "category": "medium_frequency",
+        "peak_per_hour": 1800
+      },
+      "data_size": {
+        "request_bytes": 800,
+        "response_bytes": 2500,
+        "total_bytes": 3300
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 0,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"],
+        "bms_maps": ["BNK1CC"]
+      }
+    },
+    {
+      "name": "INQACC",
+      "description": "Display account details",
+      "lines_of_code": 1002,
+      "complexity": "high",
+      "category": "inquiry",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 45,
+        "p95": 95,
+        "p99": 200
+      },
+      "request_volume": {
+        "per_hour": 3000,
+        "category": "high_frequency",
+        "peak_per_hour": 5000
+      },
+      "data_size": {
+        "request_bytes": 500,
+        "response_bytes": 1200,
+        "total_bytes": 1700
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 0,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT"],
+        "db_tables": ["ACCOUNT"],
+        "vsam_files": []
+      }
+    },
+    {
+      "name": "BNK1DAC",
+      "description": "Online display account UI",
+      "lines_of_code": 1158,
+      "complexity": "high",
+      "category": "bms_interface",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 100,
+        "p95": 210,
+        "p99": 470
+      },
+      "request_volume": {
+        "per_hour": 1500,
+        "category": "high_frequency",
+        "peak_per_hour": 2500
+      },
+      "data_size": {
+        "request_bytes": 800,
+        "response_bytes": 3000,
+        "total_bytes": 3800
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 0,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT"],
+        "db_tables": ["ACCOUNT"],
+        "vsam_files": [],
+        "bms_maps": ["BNK1DA"]
+      }
+    },
+    {
+      "name": "BNK1CRA",
+      "description": "Online credit/debit account UI",
+      "lines_of_code": 1166,
+      "complexity": "high",
+      "category": "bms_interface",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 105,
+        "p95": 220,
+        "p99": 480
+      },
+      "request_volume": {
+        "per_hour": 800,
+        "category": "medium_frequency",
+        "peak_per_hour": 1400
+      },
+      "data_size": {
+        "request_bytes": 1500,
+        "response_bytes": 2000,
+        "total_bytes": 3500
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 2,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT", "PROCTRAN"],
+        "db_tables": ["ACCOUNT", "PROCTRAN"],
+        "vsam_files": [],
+        "bms_maps": ["BNK1CR"]
+      }
+    },
+    {
+      "name": "BNK1TFN",
+      "description": "Online transfer funds UI",
+      "lines_of_code": 1224,
+      "complexity": "high",
+      "category": "bms_interface",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 110,
+        "p95": 230,
+        "p99": 510
+      },
+      "request_volume": {
+        "per_hour": 600,
+        "category": "medium_frequency",
+        "peak_per_hour": 1000
+      },
+      "data_size": {
+        "request_bytes": 1500,
+        "response_bytes": 2000,
+        "total_bytes": 3500
+      },
+      "db_operations": {
+        "reads": 2,
+        "writes": 3,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT", "PROCTRAN"],
+        "db_tables": ["ACCOUNT", "PROCTRAN"],
+        "vsam_files": [],
+        "bms_maps": ["BNK1TF"]
+      }
+    },
+    {
+      "name": "CREACC",
+      "description": "Create new account",
+      "lines_of_code": 1247,
+      "complexity": "high",
+      "category": "create",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 95,
+        "p95": 200,
+        "p99": 450
+      },
+      "request_volume": {
+        "per_hour": 200,
+        "category": "medium_frequency",
+        "peak_per_hour": 350
+      },
+      "data_size": {
+        "request_bytes": 1500,
+        "response_bytes": 800,
+        "total_bytes": 2300
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 2,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT", "PROCTRAN"],
+        "db_tables": ["ACCOUNT", "PROCTRAN"],
+        "vsam_files": []
+      }
+    },
+    {
+      "name": "BNK1CAC",
+      "description": "Online create account UI",
+      "lines_of_code": 1298,
+      "complexity": "high",
+      "category": "bms_interface",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 120,
+        "p95": 250,
+        "p99": 550
+      },
+      "request_volume": {
+        "per_hour": 200,
+        "category": "medium_frequency",
+        "peak_per_hour": 350
+      },
+      "data_size": {
+        "request_bytes": 2000,
+        "response_bytes": 3000,
+        "total_bytes": 5000
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 2,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT", "PROCTRAN"],
+        "db_tables": ["ACCOUNT", "PROCTRAN"],
+        "vsam_files": [],
+        "bms_maps": ["BNK1CA"]
+      }
+    },
+    {
+      "name": "BNKMENU",
+      "description": "Main menu interface",
+      "lines_of_code": 1311,
+      "complexity": "high",
+      "category": "bms_interface",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 95,
+        "p95": 200,
+        "p99": 450
+      },
+      "request_volume": {
+        "per_hour": 5000,
+        "category": "high_frequency",
+        "peak_per_hour": 8000
+      },
+      "data_size": {
+        "request_bytes": 300,
+        "response_bytes": 2000,
+        "total_bytes": 2300
+      },
+      "db_operations": {
+        "reads": 0,
+        "writes": 0,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": [],
+        "db_tables": [],
+        "vsam_files": [],
+        "bms_maps": ["BNKMENU"]
+      }
+    },
+    {
+      "name": "BNK1UAC",
+      "description": "Online update account UI",
+      "lines_of_code": 1405,
+      "complexity": "high",
+      "category": "bms_interface",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 125,
+        "p95": 260,
+        "p99": 580
+      },
+      "request_volume": {
+        "per_hour": 300,
+        "category": "medium_frequency",
+        "peak_per_hour": 500
+      },
+      "data_size": {
+        "request_bytes": 2000,
+        "response_bytes": 2500,
+        "total_bytes": 4500
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT"],
+        "db_tables": ["ACCOUNT"],
+        "vsam_files": [],
+        "bms_maps": ["BNK1UA"]
+      }
+    },
+    {
+      "name": "CRECUST",
+      "description": "Create new customer",
+      "lines_of_code": 1439,
+      "complexity": "high",
+      "category": "create",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 110,
+        "p95": 230,
+        "p99": 500
+      },
+      "request_volume": {
+        "per_hour": 150,
+        "category": "medium_frequency",
+        "peak_per_hour": 250
+      },
+      "data_size": {
+        "request_bytes": 2000,
+        "response_bytes": 800,
+        "total_bytes": 2800
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"]
+      }
+    },
+    {
+      "name": "BANKDATA",
+      "description": "Bank data utility",
+      "lines_of_code": 1463,
+      "complexity": "high",
+      "category": "utility",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 120,
+        "p95": 250,
+        "p99": 550
+      },
+      "request_volume": {
+        "per_hour": 2000,
+        "category": "high_frequency",
+        "peak_per_hour": 3500
+      },
+      "data_size": {
+        "request_bytes": 1000,
+        "response_bytes": 2000,
+        "total_bytes": 3000
+      },
+      "db_operations": {
+        "reads": 2,
+        "writes": 0,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT", "CUSTOMER"],
+        "db_tables": ["ACCOUNT"],
+        "vsam_files": ["CUSTOMER"]
+      }
+    },
+    {
+      "name": "BNK1CCS",
+      "description": "Online create customer UI",
+      "lines_of_code": 1657,
+      "complexity": "very_high",
+      "category": "bms_interface",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 145,
+        "p95": 305,
+        "p99": 680
+      },
+      "request_volume": {
+        "per_hour": 150,
+        "category": "medium_frequency",
+        "peak_per_hour": 250
+      },
+      "data_size": {
+        "request_bytes": 2500,
+        "response_bytes": 3000,
+        "total_bytes": 5500
+      },
+      "db_operations": {
+        "reads": 1,
+        "writes": 1,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER"],
+        "db_tables": [],
+        "vsam_files": ["CUSTOMER"],
+        "bms_maps": ["BNK1CC"]
+      }
+    },
+    {
+      "name": "XFRFUN",
+      "description": "Transfer funds between accounts",
+      "lines_of_code": 1924,
+      "complexity": "very_high",
+      "category": "transaction",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 180,
+        "p95": 380,
+        "p99": 850
+      },
+      "request_volume": {
+        "per_hour": 800,
+        "category": "medium_frequency",
+        "peak_per_hour": 1400
+      },
+      "data_size": {
+        "request_bytes": 1000,
+        "response_bytes": 800,
+        "total_bytes": 1800
+      },
+      "db_operations": {
+        "reads": 2,
+        "writes": 3,
+        "transactions": true
+      },
+      "dependencies": {
+        "copybooks": ["ACCOUNT", "PROCTRAN"],
+        "db_tables": ["ACCOUNT", "PROCTRAN"],
+        "vsam_files": []
+      }
+    },
+    {
+      "name": "BNK1DCS",
+      "description": "Online display customer UI",
+      "lines_of_code": 2053,
+      "complexity": "very_high",
+      "category": "bms_interface",
+      "migrated": false,
+      "latency_ms": {
+        "p50": 190,
+        "p95": 400,
+        "p99": 900
+      },
+      "request_volume": {
+        "per_hour": 1200,
+        "category": "high_frequency",
+        "peak_per_hour": 2000
+      },
+      "data_size": {
+        "request_bytes": 1000,
+        "response_bytes": 4000,
+        "total_bytes": 5000
+      },
+      "db_operations": {
+        "reads": 2,
+        "writes": 0,
+        "transactions": false
+      },
+      "dependencies": {
+        "copybooks": ["CUSTOMER", "ACCOUNT"],
+        "db_tables": ["ACCOUNT"],
+        "vsam_files": ["CUSTOMER"],
+        "bms_maps": ["BNK1DC"]
+      }
+    }
+  ],
+  "summary_statistics": {
+    "latency_ranges": {
+      "p50": {
+        "min_ms": 5,
+        "max_ms": 190,
+        "avg_ms": 75
+      },
+      "p95": {
+        "min_ms": 12,
+        "max_ms": 400,
+        "avg_ms": 160
+      },
+      "p99": {
+        "min_ms": 25,
+        "max_ms": 900,
+        "avg_ms": 350
+      }
+    },
+    "request_volume": {
+      "total_per_hour": 52130,
+      "peak_per_hour": 85210,
+      "high_frequency_programs": 10,
+      "medium_frequency_programs": 14,
+      "low_frequency_programs": 5
+    },
+    "complexity_distribution": {
+      "simple": 4,
+      "medium": 11,
+      "high": 11,
+      "very_high": 3
+    },
+    "category_distribution": {
+      "utility": 4,
+      "credit_check": 5,
+      "inquiry": 3,
+      "create": 2,
+      "update": 2,
+      "delete": 2,
+      "transaction": 2,
+      "bms_interface": 9
+    }
+  }
+}
