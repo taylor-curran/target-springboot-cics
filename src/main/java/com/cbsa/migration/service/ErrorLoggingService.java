@@ -4,6 +4,8 @@ import com.cbsa.migration.dto.ErrorRequestDto;
 import com.cbsa.migration.dto.ErrorResponseDto;
 import com.cbsa.migration.model.ApplicationError;
 import com.cbsa.migration.repository.ApplicationErrorRepository;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +22,19 @@ import java.util.List;
 public class ErrorLoggingService {
     
     private final ApplicationErrorRepository applicationErrorRepository;
+    private final MeterRegistry meterRegistry;
+    private final Counter errorLoggedCounter;
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
     @Autowired
-    public ErrorLoggingService(ApplicationErrorRepository applicationErrorRepository) {
+    public ErrorLoggingService(ApplicationErrorRepository applicationErrorRepository,
+                              MeterRegistry meterRegistry) {
         this.applicationErrorRepository = applicationErrorRepository;
+        this.meterRegistry = meterRegistry;
+        
+        this.errorLoggedCounter = Counter.builder("banking.errors.logged")
+            .description("Total number of errors logged to the system")
+            .register(meterRegistry);
     }
     
     /**
@@ -45,10 +55,10 @@ public class ErrorLoggingService {
             // Create ApplicationError from request
             ApplicationError applicationError = createApplicationError(errorRequest, currentTimestamp);
             
-            // Save to database
             Long errorId = applicationErrorRepository.save(applicationError);
             
-            // Return success response
+            errorLoggedCounter.increment();
+            
             return ErrorResponseDto.success(errorId, currentTimestamp);
             
         } catch (IllegalArgumentException e) {

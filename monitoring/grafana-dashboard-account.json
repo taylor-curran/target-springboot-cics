@@ -1,0 +1,57 @@
+{
+  "dashboard": {
+    "title": "Banking App - Account Domain",
+    "tags": ["banking", "account", "cbsa"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Account Count",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "banking_accounts_count",
+            "legendFormat": "Total Accounts"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Account Operations Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*account.*\"}[5m])",
+            "legendFormat": "{{method}} {{uri}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Account Query Response Time (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri=~\".*account.*\"}[5m]))",
+            "legendFormat": "{{uri}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Account Operation Errors",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*account.*\",status=~\"5..\"}[5m])",
+            "legendFormat": "{{method}} {{uri}} - {{status}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      }
+    ]
+  }
+}

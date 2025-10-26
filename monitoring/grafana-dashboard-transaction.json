@@ -1,0 +1,57 @@
+{
+  "dashboard": {
+    "title": "Banking App - Transaction Domain",
+    "tags": ["banking", "transaction", "cbsa"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Transaction Count",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "banking_transactions_count",
+            "legendFormat": "Total Transactions"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Transaction Rate (per second)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(banking_transactions_count[5m])",
+            "legendFormat": "Transaction Rate"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Transaction Operation Response Time (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri=~\".*transaction.*\"}[5m]))",
+            "legendFormat": "{{uri}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Transaction Operation Errors",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*transaction.*\",status=~\"5..\"}[5m])",
+            "legendFormat": "{{method}} {{uri}} - {{status}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      }
+    ]
+  }
+}
