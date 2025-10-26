@@ -1,0 +1,58 @@
+groups:
+  - name: cbsa_migration_alerts
+    interval: 30s
+    rules:
+      # Response time alerts
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket[5m])) > 1
+        for: 2m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "High response time detected on {{ $labels.uri }}"
+          description: "95th percentile response time is {{ $value }}s (threshold: 1s)"
+      
+      # Error rate alerts
+      - alert: HighErrorRate
+        expr: (rate(http_server_requests_seconds_count{status=~"5.."}[5m]) / rate(http_server_requests_seconds_count[5m])) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "High error rate detected on {{ $labels.uri }}"
+          description: "Error rate is {{ $value }}% (threshold: 5%)"
+      
+      # Low throughput alerts
+      - alert: LowThroughput
+        expr: rate(http_server_requests_seconds_count[5m]) * 60 < 10
+        for: 5m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "Low request throughput on {{ $labels.uri }}"
+          description: "Request rate is {{ $value }} requests/minute (threshold: 10/min)"
+      
+      # Application health alerts
+      - alert: ApplicationDown
+        expr: up{job="cbsa-migration"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: application
+        annotations:
+          summary: "Application is down"
+          description: "CBSA Migration application has been down for more than 1 minute"
+      
+      # Credit agency service specific alerts
+      - alert: CreditAgencySlowResponse
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri="/api/credit-agency/score"}[5m])) > 5
+        for: 2m
+        labels:
+          severity: warning
+          component: credit-agency
+        annotations:
+          summary: "Credit agency service responding slowly"
+          description: "95th percentile response time is {{ $value }}s (includes simulated delay)"

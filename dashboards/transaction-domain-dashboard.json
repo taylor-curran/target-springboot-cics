@@ -1,0 +1,53 @@
+{
+  "dashboard": {
+    "title": "Transaction Domain Monitoring",
+    "tags": ["transaction", "banking", "cbsa-migration"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Transaction API Response Time (p95)",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri=~\".*transaction.*\"}[5m]))",
+            "legendFormat": "{{uri}}"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "id": 2,
+        "title": "Transaction API Request Rate",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*transaction.*\"}[5m])",
+            "legendFormat": "{{uri}} - {{method}}"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "id": 3,
+        "title": "Transaction API Error Rate",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*transaction.*\",status=~\"5..\"}[5m])",
+            "legendFormat": "{{uri}} - {{status}}"
+          }
+        ],
+        "type": "graph"
+      },
+      {
+        "id": 4,
+        "title": "Credit Agency Service Performance",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri=\"/api/credit-agency/score\"}[5m]))",
+            "legendFormat": "Credit Score Processing Time"
+          }
+        ],
+        "type": "graph"
+      }
+    ]
+  }
+}
