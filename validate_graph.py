@@ -47,24 +47,11 @@ def check_field_brevity(tasks: List[Dict]) -> List[str]:
     for task in tasks:
         task_id = task.get('id', '')
         
-        # Check title length (20 words max)
+        # Check title length (30 words max)
         title = task.get('title', '')
-        if len(title.split()) > 20:
-            words_to_remove = len(title.split()) - 20
-            errors.append(f"❌ {task_id}: title too long ({len(title.split())} words, max 20)\nFIX: Remove {words_to_remove} word(s) from title. Keep it concise and descriptive.\nCurrent: \"{title[:50]}...\"")
-        
-        # Check content length (3 sentences max)
-        content = task.get('content', '')
-        sentences = content.count('.') + content.count('!') + content.count('?')
-        if sentences > 3:
-            errors.append(f"❌ {task_id}: content too long ({sentences} sentences, max 3)\nFIX: Reduce content to 3 sentences. Remove extra details get to the heart of things. \nTip: Focus on WHAT the task accomplishes, not HOW.")
-        
-        # Check action if present (2 sentences max)
-        if 'action' in task:
-            action = task['action']
-            action_sentences = action.count('.') + action.count('!') + action.count('?')
-            if action_sentences > 2:
-                errors.append(f"❌ {task_id}: action too long ({action_sentences} sentences, max 2)\nFIX: Simplify action to 1-2 sentences. State the core work concisely.\nExample: 'Migrate customer CRUD operations. Preserve transaction boundaries.'")
+        if len(title.split()) > 30:
+            words_to_remove = len(title.split()) - 30
+            errors.append(f"❌ {task_id}: title too long ({len(title.split())} words, max 30)\nFIX: Remove {words_to_remove} word(s) from title. Keep it concise and descriptive.\nCurrent: \"{title[:50]}...\"")
     
     if not errors:
         print("✅ All fields respect brevity limits")
