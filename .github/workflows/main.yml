@@ -37,12 +37,12 @@ jobs:
     - name: Run validation script
       run: |
         if [ -f "migration_plan.py" ]; then
-          python src/utils/validate_graph.py migration_plan.py
+          python validate_graph.py migration_plan.py
         fi
     
     - name: Upload validation results
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: validation-errors
         path: |
