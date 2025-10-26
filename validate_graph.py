@@ -178,7 +178,7 @@ def check_required_fields(tasks: List[Dict]) -> List[str]:
 def check_status_values(tasks: List[Dict]) -> List[str]:
     """Check that status values are valid."""
     errors = []
-    valid_statuses = ['not-complete', 'complete']
+    valid_statuses = ['not-complete', 'completed']
     
     for task in tasks:
         task_id = task.get('id', '')
