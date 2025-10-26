@@ -107,6 +107,36 @@ GET /api/status
 Response: {"status": "UP", "database": "connected", "tables": {...}}
 ```
 
+## 📊 Monitoring and Observability
+
+### **Metrics Endpoints**
+- **Health Check**: http://localhost:8085/actuator/health
+- **Metrics**: http://localhost:8085/actuator/metrics
+- **Prometheus Format**: http://localhost:8085/actuator/prometheus
+
+### **Dashboards**
+Grafana dashboards are available in the `monitoring/dashboards/` directory:
+- `customer-operations-dashboard.json` - Customer data operations metrics
+- `account-operations-dashboard.json` - Account data operations metrics
+- `transaction-operations-dashboard.json` - Transaction data operations metrics
+- `application-overview-dashboard.json` - Overall application health and performance
+
+### **Alerting**
+Prometheus alert rules are configured in `monitoring/alerts/prometheus-alerts.yml`:
+- High error rate (>5%)
+- Slow response times (>1000ms at 95th percentile)
+- Application availability
+- Memory usage warnings
+
+### **Baseline Collection**
+Metrics are continuously collected and can be queried via the Prometheus endpoint. For establishing a 24-hour baseline:
+1. Start the application
+2. Configure Prometheus to scrape the `/actuator/prometheus` endpoint
+3. Let the application run for 24 hours under normal load
+4. Query the metrics to establish baseline values for alerts
+
+📚 **See [monitoring/README.md](monitoring/README.md) for detailed monitoring setup and configuration**
+
 ## 🗄️ Database Schema
 
 ### **Core Tables**

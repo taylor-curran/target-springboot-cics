@@ -1,0 +1,97 @@
+{
+  "dashboard": {
+    "title": "Transaction Data Operations",
+    "tags": ["banking", "transaction", "monitoring"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Transaction Repository Operations Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(method_timed_seconds_count{class=~\".*TransactionRepository.*\"}[5m])",
+            "legendFormat": "{{method}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Operations/sec",
+            "format": "ops"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Transaction Operation Response Times (95th percentile)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(method_timed_seconds_bucket{class=~\".*TransactionRepository.*\"}[5m]))",
+            "legendFormat": "{{method}} - p95"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Response Time",
+            "format": "s"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Transaction Endpoint Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{uri=~\".*transaction.*\",status=~\"5..\"}[5m])",
+            "legendFormat": "{{uri}} - {{status}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Errors/sec",
+            "format": "ops"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Transaction Database Query Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.99, rate(jdbc_query_seconds_bucket{table=\"bank_transaction\"}[5m]))",
+            "legendFormat": "Query p99"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(jdbc_query_seconds_bucket{table=\"bank_transaction\"}[5m]))",
+            "legendFormat": "Query p95"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Query Time",
+            "format": "s"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Transaction Record Count",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "transaction_count_total",
+            "legendFormat": "Total Transactions"
+          }
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    }
+  }
+}
