@@ -5,7 +5,7 @@ migration_plan = {
             "id": "setup_001",
             "title": "Create Performance Baselines",
             "content": "Measure current COBOL program performance for key operations. Document P50/P95/P99 latencies for customer, account, and transaction operations. Establish success criteria for migration validation.",
-            "status": "not-complete",
+            "status": "complete",
             "depends_on": [],
             "deliverables": [
                 "performance_baseline.json",

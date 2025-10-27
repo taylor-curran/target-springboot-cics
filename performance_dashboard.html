@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COBOL Performance Baselines Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        .metadata {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metadata-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .metadata-value {
+            font-size: 1.1em;
+            color: #212529;
+            font-weight: 500;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .chart-container {
+            margin-bottom: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chart-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+        }
+        
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        td {
+            padding: 15px;
+            color: #495057;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-high {
+            background: #fee;
+            color: #c00;
+        }
+        
+        .badge-medium {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+        
+        .badge-low {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-inquiry {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .badge-create {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge-update {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-delete {
+            background: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .badge-transaction {
+            background: #d6d8db;
+            color: #383d41;
+        }
+        
+        .latency-value {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9em;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 COBOL Performance Baselines</h1>
+            <p>Migration Performance Targets for 11 Business Logic Programs</p>
+        </div>
+        
+        <div class="metadata">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <span class="metadata-label">Generated At</span>
+                    <span class="metadata-value" id="generated-at">Loading...</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Total Programs</span>
+                    <span class="metadata-value" id="total-programs">11</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Samples Per Program</span>
+                    <span class="metadata-value" id="sample-size">150</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Methodology</span>
+                    <span class="metadata-value">Synthetic complexity-based analysis</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="chart-container">
+                <h2 class="chart-title">Latency Distribution by Program</h2>
+                <canvas id="latencyChart"></canvas>
+            </div>
+            
+            <div class="table-container">
+                <h2 class="chart-title">Detailed Metrics</h2>
+                <table id="metricsTable">
+                    <thead>
+                        <tr>
+                            <th>Program</th>
+                            <th>Operation Type</th>
+                            <th>Lines of Code</th>
+                            <th>Complexity</th>
+                            <th>P50 (ms)</th>
+                            <th>P95 (ms)</th>
+                            <th>P99 (ms)</th>
+                            <th>Samples</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metricsBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>CBSA COBOL to Spring Boot Migration • Performance Baseline Dashboard</p>
+            <p>These metrics establish performance targets for migration validation</p>
+        </div>
+    </div>
+    
+    <script>
+        async function loadBaseline() {
+            try {
+                const response = await fetch('performance_baseline.json');
+                const data = await response.json();
+                
+                document.getElementById('generated-at').textContent = 
+                    new Date(data.generated_at).toLocaleString();
+                document.getElementById('sample-size').textContent = 
+                    data.sample_size_per_program;
+                
+                renderChart(data.programs);
+                renderTable(data.programs);
+            } catch (error) {
+                console.error('Error loading baseline data:', error);
+                alert('Failed to load performance_baseline.json. Please ensure the file exists in the same directory.');
+            }
+        }
+        
+        function renderChart(programs) {
+            const ctx = document.getElementById('latencyChart').getContext('2d');
+            
+            const labels = programs.map(p => p.name);
+            const p50Data = programs.map(p => p.latency_ms.p50);
+            const p95Data = programs.map(p => p.latency_ms.p95);
+            const p99Data = programs.map(p => p.latency_ms.p99);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'P50 (median)',
+                            data: p50Data,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'P95',
+                            data: p95Data,
+                            backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                            borderColor: 'rgba(118, 75, 162, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'P99',
+                            data: p99Data,
+                            backgroundColor: 'rgba(237, 100, 166, 0.8)',
+                            borderColor: 'rgba(237, 100, 166, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Latency (milliseconds)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'COBOL Program',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 13
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + 
+                                           context.parsed.y.toFixed(2) + ' ms';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderTable(programs) {
+            const tbody = document.getElementById('metricsBody');
+            tbody.innerHTML = '';
+            
+            programs.forEach(program => {
+                const row = document.createElement('tr');
+                
+                const complexityClass = `badge-${program.complexity}`;
+                const operationClass = `badge-${program.operation_type}`;
+                
+                row.innerHTML = `
+                    <td><strong>${program.name}</strong></td>
+                    <td><span class="badge ${operationClass}">${program.operation_type}</span></td>
+                    <td>${program.lines_of_code.toLocaleString()}</td>
+                    <td><span class="badge ${complexityClass}">${program.complexity}</span></td>
+                    <td class="latency-value">${program.latency_ms.p50}</td>
+                    <td class="latency-value">${program.latency_ms.p95}</td>
+                    <td class="latency-value">${program.latency_ms.p99}</td>
+                    <td>${program.sample_count}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        loadBaseline();
+    </script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+{
+  "generated_at": "2025-10-27T00:18:44.095400+00:00",
+  "methodology": "Synthetic baselines based on COBOL program complexity analysis",
+  "description": "Performance baselines for 11 business logic programs to be migrated from COBOL/CICS to Spring Boot",
+  "sample_size_per_program": 150,
+  "latency_calculation": {
+    "base_formula": "150 + (lines_of_code / 10)",
+    "operation_multipliers": {
+      "inquiry": 0.7,
+      "update": 1.0,
+      "delete": 1.0,
+      "create": 1.3,
+      "transaction": 1.5
+    },
+    "complexity_multipliers": {
+      "low": 1.0,
+      "medium": 1.3,
+      "high": 1.7
+    },
+    "distribution": "log-normal with shape=0.3 for realistic variance"
+  },
+  "programs": [
+    {
+      "name": "CRECUST",
+      "operation_type": "create",
+      "lines_of_code": 1440,
+      "complexity": "high",
+      "latency_ms": {
+        "p50": 611.06,
+        "p95": 983.78,
+        "p99": 1227.25
+      },
+      "sample_count": 150,
+      "samples": [
+        509.34,
+        873.58,
+        602.82,
+        521.59,
+        687.1,
+        703.15,
+        477.02,
+        403.89,
+        590.14,
+        877.49
+      ]
+    },
+    {
+      "name": "INQCUST",
+      "operation_type": "inquiry",
+      "lines_of_code": 712,
+      "complexity": "medium",
+      "latency_ms": {
+        "p50": 193.74,
+        "p95": 335.39,
+        "p99": 408.49
+      },
+      "sample_count": 150,
+      "samples": [
+        219.93,
+        137.51,
+        217.96,
+        146.03,
+        185.53,
+        225.3,
+        178.32,
+        167.86,
+        200.54,
+        122.42
+      ]
+    },
+    {
+      "name": "UPDCUST",
+      "operation_type": "update",
+      "lines_of_code": 365,
+      "complexity": "low",
+      "latency_ms": {
+        "p50": 173.12,
+        "p95": 279.9,
+        "p99": 324.32
+      },
+      "sample_count": 150,
+      "samples": [
+        187.2,
+        226.31,
+        225.85,
+        166.34,
+        102.24,
+        180.59,
+        196.69,
+        128.76,
+        135.11,
+        195.06
+      ]
+    },
+    {
+      "name": "DELCUS",
+      "operation_type": "delete",
+      "lines_of_code": 762,
+      "complexity": "medium",
+      "latency_ms": {
+        "p50": 283.06,
+        "p95": 431.19,
+        "p99": 524.84
+      },
+      "sample_count": 150,
+      "samples": [
+        317.09,
+        176.67,
+        221.41,
+        302.01,
+        302.7,
+        355.79,
+        212.93,
+        429.0,
+        315.43,
+        257.59
+      ]
+    },
+    {
+      "name": "CREACC",
+      "operation_type": "create",
+      "lines_of_code": 1248,
+      "complexity": "high",
+      "latency_ms": {
+        "p50": 554.81,
+        "p95": 885.56,
+        "p99": 1065.46
+      },
+      "sample_count": 150,
+      "samples": [
+        689.4,
+        375.63,
+        396.38,
+        555.44,
+        396.82,
+        500.0,
+        618.17,
+        574.51,
+        815.3,
+        369.97
+      ]
+    },
+    {
+      "name": "INQACC",
+      "operation_type": "inquiry",
+      "lines_of_code": 1003,
+      "complexity": "medium",
+      "latency_ms": {
+        "p50": 208.89,
+        "p95": 366.39,
+        "p99": 430.19
+      },
+      "sample_count": 150,
+      "samples": [
+        264.69,
+        252.38,
+        445.93,
+        242.22,
+        153.08,
+        241.06,
+        218.26,
+        191.57,
+        197.97,
+        190.6
+      ]
+    },
+    {
+      "name": "INQACCCU",
+      "operation_type": "inquiry",
+      "lines_of_code": 883,
+      "complexity": "medium",
+      "latency_ms": {
+        "p50": 204.21,
+        "p95": 332.69,
+        "p99": 423.83
+      },
+      "sample_count": 150,
+      "samples": [
+        180.14,
+        265.43,
+        332.41,
+        252.15,
+        216.69,
+        189.72,
+        285.92,
+        224.98,
+        212.52,
+        187.56
+      ]
+    },
+    {
+      "name": "UPDACC",
+      "operation_type": "update",
+      "lines_of_code": 407,
+      "complexity": "low",
+      "latency_ms": {
+        "p50": 192.23,
+        "p95": 288.88,
+        "p99": 357.15
+      },
+      "sample_count": 150,
+      "samples": [
+        125.31,
+        151.34,
+        130.63,
+        166.13,
+        201.45,
+        211.57,
+        200.54,
+        185.18,
+        338.72,
+        202.22
+      ]
+    },
+    {
+      "name": "DELACC",
+      "operation_type": "delete",
+      "lines_of_code": 650,
+      "complexity": "medium",
+      "latency_ms": {
+        "p50": 268.34,
+        "p95": 434.17,
+        "p99": 523.07
+      },
+      "sample_count": 150,
+      "samples": [
+        164.1,
+        224.65,
+        268.89,
+        357.19,
+        325.59,
+        227.28,
+        235.25,
+        196.06,
+        373.18,
+        255.1
+      ]
+    },
+    {
+      "name": "XFRFUN",
+      "operation_type": "transaction",
+      "lines_of_code": 1925,
+      "complexity": "high",
+      "latency_ms": {
+        "p50": 863.98,
+        "p95": 1424.5,
+        "p99": 2020.91
+      },
+      "sample_count": 150,
+      "samples": [
+        904.18,
+        1335.43,
+        755.17,
+        923.38,
+        499.52,
+        580.35,
+        493.29,
+        556.09,
+        1253.87,
+        691.07
+      ]
+    },
+    {
+      "name": "DBCRFUN",
+      "operation_type": "transaction",
+      "lines_of_code": 862,
+      "complexity": "medium",
+      "latency_ms": {
+        "p50": 453.44,
+        "p95": 675.61,
+        "p99": 791.89
+      },
+      "sample_count": 150,
+      "samples": [
+        615.82,
+        429.29,
+        326.68,
+        252.27,
+        535.41,
+        321.86,
+        446.09,
+        645.47,
+        596.17,
+        570.9
+      ]
+    }
+  ]
+}
