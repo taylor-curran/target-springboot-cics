@@ -1,0 +1,177 @@
+{
+  "baseline_metadata": {
+    "generated_at": "2025-10-27T02:34:06.064044+00:00",
+    "environment": "synthetic",
+    "methodology": "Baselines generated based on program complexity analysis and typical CICS performance characteristics",
+    "note": "Since sandbox environment lacks external CICS connectivity, metrics are synthesized using program complexity (lines of code, operation type) and industry-standard CICS transaction response times",
+    "sample_count_per_program": 100,
+    "total_programs": 11
+  },
+  "programs": [
+    {
+      "program_name": "CRECUST",
+      "complexity": "high",
+      "lines_of_code": 1440,
+      "operation_type": "create",
+      "description": "Customer Create - async credit checks, Named Counter",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 319.66,
+        "p95": 409.83,
+        "p99": 443.79,
+        "mean": 320.41,
+        "std_dev": 52.27
+      }
+    },
+    {
+      "program_name": "INQCUST",
+      "complexity": "medium",
+      "lines_of_code": 712,
+      "operation_type": "read",
+      "description": "Customer Inquiry - VSAM read with composite key",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 84.89,
+        "p95": 114.4,
+        "p99": 125.51,
+        "mean": 85.13,
+        "std_dev": 17.11
+      }
+    },
+    {
+      "program_name": "UPDCUST",
+      "complexity": "low",
+      "lines_of_code": 365,
+      "operation_type": "update",
+      "description": "Customer Update - limited fields, no PROCTRAN",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 144.85,
+        "p95": 185.83,
+        "p99": 201.27,
+        "mean": 145.19,
+        "std_dev": 23.76
+      }
+    },
+    {
+      "program_name": "DELCUS",
+      "complexity": "medium",
+      "lines_of_code": 762,
+      "operation_type": "delete",
+      "description": "Customer Delete - cascade delete all accounts",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 234.74,
+        "p95": 303.6,
+        "p99": 329.53,
+        "mean": 235.31,
+        "std_dev": 39.92
+      }
+    },
+    {
+      "program_name": "CREACC",
+      "complexity": "high",
+      "lines_of_code": 1248,
+      "operation_type": "create",
+      "description": "Account Create - Named Counter, PROCTRAN logging",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 294.69,
+        "p95": 376.66,
+        "p99": 407.53,
+        "mean": 295.37,
+        "std_dev": 47.52
+      }
+    },
+    {
+      "program_name": "INQACC",
+      "complexity": "medium",
+      "lines_of_code": 1003,
+      "operation_type": "read",
+      "description": "Account Inquiry - single account lookup",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 94.88,
+        "p95": 127.66,
+        "p99": 140.01,
+        "mean": 95.15,
+        "std_dev": 19.01
+      }
+    },
+    {
+      "program_name": "INQACCCU",
+      "complexity": "medium",
+      "lines_of_code": 883,
+      "operation_type": "read",
+      "description": "Account Inquiry by Customer - cursor pagination",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 124.83,
+        "p95": 170.73,
+        "p99": 188.02,
+        "mean": 125.21,
+        "std_dev": 26.61
+      }
+    },
+    {
+      "program_name": "UPDACC",
+      "complexity": "low",
+      "lines_of_code": 407,
+      "operation_type": "update",
+      "description": "Account Update - type, interest, overdraft fields",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 154.83,
+        "p95": 199.1,
+        "p99": 215.77,
+        "mean": 155.2,
+        "std_dev": 25.66
+      }
+    },
+    {
+      "program_name": "DELACC",
+      "complexity": "medium",
+      "lines_of_code": 650,
+      "operation_type": "delete",
+      "description": "Account Delete - PROCTRAN audit logging",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 184.78,
+        "p95": 242.16,
+        "p99": 263.77,
+        "mean": 185.26,
+        "std_dev": 33.26
+      }
+    },
+    {
+      "program_name": "XFRFUN",
+      "complexity": "high",
+      "lines_of_code": 1925,
+      "operation_type": "transfer",
+      "description": "Transfer Funds - atomic dual-account updates",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 424.54,
+        "p95": 547.49,
+        "p99": 593.8,
+        "mean": 425.56,
+        "std_dev": 71.28
+      }
+    },
+    {
+      "program_name": "DBCRFUN",
+      "complexity": "medium",
+      "lines_of_code": 862,
+      "operation_type": "debit_credit",
+      "description": "Debit/Credit - balance updates, PROCTRAN logging",
+      "samples": 100,
+      "latency_ms": {
+        "p50": 214.75,
+        "p95": 280.33,
+        "p99": 305.03,
+        "mean": 215.3,
+        "std_dev": 38.02
+      }
+    }
+  ]
+}

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COBOL Performance Baselines - CICS Banking Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .metadata {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .metadata-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .metadata-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .metadata-value {
+            font-size: 1.1em;
+            color: #212529;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #212529;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        
+        .note strong {
+            color: #856404;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        th:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .complexity {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .complexity-high {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .complexity-medium {
+            background: #ffd93d;
+            color: #333;
+        }
+        
+        .complexity-low {
+            background: #6bcf7f;
+            color: white;
+        }
+        
+        .metric {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .chart-container {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .bar-label {
+            width: 120px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .bar-visual {
+            flex: 1;
+            height: 30px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 COBOL Performance Baselines</h1>
+            <p>CICS Banking Sample Application - Business Logic Programs</p>
+        </div>
+        
+        <div class="metadata">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <div class="metadata-label">Generated At</div>
+                    <div class="metadata-value">2025-10-27T02:34:06.064044+00:00</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Environment</div>
+                    <div class="metadata-value">SYNTHETIC</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Total Programs</div>
+                    <div class="metadata-value">11</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Samples Per Program</div>
+                    <div class="metadata-value">100</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="note">
+                <strong>Note:</strong> Since sandbox environment lacks external CICS connectivity, metrics are synthesized using program complexity (lines of code, operation type) and industry-standard CICS transaction response times
+            </div>
+            
+            <h2 class="section-title">Performance Metrics Summary</h2>
+            
+            <table id="metricsTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Program ▼</th>
+                        <th onclick="sortTable(1)">Complexity ▼</th>
+                        <th onclick="sortTable(2)">Lines ▼</th>
+                        <th onclick="sortTable(3)">Operation ▼</th>
+                        <th onclick="sortTable(4)">P50 (ms) ▼</th>
+                        <th onclick="sortTable(5)">P95 (ms) ▼</th>
+                        <th onclick="sortTable(6)">P99 (ms) ▼</th>
+                        <th onclick="sortTable(7)">Mean (ms) ▼</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CRECUST</strong></td>
+                        <td><span class="complexity complexity-high">high</span></td>
+                        <td>1440</td>
+                        <td>Create</td>
+                        <td class="metric">319.66</td>
+                        <td class="metric">409.83</td>
+                        <td class="metric">443.79</td>
+                        <td class="metric">320.41</td>
+                    </tr>
+                    <tr>
+                        <td><strong>INQCUST</strong></td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>712</td>
+                        <td>Read</td>
+                        <td class="metric">84.89</td>
+                        <td class="metric">114.4</td>
+                        <td class="metric">125.51</td>
+                        <td class="metric">85.13</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UPDCUST</strong></td>
+                        <td><span class="complexity complexity-low">low</span></td>
+                        <td>365</td>
+                        <td>Update</td>
+                        <td class="metric">144.85</td>
+                        <td class="metric">185.83</td>
+                        <td class="metric">201.27</td>
+                        <td class="metric">145.19</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DELCUS</strong></td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>762</td>
+                        <td>Delete</td>
+                        <td class="metric">234.74</td>
+                        <td class="metric">303.6</td>
+                        <td class="metric">329.53</td>
+                        <td class="metric">235.31</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CREACC</strong></td>
+                        <td><span class="complexity complexity-high">high</span></td>
+                        <td>1248</td>
+                        <td>Create</td>
+                        <td class="metric">294.69</td>
+                        <td class="metric">376.66</td>
+                        <td class="metric">407.53</td>
+                        <td class="metric">295.37</td>
+                    </tr>
+                    <tr>
+                        <td><strong>INQACC</strong></td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>1003</td>
+                        <td>Read</td>
+                        <td class="metric">94.88</td>
+                        <td class="metric">127.66</td>
+                        <td class="metric">140.01</td>
+                        <td class="metric">95.15</td>
+                    </tr>
+                    <tr>
+                        <td><strong>INQACCCU</strong></td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>883</td>
+                        <td>Read</td>
+                        <td class="metric">124.83</td>
+                        <td class="metric">170.73</td>
+                        <td class="metric">188.02</td>
+                        <td class="metric">125.21</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UPDACC</strong></td>
+                        <td><span class="complexity complexity-low">low</span></td>
+                        <td>407</td>
+                        <td>Update</td>
+                        <td class="metric">154.83</td>
+                        <td class="metric">199.1</td>
+                        <td class="metric">215.77</td>
+                        <td class="metric">155.2</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DELACC</strong></td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>650</td>
+                        <td>Delete</td>
+                        <td class="metric">184.78</td>
+                        <td class="metric">242.16</td>
+                        <td class="metric">263.77</td>
+                        <td class="metric">185.26</td>
+                    </tr>
+                    <tr>
+                        <td><strong>XFRFUN</strong></td>
+                        <td><span class="complexity complexity-high">high</span></td>
+                        <td>1925</td>
+                        <td>Transfer</td>
+                        <td class="metric">424.54</td>
+                        <td class="metric">547.49</td>
+                        <td class="metric">593.8</td>
+                        <td class="metric">425.56</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DBCRFUN</strong></td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>862</td>
+                        <td>Debit Credit</td>
+                        <td class="metric">214.75</td>
+                        <td class="metric">280.33</td>
+                        <td class="metric">305.03</td>
+                        <td class="metric">215.3</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2 class="section-title">P95 Latency Comparison</h2>
+            
+            <div class="chart-container">
+                <div class="bar">
+                    <div class="bar-label">XFRFUN</div>
+                    <div class="bar-visual" style="width: 100.0%;">
+                        547.49 ms
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="bar-label">CRECUST</div>
+                    <div class="bar-visual" style="width: 74.85616175637911%;">
+                        409.83 ms
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="bar-label">CREACC</div>
+                    <div class="bar-visual" style="width: 68.79760360919835%;">
+                        376.66 ms
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="bar-label">DELCUS</div>
+                    <div class="bar-visual" style="width: 55.45306763593856%;">
+                        303.6 ms
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="bar-label">DBCRFUN</div>
+                    <div class="bar-visual" style="width: 51.20276169427752%;">
+                        280.33 ms
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="bar-label">DELACC</div>
+                    <div class="bar-visual" style="width: 44.23094485744032%;">
+                        242.16 ms
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="bar-label">UPDACC</div>
+                    <div class="bar-visual" style="width: 36.36596102211912%;">
+                        199.1 ms
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="bar-label">UPDCUST</div>
+                    <div class="bar-visual" style="width: 33.94217245977096%;">
+                        185.83 ms
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="bar-label">INQACCCU</div>
+                    <div class="bar-visual" style="width: 31.184131217008527%;">
+                        170.73 ms
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="bar-label">INQACC</div>
+                    <div class="bar-visual" style="width: 23.317320864308023%;">
+                        127.66 ms
+                    </div>
+                </div>
+                <div class="bar">
+                    <div class="bar-label">INQCUST</div>
+                    <div class="bar-visual" style="width: 20.895358819339165%;">
+                        114.4 ms
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="section-title">Program Details</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Program</th>
+                        <th>Description</th>
+                        <th>Complexity</th>
+                        <th>LOC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CRECUST</strong></td>
+                        <td>Customer Create - async credit checks, Named Counter</td>
+                        <td><span class="complexity complexity-high">high</span></td>
+                        <td>1440</td>
+                    </tr>
+                    <tr>
+                        <td><strong>INQCUST</strong></td>
+                        <td>Customer Inquiry - VSAM read with composite key</td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>712</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UPDCUST</strong></td>
+                        <td>Customer Update - limited fields, no PROCTRAN</td>
+                        <td><span class="complexity complexity-low">low</span></td>
+                        <td>365</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DELCUS</strong></td>
+                        <td>Customer Delete - cascade delete all accounts</td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>762</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CREACC</strong></td>
+                        <td>Account Create - Named Counter, PROCTRAN logging</td>
+                        <td><span class="complexity complexity-high">high</span></td>
+                        <td>1248</td>
+                    </tr>
+                    <tr>
+                        <td><strong>INQACC</strong></td>
+                        <td>Account Inquiry - single account lookup</td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>1003</td>
+                    </tr>
+                    <tr>
+                        <td><strong>INQACCCU</strong></td>
+                        <td>Account Inquiry by Customer - cursor pagination</td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>883</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UPDACC</strong></td>
+                        <td>Account Update - type, interest, overdraft fields</td>
+                        <td><span class="complexity complexity-low">low</span></td>
+                        <td>407</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DELACC</strong></td>
+                        <td>Account Delete - PROCTRAN audit logging</td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>650</td>
+                    </tr>
+                    <tr>
+                        <td><strong>XFRFUN</strong></td>
+                        <td>Transfer Funds - atomic dual-account updates</td>
+                        <td><span class="complexity complexity-high">high</span></td>
+                        <td>1925</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DBCRFUN</strong></td>
+                        <td>Debit/Credit - balance updates, PROCTRAN logging</td>
+                        <td><span class="complexity complexity-medium">medium</span></td>
+                        <td>862</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            <p>Generated by Performance Baseline Generator | CICS Banking Sample Application Migration</p>
+        </div>
+    </div>
+    
+    <script>
+        function sortTable(columnIndex) {
+            const table = document.getElementById('metricsTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                const aVal = a.cells[columnIndex].textContent.trim();
+                const bVal = b.cells[columnIndex].textContent.trim();
+                
+                const aNum = parseFloat(aVal);
+                const bNum = parseFloat(bVal);
+                
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return bNum - aNum;
+                }
+                
+                return aVal.localeCompare(bVal);
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+</body>
+</html>
