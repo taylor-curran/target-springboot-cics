@@ -60,3 +60,4 @@ jacoco.exec
 # SonarQube
 .sonar/
 sonar-project.properties
+.factorypath
