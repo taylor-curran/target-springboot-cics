@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: cbsa-migration
+  datasource:
+    url: jdbc:sqlite:banking.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    hibernate:
+      ddl-auto: none
+  jackson:
+    serialization:
+      indent-output: true
+
+server:
+  port: 8085
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      simple:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.cbsa.migration: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] [%X{correlationId}] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] [%X{correlationId}] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/application.log
+    max-size: 10MB
+    max-history: 30
+
+credit-agency:
+  simulation:
+    delay:
+      enabled: true
+      max-seconds: 3
+    score:
+      min: 1
+      max: 999
+
+data:
+  generation:
+    enabled: true
+    customer:
+      start: 1
+      end: 100
+      step: 1
+    seed: 12345
+    transaction:
+      days: 30
