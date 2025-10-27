@@ -19,7 +19,7 @@ migration_plan = {
             "id": "setup_002",
             "title": "Setup Local SQLite Database",
             "content": "Create SQLite schema matching COBOL data structures. Load test data fixtures for customers, accounts, and transactions. Configure Spring datasource for local development.",
-            "status": "complete",
+            "status": "completed",
             "depends_on": [],
             "deliverables": [
                 "banking.db",
