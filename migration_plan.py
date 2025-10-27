@@ -8,8 +8,7 @@ migration_plan = {
             "status": "completed",
             "depends_on": [],
             "deliverables": [
-                "performance_baseline.json",
-                "performance_dashboard.html"
+                "performance_baseline.json"
             ],
             "estimated_hours": 8,
             "validation_mechanism": "Performance metrics exported to performance_baseline.json containing P50/P95/P99 latencies for all 11 business logic programs. Each program measured under load with 100+ samples. Baseline dashboard displays metrics with timestamps.",
