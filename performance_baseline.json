@@ -1,0 +1,123 @@
+{
+  "baseline_version" : "1.0",
+  "generated_timestamp" : "2024-10-27T01:25:00Z",
+  "environment" : "COBOL/CICS Mainframe (Simulated)",
+  "sample_methodology" : "Normal distribution with realistic latency parameters based on operation complexity",
+  "programs" : [ {
+    "program_name" : "INQCUST",
+    "operation" : "Customer Read",
+    "description" : "Retrieve customer by composite key (sortcode + customer_number)",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 85.0,
+      "p95" : 139.0,
+      "p99" : 166.0
+    }
+  }, {
+    "program_name" : "CRECUST",
+    "operation" : "Customer Create",
+    "description" : "Create new customer with async credit check and Named Counter",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 347.0,
+      "p95" : 515.0,
+      "p99" : 580.0
+    }
+  }, {
+    "program_name" : "UPDCUST",
+    "operation" : "Customer Update",
+    "description" : "Update customer fields (limited fields, no PROCTRAN)",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 118.0,
+      "p95" : 181.0,
+      "p99" : 212.0
+    }
+  }, {
+    "program_name" : "DELCUS",
+    "operation" : "Customer Delete",
+    "description" : "Delete customer with cascade to all accounts and PROCTRAN logging",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 278.0,
+      "p95" : 414.0,
+      "p99" : 468.0
+    }
+  }, {
+    "program_name" : "INQACC",
+    "operation" : "Account Read",
+    "description" : "Retrieve single account by account number",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 74.0,
+      "p95" : 126.0,
+      "p99" : 145.0
+    }
+  }, {
+    "program_name" : "INQACCCU",
+    "operation" : "Account List by Customer",
+    "description" : "List all accounts for a customer with cursor pagination",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 94.0,
+      "p95" : 151.0,
+      "p99" : 177.0
+    }
+  }, {
+    "program_name" : "CREACC",
+    "operation" : "Account Create",
+    "description" : "Create new account with Named Counter for account number",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 318.0,
+      "p95" : 478.0,
+      "p99" : 542.0
+    }
+  }, {
+    "program_name" : "UPDACC",
+    "operation" : "Account Update",
+    "description" : "Update account fields with business rule validation",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 139.0,
+      "p95" : 212.0,
+      "p99" : 246.0
+    }
+  }, {
+    "program_name" : "DELACC",
+    "operation" : "Account Delete",
+    "description" : "Delete account with PROCTRAN audit logging",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 199.0,
+      "p95" : 299.0,
+      "p99" : 343.0
+    }
+  }, {
+    "program_name" : "XFRFUN",
+    "operation" : "Transfer Funds",
+    "description" : "Atomic dual-account transfer with rollback on failure",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 447.0,
+      "p95" : 654.0,
+      "p99" : 739.0
+    }
+  }, {
+    "program_name" : "DBCRFUN",
+    "operation" : "Debit/Credit Funds",
+    "description" : "Single account debit or credit with balance updates",
+    "sample_count" : 100,
+    "latency_ms" : {
+      "p50" : 179.0,
+      "p95" : 273.0,
+      "p99" : 313.0
+    }
+  } ],
+  "summary" : {
+    "total_programs" : 11,
+    "total_samples" : 1100,
+    "samples_per_program" : 100,
+    "notes" : "Baseline metrics represent typical COBOL/CICS transaction performance for migration validation. These simulated baselines establish performance targets that Java implementations should meet or exceed."
+  }
+}
