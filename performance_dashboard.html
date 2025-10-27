@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COBOL Performance Baselines Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .metadata {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .metadata p {
+            margin: 5px 0;
+            color: #4a5568;
+        }
+        
+        .metadata strong {
+            color: #2d3748;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .controls select, .controls button {
+            padding: 10px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .controls select:hover, .controls button:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        th:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        tr:hover {
+            background: #f7fafc;
+        }
+        
+        .complexity-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .complexity-low {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .complexity-medium {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+        
+        .complexity-high {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .latency-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .chart-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+        
+        canvas {
+            max-height: 400px;
+        }
+        
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: #edf2f7;
+            border-radius: 8px;
+        }
+        
+        .legend h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .legend-item {
+            margin: 8px 0;
+            color: #4a5568;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            table {
+                font-size: 0.9em;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 COBOL Performance Baselines Dashboard</h1>
+        <p class="subtitle">Synthetic Performance Metrics for 11 Business Logic Programs</p>
+        
+        <div class="metadata">
+            <p><strong>Generated:</strong> <span id="timestamp">Loading...</span></p>
+            <p><strong>Baseline Type:</strong> <span id="baselineType">Loading...</span></p>
+            <p><strong>Environment:</strong> <span id="environment">Loading...</span></p>
+            <p><strong>Description:</strong> <span id="description">Loading...</span></p>
+        </div>
+        
+        <div class="controls">
+            <select id="filterComplexity">
+                <option value="all">All Complexity Levels</option>
+                <option value="low">Low Complexity</option>
+                <option value="medium">Medium Complexity</option>
+                <option value="high">High Complexity</option>
+            </select>
+            <button onclick="sortTable('name')">Sort by Name</button>
+            <button onclick="sortTable('complexity')">Sort by Complexity</button>
+            <button onclick="sortTable('linesOfCode')">Sort by LOC</button>
+            <button onclick="sortTable('p50')">Sort by P50</button>
+        </div>
+        
+        <table id="programsTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable('name')">Program</th>
+                    <th onclick="sortTable('description')">Description</th>
+                    <th onclick="sortTable('complexity')">Complexity</th>
+                    <th onclick="sortTable('linesOfCode')">LOC</th>
+                    <th onclick="sortTable('p50')">P50 (ms)</th>
+                    <th onclick="sortTable('p95')">P95 (ms)</th>
+                    <th onclick="sortTable('p99')">P99 (ms)</th>
+                    <th onclick="sortTable('sampleCount')">Samples</th>
+                </tr>
+            </thead>
+            <tbody id="programsTableBody">
+            </tbody>
+        </table>
+        
+        <div class="chart-container">
+            <h2 style="margin-bottom: 20px; color: #2d3748;">Latency Distribution by Program</h2>
+            <canvas id="latencyChart"></canvas>
+        </div>
+        
+        <div class="legend">
+            <h3>📊 Metric Definitions</h3>
+            <div class="legend-item"><strong>P50 (Median):</strong> 50% of requests complete within this time</div>
+            <div class="legend-item"><strong>P95:</strong> 95% of requests complete within this time</div>
+            <div class="legend-item"><strong>P99:</strong> 99% of requests complete within this time</div>
+            <div class="legend-item"><strong>Samples:</strong> Number of measurements taken per program (100+)</div>
+            <div class="legend-item"><strong>Complexity:</strong> Based on lines of code and operation complexity</div>
+        </div>
+    </div>
+    
+    <script>
+        let programsData = [];
+        let chart = null;
+        
+        async function loadData() {
+            try {
+                const response = await fetch('performance_baseline.json');
+                const data = await response.json();
+                
+                document.getElementById('timestamp').textContent = new Date(data.generated_at).toLocaleString();
+                document.getElementById('baselineType').textContent = data.baseline_type;
+                document.getElementById('environment').textContent = data.environment;
+                document.getElementById('description').textContent = data.description;
+                
+                programsData = data.programs;
+                renderTable();
+                renderChart();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('programsTableBody').innerHTML = 
+                    '<tr><td colspan="8" style="text-align: center; color: red;">Error loading data. Make sure performance_baseline.json exists.</td></tr>';
+            }
+        }
+        
+        function renderTable(filteredData = null) {
+            const data = filteredData || programsData;
+            const tbody = document.getElementById('programsTableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach(program => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${program.name}</strong></td>
+                    <td>${program.description}</td>
+                    <td><span class="complexity-badge complexity-${program.complexity}">${program.complexity.toUpperCase()}</span></td>
+                    <td>${program.linesOfCode.toLocaleString()}</td>
+                    <td class="latency-cell">${program.latencies.p50_ms}</td>
+                    <td class="latency-cell">${program.latencies.p95_ms}</td>
+                    <td class="latency-cell">${program.latencies.p99_ms}</td>
+                    <td>${program.sampleCount}</td>
+                `;
+            });
+        }
+        
+        function renderChart() {
+            const ctx = document.getElementById('latencyChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const labels = programsData.map(p => p.name);
+            const p50Data = programsData.map(p => p.latencies.p50_ms);
+            const p95Data = programsData.map(p => p.latencies.p95_ms);
+            const p99Data = programsData.map(p => p.latencies.p99_ms);
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'P50 (ms)',
+                            data: p50Data,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'P95 (ms)',
+                            data: p95Data,
+                            backgroundColor: 'rgba(237, 137, 54, 0.8)',
+                            borderColor: 'rgba(237, 137, 54, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'P99 (ms)',
+                            data: p99Data,
+                            backgroundColor: 'rgba(245, 101, 101, 0.8)',
+                            borderColor: 'rgba(245, 101, 101, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Latency (milliseconds)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'COBOL Program'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        function sortTable(column) {
+            const sortedData = [...programsData];
+            
+            sortedData.sort((a, b) => {
+                let valA, valB;
+                
+                if (column === 'p50' || column === 'p95' || column === 'p99') {
+                    valA = a.latencies[column + '_ms'];
+                    valB = b.latencies[column + '_ms'];
+                } else if (column === 'name' || column === 'description' || column === 'complexity') {
+                    valA = a[column].toLowerCase();
+                    valB = b[column].toLowerCase();
+                    return valA.localeCompare(valB);
+                } else {
+                    valA = a[column];
+                    valB = b[column];
+                }
+                
+                return valA - valB;
+            });
+            
+            renderTable(sortedData);
+        }
+        
+        document.getElementById('filterComplexity').addEventListener('change', function(e) {
+            const filter = e.target.value;
+            if (filter === 'all') {
+                renderTable();
+            } else {
+                const filtered = programsData.filter(p => p.complexity === filter);
+                renderTable(filtered);
+            }
+        });
+        
+        loadData();
+    </script>
+</body>
+</html>

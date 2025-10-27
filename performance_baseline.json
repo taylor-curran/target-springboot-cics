@@ -1,0 +1,139 @@
+{
+  "environment" : "COBOL/CICS Mainframe (estimated)",
+  "baseline_type" : "synthetic",
+  "generated_at" : "2025-10-27T01:08:55.496897605Z",
+  "description" : "Synthetic performance baselines for COBOL business logic programs",
+  "programs" : [ {
+    "name" : "INQCUST",
+    "description" : "Customer Read - Query customer by sort code and number",
+    "status" : "not-migrated",
+    "complexity" : "medium",
+    "linesOfCode" : 712,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 125,
+      "p99_ms" : 250,
+      "p50_ms" : 50
+    }
+  }, {
+    "name" : "CRECUST",
+    "description" : "Customer Create - Create customer with credit agency integration and Named Counter",
+    "status" : "not-migrated",
+    "complexity" : "high",
+    "linesOfCode" : 1440,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 400,
+      "p99_ms" : 800,
+      "p50_ms" : 150
+    }
+  }, {
+    "name" : "UPDCUST",
+    "description" : "Customer Update - Modify customer fields without PROCTRAN audit",
+    "status" : "not-migrated",
+    "complexity" : "low",
+    "linesOfCode" : 365,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 75,
+      "p99_ms" : 150,
+      "p50_ms" : 25
+    }
+  }, {
+    "name" : "DELCUS",
+    "description" : "Customer Delete - Cascade delete customer and all accounts with PROCTRAN",
+    "status" : "not-migrated",
+    "complexity" : "medium",
+    "linesOfCode" : 762,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 125,
+      "p99_ms" : 250,
+      "p50_ms" : 50
+    }
+  }, {
+    "name" : "INQACC",
+    "description" : "Account Read - Query account by account number",
+    "status" : "not-migrated",
+    "complexity" : "medium",
+    "linesOfCode" : 1003,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 125,
+      "p99_ms" : 250,
+      "p50_ms" : 50
+    }
+  }, {
+    "name" : "INQACCCU",
+    "description" : "Account Read for Customer - Query all accounts for customer with cursor pagination",
+    "status" : "not-migrated",
+    "complexity" : "medium",
+    "linesOfCode" : 883,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 125,
+      "p99_ms" : 250,
+      "p50_ms" : 50
+    }
+  }, {
+    "name" : "CREACC",
+    "description" : "Account Create - Create account with Named Counter and PROCTRAN",
+    "status" : "not-migrated",
+    "complexity" : "high",
+    "linesOfCode" : 1248,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 400,
+      "p99_ms" : 800,
+      "p50_ms" : 150
+    }
+  }, {
+    "name" : "UPDACC",
+    "description" : "Account Update - Modify account fields with business rule validation",
+    "status" : "not-migrated",
+    "complexity" : "low",
+    "linesOfCode" : 407,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 75,
+      "p99_ms" : 150,
+      "p50_ms" : 25
+    }
+  }, {
+    "name" : "DELACC",
+    "description" : "Account Delete - Delete account with PROCTRAN audit",
+    "status" : "not-migrated",
+    "complexity" : "medium",
+    "linesOfCode" : 650,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 125,
+      "p99_ms" : 250,
+      "p50_ms" : 50
+    }
+  }, {
+    "name" : "XFRFUN",
+    "description" : "Transfer Funds - Atomic debit/credit operations across two accounts with rollback",
+    "status" : "not-migrated",
+    "complexity" : "high",
+    "linesOfCode" : 1925,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 500,
+      "p99_ms" : 1000,
+      "p50_ms" : 200
+    }
+  }, {
+    "name" : "DBCRFUN",
+    "description" : "Debit/Credit - Cash deposits and withdrawals with balance updates and PROCTRAN",
+    "status" : "not-migrated",
+    "complexity" : "medium",
+    "linesOfCode" : 862,
+    "sampleCount" : 100,
+    "latencies" : {
+      "p95_ms" : 125,
+      "p99_ms" : 250,
+      "p50_ms" : 50
+    }
+  } ]
+}
