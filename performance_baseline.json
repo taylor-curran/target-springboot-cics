@@ -1,0 +1,71 @@
+{
+  "generatedAt" : "2025-10-27T01:01:14.497788125Z",
+  "methodology" : "Synthetic baseline using CPU work scaled by COBOL program lines and complexity (low=1, medium=2, high=3) under concurrent load; deterministic seed.",
+  "results" : [ {
+    "program" : "CRECUST",
+    "samples" : 1000,
+    "p50_ms" : 0.245127,
+    "p95_ms" : 0.845582,
+    "p99_ms" : 1.004459
+  }, {
+    "program" : "INQCUST",
+    "samples" : 1000,
+    "p50_ms" : 0.002896,
+    "p95_ms" : 0.004178,
+    "p99_ms" : 0.006543
+  }, {
+    "program" : "UPDCUST",
+    "samples" : 1000,
+    "p50_ms" : 8.11E-4,
+    "p95_ms" : 0.001242,
+    "p99_ms" : 0.001503
+  }, {
+    "program" : "DELCUS",
+    "samples" : 1000,
+    "p50_ms" : 0.002946,
+    "p95_ms" : 0.003889,
+    "p99_ms" : 0.005475
+  }, {
+    "program" : "CREACC",
+    "samples" : 1000,
+    "p50_ms" : 0.009358,
+    "p95_ms" : 0.0154,
+    "p99_ms" : 0.026213
+  }, {
+    "program" : "INQACC",
+    "samples" : 1000,
+    "p50_ms" : 0.00514,
+    "p95_ms" : 0.006473,
+    "p99_ms" : 0.008842
+  }, {
+    "program" : "INQACCCU",
+    "samples" : 1000,
+    "p50_ms" : 0.004453,
+    "p95_ms" : 0.007415,
+    "p99_ms" : 0.009749
+  }, {
+    "program" : "UPDACC",
+    "samples" : 1000,
+    "p50_ms" : 9.12E-4,
+    "p95_ms" : 0.001393,
+    "p99_ms" : 0.001873
+  }, {
+    "program" : "DELACC",
+    "samples" : 1000,
+    "p50_ms" : 0.003256,
+    "p95_ms" : 0.005431,
+    "p99_ms" : 0.006773
+  }, {
+    "program" : "XFRFUN",
+    "samples" : 1000,
+    "p50_ms" : 0.010725,
+    "p95_ms" : 0.015039,
+    "p99_ms" : 0.029867
+  }, {
+    "program" : "DBCRFUN",
+    "samples" : 1000,
+    "p50_ms" : 0.003186,
+    "p95_ms" : 0.003908,
+    "p99_ms" : 0.006844
+  } ]
+}
