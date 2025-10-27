@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COBOL Program Performance Baseline Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .metadata {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .metadata-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .metadata-value {
+            color: #6c757d;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            color: #212529;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 40px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .complexity-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .complexity-simple {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .complexity-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .complexity-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .complexity-very-high {
+            background: #d1d1d1;
+            color: #383d41;
+        }
+        
+        .metric-cell {
+            font-weight: 600;
+        }
+        
+        .metric-fast {
+            color: #28a745;
+        }
+        
+        .metric-medium {
+            color: #ffc107;
+        }
+        
+        .metric-slow {
+            color: #dc3545;
+        }
+        
+        .notes {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        
+        .notes h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .notes ul {
+            margin-left: 20px;
+            color: #495057;
+        }
+        
+        .notes li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>COBOL Program Performance Baseline Dashboard</h1>
+            <p>P50/P95/P99 Latency Metrics for 11 Business Logic Programs</p>
+        </div>
+        
+        <div class="metadata" id="metadata-section">
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">📊 Performance Overview</h2>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">📈 Detailed Metrics</h2>
+                <table id="metricsTable">
+                    <thead>
+                        <tr>
+                            <th>Program</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>LOC</th>
+                            <th>Complexity</th>
+                            <th>P50 (ms)</th>
+                            <th>P95 (ms)</th>
+                            <th>P99 (ms)</th>
+                            <th>Samples</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metricsBody">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3>📝 Methodology Notes</h3>
+                <ul id="notesList">
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadPerformanceData() {
+            try {
+                const response = await fetch('performance_baseline.json');
+                const data = await response.json();
+                
+                renderMetadata(data.metadata);
+                renderTable(data.programs);
+                renderChart(data.programs);
+                renderNotes(data.metadata.notes);
+            } catch (error) {
+                console.error('Error loading performance data:', error);
+                document.getElementById('metricsBody').innerHTML = 
+                    '<tr><td colspan="9" style="text-align:center;color:red;">Error loading performance data. Please ensure performance_baseline.json exists.</td></tr>';
+            }
+        }
+        
+        function renderMetadata(metadata) {
+            const metadataSection = document.getElementById('metadata-section');
+            metadataSection.innerHTML = `
+                <div class="metadata-grid">
+                    <div class="metadata-item">
+                        <span class="metadata-label">Generated:</span>
+                        <span class="metadata-value">${new Date(metadata.generated_at).toLocaleString()}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Environment:</span>
+                        <span class="metadata-value">${metadata.environment}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Samples per Program:</span>
+                        <span class="metadata-value">${metadata.sample_count_per_program}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Methodology:</span>
+                        <span class="metadata-value">${metadata.methodology}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderTable(programs) {
+            const tbody = document.getElementById('metricsBody');
+            tbody.innerHTML = programs.map(program => {
+                const p99Class = program.metrics.p99_ms < 50 ? 'metric-fast' : 
+                                program.metrics.p99_ms < 200 ? 'metric-medium' : 'metric-slow';
+                
+                return `
+                    <tr>
+                        <td><strong>${program.name}</strong></td>
+                        <td>${program.description}</td>
+                        <td>${program.operation_type}</td>
+                        <td>${program.lines_of_code.toLocaleString()}</td>
+                        <td><span class="complexity-badge complexity-${program.complexity}">${program.complexity}</span></td>
+                        <td class="metric-cell">${program.metrics.p50_ms}</td>
+                        <td class="metric-cell">${program.metrics.p95_ms}</td>
+                        <td class="metric-cell ${p99Class}">${program.metrics.p99_ms}</td>
+                        <td>${program.metrics.sample_count}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function renderChart(programs) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            const sortedPrograms = [...programs].sort((a, b) => 
+                b.metrics.p99_ms - a.metrics.p99_ms
+            );
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedPrograms.map(p => p.name),
+                    datasets: [
+                        {
+                            label: 'P50 (median)',
+                            data: sortedPrograms.map(p => p.metrics.p50_ms),
+                            backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'P95',
+                            data: sortedPrograms.map(p => p.metrics.p95_ms),
+                            backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                            borderColor: 'rgba(255, 193, 7, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'P99',
+                            data: sortedPrograms.map(p => p.metrics.p99_ms),
+                            backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                            borderColor: 'rgba(220, 53, 69, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Latency Distribution by Program (sorted by P99)',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Latency (ms)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'COBOL Program'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderNotes(notes) {
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = notes.map(note => `<li>${note}</li>`).join('');
+        }
+        
+        loadPerformanceData();
+    </script>
+</body>
+</html>
