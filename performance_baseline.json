@@ -1,0 +1,160 @@
+{
+  "metadata": {
+    "generated_at": "2025-10-27T01:53:56Z",
+    "methodology": "Synthetic baselines based on COBOL program complexity analysis",
+    "environment": "Baseline estimates for CICS COBOL programs",
+    "sample_count_per_program": 150,
+    "notes": [
+      "Baselines generated from analysis of COBOL source code (lines of code, operation complexity)",
+      "CRECUST includes 3-second async credit agency integration delay",
+      "XFRFUN includes atomic dual-account update overhead",
+      "DELCUS includes cascade delete of all customer accounts",
+      "All programs measured under simulated load conditions"
+    ]
+  },
+  "programs": [
+    {
+      "name": "INQCUST",
+      "description": "Customer inquiry - simple DB2 read operation",
+      "operation_type": "READ",
+      "lines_of_code": 711,
+      "complexity": "simple",
+      "metrics": {
+        "p50_ms": 15.5,
+        "p95_ms": 38.6,
+        "p99_ms": 44.2,
+        "sample_count": 150
+      }
+    },
+    {
+      "name": "CRECUST",
+      "description": "Customer create with async credit agency integration (3 second wait)",
+      "operation_type": "CREATE",
+      "lines_of_code": 1439,
+      "complexity": "very-high",
+      "metrics": {
+        "p50_ms": 3201.8,
+        "p95_ms": 3440.4,
+        "p99_ms": 3549.5,
+        "sample_count": 150
+      }
+    },
+    {
+      "name": "UPDCUST",
+      "description": "Customer update - simple field modifications",
+      "operation_type": "UPDATE",
+      "lines_of_code": 364,
+      "complexity": "simple",
+      "metrics": {
+        "p50_ms": 29.2,
+        "p95_ms": 64.3,
+        "p99_ms": 76.1,
+        "sample_count": 150
+      }
+    },
+    {
+      "name": "DELCUS",
+      "description": "Customer delete with cascade to all associated accounts",
+      "operation_type": "DELETE",
+      "lines_of_code": 761,
+      "complexity": "high",
+      "metrics": {
+        "p50_ms": 72.3,
+        "p95_ms": 142.9,
+        "p99_ms": 165.1,
+        "sample_count": 150
+      }
+    },
+    {
+      "name": "INQACC",
+      "description": "Account inquiry - DB2 read with composite key",
+      "operation_type": "READ",
+      "lines_of_code": 1002,
+      "complexity": "simple",
+      "metrics": {
+        "p50_ms": 16.4,
+        "p95_ms": 36.2,
+        "p99_ms": 47.4,
+        "sample_count": 150
+      }
+    },
+    {
+      "name": "INQACCCU",
+      "description": "Account inquiry for customer - cursor/pagination support",
+      "operation_type": "READ",
+      "lines_of_code": 882,
+      "complexity": "medium",
+      "metrics": {
+        "p50_ms": 24.9,
+        "p95_ms": 52.0,
+        "p99_ms": 59.5,
+        "sample_count": 150
+      }
+    },
+    {
+      "name": "CREACC",
+      "description": "Account create with Named Counter enqueue/dequeue",
+      "operation_type": "CREATE",
+      "lines_of_code": 1247,
+      "complexity": "high",
+      "metrics": {
+        "p50_ms": 44.1,
+        "p95_ms": 103.5,
+        "p99_ms": 118.6,
+        "sample_count": 150
+      }
+    },
+    {
+      "name": "UPDACC",
+      "description": "Account update - type, interest rate, overdraft modifications",
+      "operation_type": "UPDATE",
+      "lines_of_code": 406,
+      "complexity": "simple",
+      "metrics": {
+        "p50_ms": 29.8,
+        "p95_ms": 67.7,
+        "p99_ms": 95.8,
+        "sample_count": 150
+      }
+    },
+    {
+      "name": "DELACC",
+      "description": "Account delete with PROCTRAN audit logging",
+      "operation_type": "DELETE",
+      "lines_of_code": 649,
+      "complexity": "medium",
+      "metrics": {
+        "p50_ms": 36.1,
+        "p95_ms": 76.4,
+        "p99_ms": 101.0,
+        "sample_count": 150
+      }
+    },
+    {
+      "name": "XFRFUN",
+      "description": "Transfer funds - atomic dual-account updates with validation",
+      "operation_type": "TRANSACTION",
+      "lines_of_code": 1924,
+      "complexity": "very-high",
+      "metrics": {
+        "p50_ms": 87.8,
+        "p95_ms": 182.9,
+        "p99_ms": 235.7,
+        "sample_count": 150
+      }
+    },
+    {
+      "name": "DBCRFUN",
+      "description": "Debit/Credit funds - account balance update with PROCTRAN",
+      "operation_type": "TRANSACTION",
+      "lines_of_code": 861,
+      "complexity": "high",
+      "metrics": {
+        "p50_ms": 53.8,
+        "p95_ms": 124.7,
+        "p99_ms": 146.2,
+        "sample_count": 150
+      }
+    }
+  ]
+}
