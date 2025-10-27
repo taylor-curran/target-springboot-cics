@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COBOL Performance Baseline Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 30px 40px;
+            border-bottom: 4px solid #667eea;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        
+        .metadata {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 15px;
+        }
+        
+        .metadata-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .metadata-label {
+            font-weight: 600;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .card-value {
+            font-size: 36px;
+            font-weight: 700;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        thead {
+            background: #2d3748;
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        tbody tr:hover {
+            background: #f7fafc;
+        }
+        
+        .program-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .operation {
+            color: #4a5568;
+        }
+        
+        .latency-value {
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .latency-fast {
+            color: #38a169;
+        }
+        
+        .latency-medium {
+            color: #d69e2e;
+        }
+        
+        .latency-slow {
+            color: #e53e3e;
+        }
+        
+        .bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .bar-fast {
+            background: linear-gradient(90deg, #38a169 0%, #48bb78 100%);
+        }
+        
+        .bar-medium {
+            background: linear-gradient(90deg, #d69e2e 0%, #ecc94b 100%);
+        }
+        
+        .bar-slow {
+            background: linear-gradient(90deg, #e53e3e 0%, #fc8181 100%);
+        }
+        
+        .chart-section {
+            margin-top: 40px;
+        }
+        
+        .chart-container {
+            background: #f7fafc;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .bar-chart-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .bar-chart-label {
+            width: 120px;
+            font-weight: 600;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            color: #2d3748;
+        }
+        
+        .bar-chart-bar-container {
+            flex: 1;
+            height: 30px;
+            background: white;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bar-chart-bar {
+            height: 100%;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        footer {
+            background: #f7fafc;
+            padding: 20px 40px;
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏦 COBOL Performance Baseline Dashboard</h1>
+            <div class="subtitle">CICS Banking Sample Application - Migration Performance Targets</div>
+            <div class="metadata">
+                <div class="metadata-item">
+                    <span class="metadata-label">Version:</span>
+                    <span id="version">1.0</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Generated:</span>
+                    <span id="timestamp">2024-10-27T01:25:00Z</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Environment:</span>
+                    <span id="environment">COBOL/CICS Mainframe (Simulated)</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="summary-cards">
+                <div class="card">
+                    <div class="card-label">Total Programs</div>
+                    <div class="card-value" id="total-programs">11</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Total Samples</div>
+                    <div class="card-value" id="total-samples">1,100</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Samples per Program</div>
+                    <div class="card-value" id="samples-per-program">100</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Avg P50 Latency</div>
+                    <div class="card-value" id="avg-p50">195ms</div>
+                </div>
+            </div>
+            
+            <h2 class="section-title">📊 Performance Metrics by Program</h2>
+            
+            <table id="metrics-table">
+                <thead>
+                    <tr>
+                        <th>Program</th>
+                        <th>Operation</th>
+                        <th>P50 (ms)</th>
+                        <th>P95 (ms)</th>
+                        <th>P99 (ms)</th>
+                        <th>Samples</th>
+                        <th>Visual</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+            
+            <div class="chart-section">
+                <div class="chart-container">
+                    <h3 class="chart-title">P50 Latency Comparison</h3>
+                    <div class="bar-chart" id="p50-chart"></div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">P95 Latency Comparison</h3>
+                    <div class="bar-chart" id="p95-chart"></div>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(90deg, #38a169 0%, #48bb78 100%);"></div>
+                        <span>Fast (&lt;200ms)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(90deg, #d69e2e 0%, #ecc94b 100%);"></div>
+                        <span>Medium (200-400ms)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(90deg, #e53e3e 0%, #fc8181 100%);"></div>
+                        <span>Slow (&gt;400ms)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>CICS Banking Sample Application - Java Migration Project</p>
+            <p style="margin-top: 10px; font-size: 12px;">
+                Baseline metrics represent typical COBOL/CICS transaction performance for migration validation.
+                These simulated baselines establish performance targets that Java implementations should meet or exceed.
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        const baselineData = {
+            "baseline_version": "1.0",
+            "generated_timestamp": "2024-10-27T01:25:00Z",
+            "environment": "COBOL/CICS Mainframe (Simulated)",
+            "programs": [
+                {
+                    "program_name": "INQCUST",
+                    "operation": "Customer Read",
+                    "description": "Retrieve customer by composite key",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 85.0, "p95": 139.0, "p99": 166.0}
+                },
+                {
+                    "program_name": "CRECUST",
+                    "operation": "Customer Create",
+                    "description": "Create new customer with async credit check",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 347.0, "p95": 515.0, "p99": 580.0}
+                },
+                {
+                    "program_name": "UPDCUST",
+                    "operation": "Customer Update",
+                    "description": "Update customer fields",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 118.0, "p95": 181.0, "p99": 212.0}
+                },
+                {
+                    "program_name": "DELCUS",
+                    "operation": "Customer Delete",
+                    "description": "Delete customer with cascade",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 278.0, "p95": 414.0, "p99": 468.0}
+                },
+                {
+                    "program_name": "INQACC",
+                    "operation": "Account Read",
+                    "description": "Retrieve single account",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 74.0, "p95": 126.0, "p99": 145.0}
+                },
+                {
+                    "program_name": "INQACCCU",
+                    "operation": "Account List by Customer",
+                    "description": "List accounts with pagination",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 94.0, "p95": 151.0, "p99": 177.0}
+                },
+                {
+                    "program_name": "CREACC",
+                    "operation": "Account Create",
+                    "description": "Create new account with Named Counter",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 318.0, "p95": 478.0, "p99": 542.0}
+                },
+                {
+                    "program_name": "UPDACC",
+                    "operation": "Account Update",
+                    "description": "Update account with validation",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 139.0, "p95": 212.0, "p99": 246.0}
+                },
+                {
+                    "program_name": "DELACC",
+                    "operation": "Account Delete",
+                    "description": "Delete account with audit",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 199.0, "p95": 299.0, "p99": 343.0}
+                },
+                {
+                    "program_name": "XFRFUN",
+                    "operation": "Transfer Funds",
+                    "description": "Atomic dual-account transfer",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 447.0, "p95": 654.0, "p99": 739.0}
+                },
+                {
+                    "program_name": "DBCRFUN",
+                    "operation": "Debit/Credit Funds",
+                    "description": "Single account debit or credit",
+                    "sample_count": 100,
+                    "latency_ms": {"p50": 179.0, "p95": 273.0, "p99": 313.0}
+                }
+            ],
+            "summary": {
+                "total_programs": 11,
+                "total_samples": 1100,
+                "samples_per_program": 100
+            }
+        };
+
+        function getLatencyClass(latency) {
+            if (latency < 200) return 'fast';
+            if (latency < 400) return 'medium';
+            return 'slow';
+        }
+
+        function populateTable() {
+            const tbody = document.getElementById('table-body');
+            baselineData.programs.forEach(program => {
+                const row = document.createElement('tr');
+                
+                const p50 = program.latency_ms.p50;
+                const p95 = program.latency_ms.p95;
+                const p99 = program.latency_ms.p99;
+                const p50Class = getLatencyClass(p50);
+                
+                row.innerHTML = `
+                    <td><span class="program-name">${program.program_name}</span></td>
+                    <td><span class="operation">${program.operation}</span></td>
+                    <td><span class="latency-value latency-${p50Class}">${p50.toFixed(1)}</span></td>
+                    <td><span class="latency-value latency-${getLatencyClass(p95)}">${p95.toFixed(1)}</span></td>
+                    <td><span class="latency-value latency-${getLatencyClass(p99)}">${p99.toFixed(1)}</span></td>
+                    <td>${program.sample_count}</td>
+                    <td>
+                        <div class="bar-container">
+                            <div class="bar bar-${p50Class}" style="width: ${(p50 / 800) * 100}%"></div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function createBarChart(containerId, metricKey) {
+            const container = document.getElementById(containerId);
+            const maxValue = Math.max(...baselineData.programs.map(p => p.latency_ms[metricKey]));
+            
+            baselineData.programs.forEach(program => {
+                const value = program.latency_ms[metricKey];
+                const className = getLatencyClass(value);
+                const percentage = (value / maxValue) * 100;
+                
+                const item = document.createElement('div');
+                item.className = 'bar-chart-item';
+                item.innerHTML = `
+                    <div class="bar-chart-label">${program.program_name}</div>
+                    <div class="bar-chart-bar-container">
+                        <div class="bar-chart-bar bar-${className}" style="width: ${percentage}%">
+                            ${value.toFixed(1)}ms
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function updateSummary() {
+            const avgP50 = baselineData.programs.reduce((sum, p) => sum + p.latency_ms.p50, 0) / baselineData.programs.length;
+            document.getElementById('avg-p50').textContent = Math.round(avgP50) + 'ms';
+            document.getElementById('total-samples').textContent = baselineData.summary.total_samples.toLocaleString();
+        }
+
+        populateTable();
+        createBarChart('p50-chart', 'p50');
+        createBarChart('p95-chart', 'p95');
+        updateSummary();
+    </script>
+</body>
+</html>
