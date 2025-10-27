@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COBOL Migration Performance Baselines</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        h1 { color: #333; }
+        .summary { background-color: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        th { background-color: #4CAF50; color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #ddd; }
+        tr:hover { background-color: #f5f5f5; }
+        .low { color: green; }
+        .medium { color: orange; }
+        .high { color: red; }
+        .chart-container { background-color: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>COBOL Migration Performance Baselines</h1>
+    <div class="summary">
+        <h2>Summary</h2>
+        <p><strong>Generated:</strong> 2025-10-27T12:47:07.80149018</p>
+        <p><strong>Total Programs:</strong> 11</p>
+        <p><strong>Samples per Program:</strong> 100</p>
+        <p><strong>Purpose:</strong> Synthetic baseline targets for Spring Boot migration validation</p>
+    </div>
+    <table>
+        <tr>
+            <th>Program</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Complexity</th>
+            <th>LOC</th>
+            <th>P50 (ms)</th>
+            <th>P95 (ms)</th>
+            <th>P99 (ms)</th>
+        </tr>
+        <tr>
+            <td><strong>CRECUST</strong></td>
+            <td>Customer Create</td>
+            <td>write</td>
+            <td class="high">high</td>
+            <td>1440</td>
+            <td>100.64</td>
+            <td>134.02</td>
+            <td>144.04</td>
+        </tr>
+        <tr>
+            <td><strong>INQCUST</strong></td>
+            <td>Customer Read</td>
+            <td>read</td>
+            <td class="medium">medium</td>
+            <td>712</td>
+            <td>36.35</td>
+            <td>47.81</td>
+            <td>50.29</td>
+        </tr>
+        <tr>
+            <td><strong>UPDCUST</strong></td>
+            <td>Customer Update</td>
+            <td>write</td>
+            <td class="low">low</td>
+            <td>365</td>
+            <td>48.88</td>
+            <td>66.26</td>
+            <td>72.33</td>
+        </tr>
+        <tr>
+            <td><strong>DELCUS</strong></td>
+            <td>Customer Delete</td>
+            <td>write</td>
+            <td class="medium">medium</td>
+            <td>762</td>
+            <td>75.77</td>
+            <td>101.73</td>
+            <td>108.47</td>
+        </tr>
+        <tr>
+            <td><strong>CREACC</strong></td>
+            <td>Account Create</td>
+            <td>write</td>
+            <td class="high">high</td>
+            <td>1248</td>
+            <td>102.58</td>
+            <td>135.87</td>
+            <td>149.21</td>
+        </tr>
+        <tr>
+            <td><strong>INQACC</strong></td>
+            <td>Account Read</td>
+            <td>read</td>
+            <td class="medium">medium</td>
+            <td>1003</td>
+            <td>36.31</td>
+            <td>49.72</td>
+            <td>56.86</td>
+        </tr>
+        <tr>
+            <td><strong>INQACCCU</strong></td>
+            <td>Account Read All (Customer)</td>
+            <td>read</td>
+            <td class="medium">medium</td>
+            <td>883</td>
+            <td>37.39</td>
+            <td>46.3</td>
+            <td>52.18</td>
+        </tr>
+        <tr>
+            <td><strong>UPDACC</strong></td>
+            <td>Account Update</td>
+            <td>write</td>
+            <td class="low">low</td>
+            <td>407</td>
+            <td>50.04</td>
+            <td>65.95</td>
+            <td>73.05</td>
+        </tr>
+        <tr>
+            <td><strong>DELACC</strong></td>
+            <td>Account Delete</td>
+            <td>write</td>
+            <td class="medium">medium</td>
+            <td>650</td>
+            <td>75.27</td>
+            <td>98.29</td>
+            <td>105.79</td>
+        </tr>
+        <tr>
+            <td><strong>XFRFUN</strong></td>
+            <td>Transfer Funds</td>
+            <td>atomic</td>
+            <td class="high">high</td>
+            <td>1925</td>
+            <td>239.09</td>
+            <td>306.89</td>
+            <td>330.4</td>
+        </tr>
+        <tr>
+            <td><strong>DBCRFUN</strong></td>
+            <td>Debit/Credit</td>
+            <td>write</td>
+            <td class="medium">medium</td>
+            <td>862</td>
+            <td>71.33</td>
+            <td>95.14</td>
+            <td>99.81</td>
+        </tr>
+    </table>
+    <div class="chart-container">
+        <h2>P95 Latency Comparison</h2>
+        <canvas id="latencyChart"></canvas>
+    </div>
+    <script>
+        const ctx = document.getElementById('latencyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['CRECUST', 'INQCUST', 'UPDCUST', 'DELCUS', 'CREACC', 'INQACC', 'INQACCCU', 'UPDACC', 'DELACC', 'XFRFUN', 'DBCRFUN'],
+                datasets: [{
+                    label: 'P95 Latency (ms)',
+                    data: [134.02, 47.81, 66.26, 101.73, 135.87, 49.72, 46.3, 65.95, 98.29, 306.89, 95.14],
+                    backgroundColor: 'rgba(76, 175, 80, 0.6)',
+                    borderColor: 'rgba(76, 175, 80, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Latency (ms)' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Program' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
