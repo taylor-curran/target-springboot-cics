@@ -1,0 +1,192 @@
+{
+  "metadata": {
+    "generated_at": "2025-10-27T00:53:42.477992Z",
+    "methodology": "Simulated baseline using typical COBOL/CICS transaction patterns",
+    "reason": "Original COBOL programs not accessible in sandbox environment",
+    "sample_count_per_program": 150,
+    "program_count": 11
+  },
+  "programs": {
+    "INQCUST": {
+      "description": "Customer Read - Query customer by ID",
+      "category": "read",
+      "samples": {
+        "count": 150,
+        "mean_ms": 78.35,
+        "std_ms": 18.78,
+        "min_ms": 27.61,
+        "max_ms": 129.26
+      },
+      "percentiles": {
+        "p50_ms": 78.92,
+        "p95_ms": 110.63,
+        "p99_ms": 120.83
+      }
+    },
+    "CRECUST": {
+      "description": "Customer Create - Create customer with credit agency check",
+      "category": "create",
+      "samples": {
+        "count": 150,
+        "mean_ms": 132.14,
+        "std_ms": 30.55,
+        "min_ms": 32.76,
+        "max_ms": 245.58
+      },
+      "percentiles": {
+        "p50_ms": 134.27,
+        "p95_ms": 184.62,
+        "p99_ms": 205.64
+      }
+    },
+    "UPDCUST": {
+      "description": "Customer Update - Modify customer fields",
+      "category": "update",
+      "samples": {
+        "count": 150,
+        "mean_ms": 106.37,
+        "std_ms": 23.66,
+        "min_ms": 51.9,
+        "max_ms": 159.75
+      },
+      "percentiles": {
+        "p50_ms": 105.89,
+        "p95_ms": 144.84,
+        "p99_ms": 158.08
+      }
+    },
+    "DELCUS": {
+      "description": "Customer Delete - Cascade delete customer and accounts",
+      "category": "delete",
+      "samples": {
+        "count": 150,
+        "mean_ms": 112.55,
+        "std_ms": 24.19,
+        "min_ms": 53.21,
+        "max_ms": 191.97
+      },
+      "percentiles": {
+        "p50_ms": 111.46,
+        "p95_ms": 154.75,
+        "p99_ms": 169.37
+      }
+    },
+    "INQACC": {
+      "description": "Account Read - Query account by number",
+      "category": "read",
+      "samples": {
+        "count": 150,
+        "mean_ms": 79.29,
+        "std_ms": 20.59,
+        "min_ms": 26.06,
+        "max_ms": 131.47
+      },
+      "percentiles": {
+        "p50_ms": 79.3,
+        "p95_ms": 113.68,
+        "p99_ms": 123.39
+      }
+    },
+    "INQACCCU": {
+      "description": "Account Read by Customer - Query all customer accounts with pagination",
+      "category": "read",
+      "samples": {
+        "count": 150,
+        "mean_ms": 83.99,
+        "std_ms": 18.9,
+        "min_ms": 46.78,
+        "max_ms": 132.65
+      },
+      "percentiles": {
+        "p50_ms": 83.44,
+        "p95_ms": 116.1,
+        "p99_ms": 130.88
+      }
+    },
+    "CREACC": {
+      "description": "Account Create - Create account with named counter",
+      "category": "create",
+      "samples": {
+        "count": 150,
+        "mean_ms": 133.83,
+        "std_ms": 29.01,
+        "min_ms": 57.28,
+        "max_ms": 194.9
+      },
+      "percentiles": {
+        "p50_ms": 135.78,
+        "p95_ms": 181.97,
+        "p99_ms": 193.28
+      }
+    },
+    "UPDACC": {
+      "description": "Account Update - Modify account type, rates, overdraft",
+      "category": "update",
+      "samples": {
+        "count": 150,
+        "mean_ms": 106.73,
+        "std_ms": 26.17,
+        "min_ms": 32.59,
+        "max_ms": 165.99
+      },
+      "percentiles": {
+        "p50_ms": 107.89,
+        "p95_ms": 145.95,
+        "p99_ms": 163.71
+      }
+    },
+    "DELACC": {
+      "description": "Account Delete - Delete account with audit logging",
+      "category": "delete",
+      "samples": {
+        "count": 150,
+        "mean_ms": 115.43,
+        "std_ms": 24.0,
+        "min_ms": 51.15,
+        "max_ms": 179.49
+      },
+      "percentiles": {
+        "p50_ms": 115.48,
+        "p95_ms": 156.44,
+        "p99_ms": 175.2
+      }
+    },
+    "XFRFUN": {
+      "description": "Transfer Funds - Atomic dual-account balance update",
+      "category": "transaction",
+      "samples": {
+        "count": 150,
+        "mean_ms": 218.31,
+        "std_ms": 51.31,
+        "min_ms": 80.45,
+        "max_ms": 340.08
+      },
+      "percentiles": {
+        "p50_ms": 219.23,
+        "p95_ms": 306.25,
+        "p99_ms": 328.28
+      }
+    },
+    "DBCRFUN": {
+      "description": "Debit/Credit - Cash deposit/withdrawal with balance updates",
+      "category": "transaction",
+      "samples": {
+        "count": 150,
+        "mean_ms": 145.32,
+        "std_ms": 31.25,
+        "min_ms": 57.36,
+        "max_ms": 240.79
+      },
+      "percentiles": {
+        "p50_ms": 143.3,
+        "p95_ms": 196.67,
+        "p99_ms": 214.94
+      }
+    }
+  },
+  "summary": {
+    "overall_p50_ms": 119.54,
+    "overall_p95_ms": 164.72,
+    "overall_p99_ms": 180.33
+  }
+}
