@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CICS Migration - Performance Baselines</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        h1 { font-size: 28px; margin-bottom: 10px; color: #2c3e50; }
+        .subtitle { color: #7f8c8d; font-size: 14px; }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #34495e;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+        td { font-size: 14px; }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-measured { background: #d4edda; color: #155724; }
+        .badge-synthetic { background: #fff3cd; color: #856404; }
+        .badge-high { background: #f8d7da; color: #721c24; }
+        .badge-medium { background: #fff3cd; color: #856404; }
+        .badge-low { background: #d1ecf1; color: #0c5460; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏦 CICS Banking Application - Performance Baselines</h1>
+            <p class="subtitle">Baseline performance metrics for COBOL business logic program migration</p>
+            <p class="subtitle" id="timestamp"></p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value" id="total-programs">0</div>
+                <div class="stat-label">Total Programs</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="measured-programs">0</div>
+                <div class="stat-label">Measured</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="synthetic-programs">0</div>
+                <div class="stat-label">Synthetic Estimates</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>📊 Performance Metrics by Program</h2>
+                <div style="overflow-x: auto;">
+                    <table id="metrics-table">
+                        <thead>
+                            <tr>
+                                <th>Program</th>
+                                <th>Type</th>
+                                <th>P50 (ms)</th>
+                                <th>P95 (ms)</th>
+                                <th>P99 (ms)</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📈 Latency Distribution (P50/P95/P99)</h2>
+                <div class="chart-container">
+                    <canvas id="latency-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔍 Program Details</h2>
+            <div id="program-details"></div>
+        </div>
+    </div>
+
+    <script>
+        fetch('performance_baseline.json')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('timestamp').textContent = 
+                    `Generated: ${new Date(data.measurement_timestamp).toLocaleString()}`;
+                
+                const programs = Object.entries(data.programs);
+                const measured = programs.filter(([_, p]) => p.measured).length;
+                document.getElementById('total-programs').textContent = programs.length;
+                document.getElementById('measured-programs').textContent = measured;
+                document.getElementById('synthetic-programs').textContent = programs.length - measured;
+                
+                const tbody = document.getElementById('metrics-table').querySelector('tbody');
+                programs.sort((a, b) => a[0].localeCompare(b[0])).forEach(([name, prog]) => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td><strong>${name}</strong></td>
+                        <td><span class="badge badge-${prog.complexity}">${prog.complexity}</span></td>
+                        <td>${prog.metrics.p50_ms.toFixed(2)}</td>
+                        <td>${prog.metrics.p95_ms.toFixed(2)}</td>
+                        <td>${prog.metrics.p99_ms.toFixed(2)}</td>
+                        <td><span class="badge badge-${prog.measured ? 'measured' : 'synthetic'}">
+                            ${prog.measured ? 'Measured' : 'Synthetic'}
+                        </span></td>
+                    `;
+                });
+                
+                const ctx = document.getElementById('latency-chart').getContext('2d');
+                const chartData = {
+                    labels: programs.map(([name, _]) => name),
+                    datasets: [
+                        {
+                            label: 'P50',
+                            data: programs.map(([_, p]) => p.metrics.p50_ms),
+                            backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                        },
+                        {
+                            label: 'P95',
+                            data: programs.map(([_, p]) => p.metrics.p95_ms),
+                            backgroundColor: 'rgba(241, 196, 15, 0.8)',
+                        },
+                        {
+                            label: 'P99',
+                            data: programs.map(([_, p]) => p.metrics.p99_ms),
+                            backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                        }
+                    ]
+                };
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Latency (ms)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: false }
+                        }
+                    }
+                });
+                
+                const details = document.getElementById('program-details');
+                programs.forEach(([name, prog]) => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'padding: 15px; margin: 10px 0; background: #f8f9fa; border-radius: 8px;';
+                    div.innerHTML = `
+                        <h3 style="margin-bottom: 10px; font-size: 16px;">${name} - ${prog.description}</h3>
+                        <p style="font-size: 13px; color: #7f8c8d; margin-bottom: 10px;">
+                            <strong>Operation:</strong> ${prog.operation_type} | 
+                            <strong>Complexity:</strong> ${prog.complexity} |
+                            <strong>Source:</strong> ${prog.measured ? 'Measured with ' + prog.metrics.samples + ' samples' : prog.metrics.basis}
+                        </p>
+                        <p style="font-size: 13px;">
+                            <strong>Min:</strong> ${prog.metrics.min_ms.toFixed(2)}ms | 
+                            <strong>Mean:</strong> ${prog.metrics.mean_ms.toFixed(2)}ms | 
+                            <strong>P50:</strong> ${prog.metrics.p50_ms.toFixed(2)}ms | 
+                            <strong>P95:</strong> ${prog.metrics.p95_ms.toFixed(2)}ms | 
+                            <strong>P99:</strong> ${prog.metrics.p99_ms.toFixed(2)}ms | 
+                            <strong>Max:</strong> ${prog.metrics.max_ms.toFixed(2)}ms
+                        </p>
+                    `;
+                    details.appendChild(div);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading performance data:', error);
+                document.body.innerHTML += '<p style="color: red; text-align: center; padding: 50px;">Error loading performance_baseline.json. Make sure the file exists in the same directory.</p>';
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+{
+  "measurement_timestamp": "2025-10-27T02:55:48.885689",
+  "baseline_version": "1.0",
+  "description": "Performance baselines for COBOL business logic programs. Includes measured data for migrated programs and synthetic estimates for not-yet-migrated programs.",
+  "programs": {
+    "INQCUST": {
+      "description": "Inquiry customer",
+      "operation_type": "read",
+      "complexity": "medium",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 15.0,
+        "p95_ms": 35.0,
+        "p99_ms": 50.0,
+        "min_ms": 9.0,
+        "max_ms": 60.0,
+        "mean_ms": 16.5,
+        "synthetic": true,
+        "basis": "Estimated based on medium complexity read operation"
+      }
+    },
+    "CRECUST": {
+      "description": "Create customer",
+      "operation_type": "create",
+      "complexity": "high",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 63.0,
+        "p95_ms": 133.0,
+        "p99_ms": 196.0,
+        "min_ms": 37.8,
+        "max_ms": 235.2,
+        "mean_ms": 69.3,
+        "synthetic": true,
+        "basis": "Estimated based on high complexity create operation"
+      }
+    },
+    "UPDCUST": {
+      "description": "Update customer",
+      "operation_type": "update",
+      "complexity": "low",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 28.0,
+        "p95_ms": 60.0,
+        "p99_ms": 88.0,
+        "min_ms": 16.8,
+        "max_ms": 105.6,
+        "mean_ms": 30.8,
+        "synthetic": true,
+        "basis": "Estimated based on low complexity update operation"
+      }
+    },
+    "DELCUS": {
+      "description": "Delete customer",
+      "operation_type": "delete",
+      "complexity": "medium",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 40.0,
+        "p95_ms": 85.0,
+        "p99_ms": 125.0,
+        "min_ms": 24.0,
+        "max_ms": 150.0,
+        "mean_ms": 44.0,
+        "synthetic": true,
+        "basis": "Estimated based on medium complexity delete operation"
+      }
+    },
+    "INQACC": {
+      "description": "Inquiry account",
+      "operation_type": "read",
+      "complexity": "medium",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 15.0,
+        "p95_ms": 35.0,
+        "p99_ms": 50.0,
+        "min_ms": 9.0,
+        "max_ms": 60.0,
+        "mean_ms": 16.5,
+        "synthetic": true,
+        "basis": "Estimated based on medium complexity read operation"
+      }
+    },
+    "INQACCCU": {
+      "description": "Inquiry accounts by customer",
+      "operation_type": "read",
+      "complexity": "medium",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 15.0,
+        "p95_ms": 35.0,
+        "p99_ms": 50.0,
+        "min_ms": 9.0,
+        "max_ms": 60.0,
+        "mean_ms": 16.5,
+        "synthetic": true,
+        "basis": "Estimated based on medium complexity read operation"
+      }
+    },
+    "CREACC": {
+      "description": "Create account",
+      "operation_type": "create",
+      "complexity": "high",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 63.0,
+        "p95_ms": 133.0,
+        "p99_ms": 196.0,
+        "min_ms": 37.8,
+        "max_ms": 235.2,
+        "mean_ms": 69.3,
+        "synthetic": true,
+        "basis": "Estimated based on high complexity create operation"
+      }
+    },
+    "UPDACC": {
+      "description": "Update account",
+      "operation_type": "update",
+      "complexity": "low",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 28.0,
+        "p95_ms": 60.0,
+        "p99_ms": 88.0,
+        "min_ms": 16.8,
+        "max_ms": 105.6,
+        "mean_ms": 30.8,
+        "synthetic": true,
+        "basis": "Estimated based on low complexity update operation"
+      }
+    },
+    "DELACC": {
+      "description": "Delete account",
+      "operation_type": "delete",
+      "complexity": "medium",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 40.0,
+        "p95_ms": 85.0,
+        "p99_ms": 125.0,
+        "min_ms": 24.0,
+        "max_ms": 150.0,
+        "mean_ms": 44.0,
+        "synthetic": true,
+        "basis": "Estimated based on medium complexity delete operation"
+      }
+    },
+    "XFRFUN": {
+      "description": "Transfer funds",
+      "operation_type": "transfer",
+      "complexity": "high",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 119.0,
+        "p95_ms": 245.0,
+        "p99_ms": 350.0,
+        "min_ms": 71.4,
+        "max_ms": 420.0,
+        "mean_ms": 130.9,
+        "synthetic": true,
+        "basis": "Estimated based on high complexity transfer operation"
+      }
+    },
+    "DBCRFUN": {
+      "description": "Debit/credit funds",
+      "operation_type": "update",
+      "complexity": "medium",
+      "measured": false,
+      "metrics": {
+        "samples": 0,
+        "p50_ms": 35.0,
+        "p95_ms": 75.0,
+        "p99_ms": 110.0,
+        "min_ms": 21.0,
+        "max_ms": 132.0,
+        "mean_ms": 38.5,
+        "synthetic": true,
+        "basis": "Estimated based on medium complexity update operation"
+      }
+    }
+  }
+}
