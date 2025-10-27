@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COBOL Performance Baseline Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .metadata {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metadata-label {
+            font-size: 0.85em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .metadata-value {
+            font-size: 1.1em;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .methodology-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 40px;
+            border-radius: 4px;
+        }
+        
+        .methodology-note strong {
+            color: #856404;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .chart-container {
+            margin-bottom: 50px;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+        }
+        
+        .chart-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .summary-card-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .summary-card-value {
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+        
+        .summary-card-unit {
+            font-size: 0.5em;
+            opacity: 0.9;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        thead {
+            background: #667eea;
+            color: white;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        
+        th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tbody tr:hover {
+            background: #e9ecef;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .category-read {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .category-create {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .category-update {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .category-delete {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .category-transaction {
+            background: #d6d8db;
+            color: #383d41;
+        }
+        
+        footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 COBOL Performance Baseline Dashboard</h1>
+            <p class="subtitle">Performance metrics for 11 business logic programs</p>
+        </header>
+        
+        <div class="metadata">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <div class="metadata-label">Generated At</div>
+                    <div class="metadata-value" id="timestamp">Loading...</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Programs Measured</div>
+                    <div class="metadata-value" id="program-count">11</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Samples Per Program</div>
+                    <div class="metadata-value" id="sample-count">150</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Methodology</div>
+                    <div class="metadata-value">Simulated Baseline</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="methodology-note">
+            <strong>Note:</strong> This baseline uses simulated performance data based on typical COBOL/CICS mainframe transaction patterns. 
+            The original COBOL programs are not accessible in this sandbox environment. These metrics establish reasonable 
+            performance expectations for migration validation.
+        </div>
+        
+        <div class="content">
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-card-label">Average P50 (Median)</div>
+                    <div class="summary-card-value">
+                        <span id="overall-p50">--</span><span class="summary-card-unit">ms</span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-label">Average P95</div>
+                    <div class="summary-card-value">
+                        <span id="overall-p95">--</span><span class="summary-card-unit">ms</span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-label">Average P99</div>
+                    <div class="summary-card-value">
+                        <span id="overall-p99">--</span><span class="summary-card-unit">ms</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h2 class="chart-title">Latency Percentiles by Program (P50 / P95 / P99)</h2>
+                <canvas id="percentileChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2 class="chart-title">Detailed Program Metrics</h2>
+                <table id="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Program</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>P50 (ms)</th>
+                            <th>P95 (ms)</th>
+                            <th>P99 (ms)</th>
+                            <th>Mean (ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metrics-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <footer>
+            <p>COBOL to Java Migration Performance Baseline | Generated by setup_001 task</p>
+        </footer>
+    </div>
+    
+    <script>
+        async function loadPerformanceData() {
+            try {
+                const response = await fetch('performance_baseline.json');
+                const data = await response.json();
+                
+                updateMetadata(data.metadata);
+                updateSummary(data.summary);
+                renderChart(data.programs);
+                renderTable(data.programs);
+            } catch (error) {
+                console.error('Error loading performance data:', error);
+                alert('Error loading performance_baseline.json. Make sure the file exists in the same directory.');
+            }
+        }
+        
+        function updateMetadata(metadata) {
+            document.getElementById('timestamp').textContent = new Date(metadata.generated_at).toLocaleString();
+            document.getElementById('program-count').textContent = metadata.program_count;
+            document.getElementById('sample-count').textContent = metadata.sample_count_per_program;
+        }
+        
+        function updateSummary(summary) {
+            document.getElementById('overall-p50').textContent = summary.overall_p50_ms;
+            document.getElementById('overall-p95').textContent = summary.overall_p95_ms;
+            document.getElementById('overall-p99').textContent = summary.overall_p99_ms;
+        }
+        
+        function renderChart(programs) {
+            const programNames = Object.keys(programs);
+            const p50Data = programNames.map(name => programs[name].percentiles.p50_ms);
+            const p95Data = programNames.map(name => programs[name].percentiles.p95_ms);
+            const p99Data = programNames.map(name => programs[name].percentiles.p99_ms);
+            
+            const ctx = document.getElementById('percentileChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: programNames,
+                    datasets: [
+                        {
+                            label: 'P50 (Median)',
+                            data: p50Data,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'P95',
+                            data: p95Data,
+                            backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                            borderColor: 'rgba(118, 75, 162, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'P99',
+                            data: p99Data,
+                            backgroundColor: 'rgba(237, 100, 166, 0.8)',
+                            borderColor: 'rgba(237, 100, 166, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Latency (ms)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Program',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 13
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + 'ms';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderTable(programs) {
+            const tbody = document.getElementById('metrics-body');
+            tbody.innerHTML = '';
+            
+            for (const [name, data] of Object.entries(programs)) {
+                const row = document.createElement('tr');
+                
+                const categoryClass = `category-${data.category}`;
+                
+                row.innerHTML = `
+                    <td><strong>${name}</strong></td>
+                    <td>${data.description}</td>
+                    <td><span class="category-badge ${categoryClass}">${data.category}</span></td>
+                    <td>${data.percentiles.p50_ms}</td>
+                    <td>${data.percentiles.p95_ms}</td>
+                    <td>${data.percentiles.p99_ms}</td>
+                    <td>${data.samples.mean_ms}</td>
+                `;
+                
+                tbody.appendChild(row);
+            }
+        }
+        
+        loadPerformanceData();
+    </script>
+</body>
+</html>
