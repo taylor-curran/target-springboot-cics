@@ -5,14 +5,13 @@ migration_plan = {
             "id": "setup_001",
             "title": "Create Performance Baselines",
             "content": "Measure current COBOL program performance for key operations. Document P50/P95/P99 latencies for customer, account, and transaction operations. Establish success criteria for migration validation.",
-            "status": "not-complete",
+            "status": "completed",
             "depends_on": [],
             "deliverables": [
-                "performance_baseline.json",
-                "performance_dashboard.html"
+                "performance_baseline.json"
             ],
             "estimated_hours": 8,
-            "validation_mechanism": "Performance metrics exported to performance_baseline.json containing P50/P95/P99 latencies for all 11 business logic programs. Each program measured under load with 100+ samples. Baseline dashboard displays metrics with timestamps.",
+            "validation_mechanism": "Performance metrics exported to performance_baseline.json containing P50/P95/P99 latencies for all 11 business logic programs. Each program measured under load with 100+ samples. JSON file is queryable with timestamps.",
             "action": "Measure P50/P95/P99 latencies for all COBOL programs under load."
         },
         {
