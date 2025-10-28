@@ -182,4 +182,13 @@ public class JdbcAccountRepository implements AccountRepository {
             return Optional.empty();
         }
     }
+
+    @Override
+    public int countByCustomerNumber(Long customerNumber) {
+        return jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM account WHERE customer_number = ?", 
+            Integer.class, 
+            customerNumber
+        );
+    }
 }

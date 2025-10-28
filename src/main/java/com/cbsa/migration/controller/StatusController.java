@@ -64,8 +64,12 @@ public class StatusController {
         status.put("version", "0.0.1");
         status.put("database", databaseUrl);
         
-        // Initialize control record if needed
-        Control control = controlRepository.initializeControlRecord();
+        // Initialize control records if they don't exist
+        if (controlRepository.getControlValueNum("SYSTEM-INITIALIZED") == null) {
+            controlRepository.updateControlValueNum("SYSTEM-INITIALIZED", 1);
+            controlRepository.updateControlValueNum("LAST-CUSTOMER-NUMBER", 100000);
+            controlRepository.updateControlValueNum("LAST-ACCOUNT-NUMBER", 10000000);
+        }
         
         // Entity counts
         status.put("customers", customerRepository.count());
@@ -74,8 +78,10 @@ public class StatusController {
         
         // Control record info
         Map<String, Object> controlInfo = new HashMap<>();
-        controlInfo.put("lastCustomerNumber", control.getLastCustomerNumber());
-        controlInfo.put("lastAccountNumber", control.getLastAccountNumber());
+        Integer lastCustomerNumber = controlRepository.getControlValueNum("LAST-CUSTOMER-NUMBER");
+        Integer lastAccountNumber = controlRepository.getControlValueNum("LAST-ACCOUNT-NUMBER");
+        controlInfo.put("lastCustomerNumber", lastCustomerNumber != null ? lastCustomerNumber : 100000);
+        controlInfo.put("lastAccountNumber", lastAccountNumber != null ? lastAccountNumber : 10000000);
         status.put("control", controlInfo);
         
         return ResponseEntity.ok(status);

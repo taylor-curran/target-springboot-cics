@@ -1,15 +1,9 @@
 package com.cbsa.migration.repository.jdbc;
 
-import com.cbsa.migration.model.Control;
 import com.cbsa.migration.repository.ControlRepository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.ResultSet;
-import java.util.Optional;
 
 /**
  * JDBC implementation of ControlRepository using Spring's JdbcTemplate
@@ -18,155 +12,70 @@ import java.util.Optional;
 public class JdbcControlRepository implements ControlRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    
-    /**
-     * Row mapper for Control entities
-     */
-    private final RowMapper<Control> rowMapper = (ResultSet rs, int rowNum) -> {
-        Control control = new Control();
-        control.setCustomerCount(rs.getLong("customer_count"));
-        control.setLastCustomerNumber(rs.getLong("last_customer_number"));
-        control.setAccountCount(rs.getInt("account_count"));
-        control.setLastAccountNumber(rs.getInt("last_account_number"));
-        return control;
-    };
 
     public JdbcControlRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public Optional<Control> getControl() {
+    public Integer getControlValueNum(String controlName) {
         try {
-            Control control = jdbcTemplate.queryForObject(
-                "SELECT * FROM control WHERE id = ?",
-                rowMapper,
-                Control.CONTROL_ID
+            return jdbcTemplate.queryForObject(
+                "SELECT control_value_num FROM control WHERE control_name = ?",
+                Integer.class,
+                controlName
             );
-            return Optional.ofNullable(control);
         } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
+            return null;
         }
     }
 
     @Override
-    public Control save(Control control) {
-        // Check if control record exists
-        if (recordExists()) {
-            // Update
+    public void updateControlValueNum(String controlName, Integer value) {
+        int rowsUpdated = jdbcTemplate.update(
+            "UPDATE control SET control_value_num = ? WHERE control_name = ?",
+            value,
+            controlName
+        );
+        
+        if (rowsUpdated == 0) {
             jdbcTemplate.update(
-                "UPDATE control SET " +
-                "customer_count = ?, " +
-                "last_customer_number = ?, " +
-                "account_count = ?, " +
-                "last_account_number = ? " +
-                "WHERE id = ?",
-                control.getCustomerCount(),
-                control.getLastCustomerNumber(),
-                control.getAccountCount(),
-                control.getLastAccountNumber(),
-                Control.CONTROL_ID
-            );
-        } else {
-            // Insert
-            jdbcTemplate.update(
-                "INSERT INTO control (" +
-                "id, customer_count, last_customer_number, account_count, last_account_number) " +
-                "VALUES (?, ?, ?, ?, ?)",
-                Control.CONTROL_ID,
-                control.getCustomerCount(),
-                control.getLastCustomerNumber(),
-                control.getAccountCount(),
-                control.getLastAccountNumber()
+                "INSERT INTO control (control_name, control_value_num, control_value_str) VALUES (?, ?, ?)",
+                controlName,
+                value,
+                ""
             );
         }
-        
-        return control;
     }
 
     @Override
-    @Transactional
-    public Long getNextCustomerNumber() {
-        // Ensure control record exists
-        if (!recordExists()) {
-            initializeControlRecord();
+    public String getControlValueStr(String controlName) {
+        try {
+            return jdbcTemplate.queryForObject(
+                "SELECT control_value_str FROM control WHERE control_name = ?",
+                String.class,
+                controlName
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
-        
-        // Get current value
-        Long currentValue = jdbcTemplate.queryForObject(
-            "SELECT last_customer_number FROM control WHERE id = ?",
-            Long.class,
-            Control.CONTROL_ID
-        );
-        
-        // Increment value
-        Long nextValue = currentValue + 1;
-        
-        // Update in database
-        jdbcTemplate.update(
-            "UPDATE control SET last_customer_number = ?, customer_count = customer_count + 1 WHERE id = ?",
-            nextValue,
-            Control.CONTROL_ID
-        );
-        
-        return nextValue;
     }
 
     @Override
-    @Transactional
-    public Integer getNextAccountNumber() {
-        // Ensure control record exists
-        if (!recordExists()) {
-            initializeControlRecord();
+    public void updateControlValueStr(String controlName, String value) {
+        int rowsUpdated = jdbcTemplate.update(
+            "UPDATE control SET control_value_str = ? WHERE control_name = ?",
+            value,
+            controlName
+        );
+        
+        if (rowsUpdated == 0) {
+            jdbcTemplate.update(
+                "INSERT INTO control (control_name, control_value_num, control_value_str) VALUES (?, ?, ?)",
+                controlName,
+                0,
+                value
+            );
         }
-        
-        // Get current value
-        Integer currentValue = jdbcTemplate.queryForObject(
-            "SELECT last_account_number FROM control WHERE id = ?",
-            Integer.class,
-            Control.CONTROL_ID
-        );
-        
-        // Increment value
-        Integer nextValue = currentValue + 1;
-        
-        // Update in database
-        jdbcTemplate.update(
-            "UPDATE control SET last_account_number = ?, account_count = account_count + 1 WHERE id = ?",
-            nextValue,
-            Control.CONTROL_ID
-        );
-        
-        return nextValue;
-    }
-
-    @Override
-    @Transactional
-    public Control initializeControlRecord() {
-        if (!recordExists()) {
-            Control control = new Control();
-            control.setCustomerCount(0L);
-            control.setLastCustomerNumber(100000L);
-            control.setAccountCount(0);
-            control.setLastAccountNumber(10000000);
-            save(control);
-            return control;
-        } else {
-            return getControl().get();
-        }
-    }
-    
-    /**
-     * Check if control record exists
-     * 
-     * @return true if exists, false otherwise
-     */
-    private boolean recordExists() {
-        Integer count = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM control WHERE id = ?", 
-            Integer.class, 
-            Control.CONTROL_ID
-        );
-        return count != null && count > 0;
     }
 }
