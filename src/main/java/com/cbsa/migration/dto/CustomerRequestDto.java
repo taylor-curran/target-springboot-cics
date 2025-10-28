@@ -24,14 +24,14 @@ public class CustomerRequestDto {
      * Customer's full name
      */
     @NotBlank(message = "Customer name is required")
-    @Size(max = 25, message = "Customer name must not exceed 25 characters")
+    @Size(max = 60, message = "Customer name must not exceed 60 characters")
     private String name;
     
     /**
      * Customer's address
      */
     @NotBlank(message = "Customer address is required")
-    @Size(max = 50, message = "Customer address must not exceed 50 characters")
+    @Size(max = 160, message = "Customer address must not exceed 160 characters")
     private String address;
     
     /**
