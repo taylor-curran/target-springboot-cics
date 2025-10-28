@@ -57,4 +57,12 @@ public interface CustomerRepository {
      * @return the number of customers
      */
     int count();
+    
+    /**
+     * Find the customer with the highest customer number for a given sort code
+     * 
+     * @param sortCode the sort code
+     * @return the customer with the highest customer number, or empty if no customers exist
+     */
+    Optional<Customer> findLastCustomer(String sortCode);
 }

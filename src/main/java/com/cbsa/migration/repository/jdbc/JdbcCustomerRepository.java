@@ -135,4 +135,18 @@ public class JdbcCustomerRepository implements CustomerRepository {
     public int count() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM customer", Integer.class);
     }
+    
+    @Override
+    public Optional<Customer> findLastCustomer(String sortCode) {
+        try {
+            Customer customer = jdbcTemplate.queryForObject(
+                "SELECT * FROM customer WHERE sort_code = ? ORDER BY customer_number DESC LIMIT 1",
+                rowMapper,
+                sortCode
+            );
+            return Optional.ofNullable(customer);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
 }
