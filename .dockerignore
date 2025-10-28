@@ -1,0 +1,43 @@
+# Maven build artifacts
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Logs
+*.log
+logs/
+
+# Maven wrapper
+.mvn/
+
+# Documentation (not needed in container)
+README.md
+MIGRATION_PLAYBOOK.md
+docs/
+*.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+src/test/
+
+# CI/CD
+.github/
