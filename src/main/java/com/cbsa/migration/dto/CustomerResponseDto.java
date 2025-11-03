@@ -44,6 +44,16 @@ public class CustomerResponseDto {
     private String sortCode;
     
     /**
+     * Customer's credit score
+     */
+    private Integer creditScore;
+    
+    /**
+     * Date when the credit score was last reviewed
+     */
+    private LocalDate creditScoreReviewDate;
+    
+    /**
      * Summary of customer's accounts (optional)
      */
     private List<AccountSummaryDto> accounts;
