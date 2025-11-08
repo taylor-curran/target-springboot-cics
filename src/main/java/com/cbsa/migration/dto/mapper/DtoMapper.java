@@ -25,6 +25,8 @@ public class DtoMapper {
                 .dateOfBirth(customer.getDateOfBirth())
                 .customerNumber(customer.getCustomerNumber())
                 .sortCode(customer.getSortCode())
+                .creditScore(customer.getCreditScore())
+                .creditScoreReviewDate(customer.getCreditScoreReviewDate())
                 .status(deriveCustomerStatus(customer))
                 .build();
     }
