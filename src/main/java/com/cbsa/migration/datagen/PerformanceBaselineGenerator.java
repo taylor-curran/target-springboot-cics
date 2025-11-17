@@ -1,14 +1,17 @@
 package com.cbsa.migration.datagen;
 
+import com.cbsa.migration.util.SecurityUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -19,6 +22,9 @@ public class PerformanceBaselineGenerator {
     private static final Logger log = LoggerFactory.getLogger(PerformanceBaselineGenerator.class);
     private static final int SAMPLES_PER_PROGRAM = 100;
     private static final long SEED = 12345L;
+    
+    @Value("${performance.output.directory:./output}")
+    private String outputDirectory;
     
     private static final double READ_BASE_LATENCY = 25.0;
     private static final double WRITE_BASE_LATENCY = 50.0;
@@ -66,8 +72,10 @@ public class PerformanceBaselineGenerator {
         
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.writeValue(new File("performance_baseline.json"), baselineData);
-        log.info("Wrote performance_baseline.json");
+        
+        Path jsonPath = SecurityUtils.validateFilePath(outputDirectory, "performance_baseline.json");
+        mapper.writeValue(jsonPath.toFile(), baselineData);
+        log.info("Wrote performance_baseline.json to {}", jsonPath);
         
         generateDashboard(programBaselines);
         log.info("Wrote performance_dashboard.html");
@@ -243,7 +251,8 @@ public class PerformanceBaselineGenerator {
         html.append("</body>\n");
         html.append("</html>\n");
         
-        try (FileWriter writer = new FileWriter("performance_dashboard.html")) {
+        Path htmlPath = SecurityUtils.validateFilePath(outputDirectory, "performance_dashboard.html");
+        try (FileWriter writer = new FileWriter(htmlPath.toFile())) {
             writer.write(html.toString());
         }
     }

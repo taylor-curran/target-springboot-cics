@@ -62,10 +62,18 @@ public class JdbcCustomerRepository implements CustomerRepository {
 
     @Override
     public List<Customer> findByNameContaining(String name) {
+        if (name == null) {
+            return jdbcTemplate.query("SELECT * FROM customer", rowMapper);
+        }
+        
+        String sanitizedName = name.replace("\\", "\\\\")
+                                   .replace("%", "\\%")
+                                   .replace("_", "\\_");
+        
         return jdbcTemplate.query(
-            "SELECT * FROM customer WHERE name LIKE ?",
+            "SELECT * FROM customer WHERE name LIKE ? ESCAPE '\\'",
             rowMapper,
-            "%" + name + "%"
+            "%" + sanitizedName + "%"
         );
     }
 
