@@ -67,4 +67,12 @@ public interface ApplicationErrorRepository {
      * @return list of most recent error records
      */
     List<ApplicationError> findRecentErrors(int limit);
+    
+    /**
+     * CX-SQL-001: VULNERABLE METHOD - SQL Injection
+     * This method executes raw SQL with string concatenation
+     * @deprecated Use findByProgramName instead
+     */
+    @Deprecated
+    List<ApplicationError> findByProgramNameUnsafe(String sql);
 }
