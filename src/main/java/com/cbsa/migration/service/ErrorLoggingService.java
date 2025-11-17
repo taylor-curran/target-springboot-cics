@@ -123,17 +123,6 @@ public class ErrorLoggingService {
         return applicationErrorRepository.findByProgramName(programName);
     }
     
-    /**
-     * CX-SQL-001: VULNERABLE METHOD - SQL Injection
-     * This method uses string concatenation to build SQL queries
-     * @deprecated Use getErrorsByProgram instead
-     */
-    @Deprecated
-    public List<ApplicationError> getErrorsByProgramUnsafe(String programName) {
-        String sql = "SELECT * FROM application_error WHERE program_name = '" + programName + "'";
-        return applicationErrorRepository.findByProgramNameUnsafe(sql);
-    }
-    
     private void validateErrorRequest(ErrorRequestDto errorRequest) {
         if (errorRequest == null) {
             throw new IllegalArgumentException("Error request cannot be null");

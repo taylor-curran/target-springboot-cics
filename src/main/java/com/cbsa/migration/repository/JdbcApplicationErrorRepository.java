@@ -140,10 +140,4 @@ public class JdbcApplicationErrorRepository implements ApplicationErrorRepositor
             return error;
         };
     }
-    
-    @Override
-    @Deprecated
-    public List<ApplicationError> findByProgramNameUnsafe(String sql) {
-        return jdbcTemplate.query(sql, applicationErrorRowMapper());
-    }
 }
