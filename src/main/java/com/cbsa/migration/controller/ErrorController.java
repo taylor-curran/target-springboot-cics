@@ -4,6 +4,7 @@ import com.cbsa.migration.dto.ErrorRequestDto;
 import com.cbsa.migration.dto.ErrorResponseDto;
 import com.cbsa.migration.model.ApplicationError;
 import com.cbsa.migration.service.ErrorLoggingService;
+import com.cbsa.migration.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -66,7 +67,8 @@ public class ErrorController {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
         } catch (Exception e) {
-            ErrorResponseDto errorResponse = ErrorResponseDto.failure("Service error: " + e.getMessage(), 
+            String sanitizedMessage = SecurityUtils.sanitizeForHtml(e.getMessage());
+            ErrorResponseDto errorResponse = ErrorResponseDto.failure("Service error: " + sanitizedMessage, 
                 java.time.LocalDateTime.now().toString());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
@@ -85,6 +87,9 @@ public class ErrorController {
     public ResponseEntity<Long> getErrorCount(
             @Parameter(description = "Program name to get error count for")
             @PathVariable String programName) {
+        if (!SecurityUtils.isValidProgramName(programName)) {
+            return ResponseEntity.badRequest().build();
+        }
         long count = errorLoggingService.getErrorCount(programName);
         return ResponseEntity.ok(count);
     }
@@ -120,6 +125,9 @@ public class ErrorController {
     public ResponseEntity<List<ApplicationError>> getErrorsByProgram(
             @Parameter(description = "Program name to get errors for")
             @PathVariable String programName) {
+        if (!SecurityUtils.isValidProgramName(programName)) {
+            return ResponseEntity.badRequest().build();
+        }
         List<ApplicationError> errors = errorLoggingService.getErrorsByProgram(programName);
         return ResponseEntity.ok(errors);
     }
