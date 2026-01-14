@@ -26,6 +26,8 @@ public class DtoMapper {
                 .customerNumber(customer.getCustomerNumber())
                 .sortCode(customer.getSortCode())
                 .status(deriveCustomerStatus(customer))
+                .creditScore(customer.getCreditScore())
+                .creditScoreReviewDate(customer.getCreditScoreReviewDate())
                 .build();
     }
     
