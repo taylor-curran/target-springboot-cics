@@ -57,4 +57,13 @@ public interface CustomerRepository {
      * @return the number of customers
      */
     int count();
+    
+    /**
+     * Find the maximum customer number for a given sort code.
+     * Used by INQCUST for random customer generation and last customer lookup.
+     * 
+     * @param sortCode the sort code
+     * @return the maximum customer number, or empty if no customers exist
+     */
+    Optional<Long> findMaxCustomerNumber(String sortCode);
 }
