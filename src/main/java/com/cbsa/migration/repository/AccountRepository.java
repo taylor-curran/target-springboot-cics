@@ -74,4 +74,13 @@ public interface AccountRepository {
      * @return highest-numbered account if present
      */
     Optional<Account> findTopBySortCodeOrderByAccountNumberDesc(String sortCode);
+
+    /**
+     * Count the number of accounts belonging to a customer.
+     * Used by CREACC to enforce the 10-account limit.
+     *
+     * @param customerNumber the customer number
+     * @return the number of accounts for the customer
+     */
+    int countByCustomerNumber(Long customerNumber);
 }

@@ -176,7 +176,7 @@ migration_plan = {
             "id": "migrate_005",
             "title": "Migrate Account Create Operations",
             "content": "Port CREACC to Spring Boot account creation endpoint. Implement Named Counter with enqueue/dequeue for account numbers. Handle DB2 writes, PROCTRAN logging, and rollback on failure.",
-            "status": "not-complete",
+            "status": "complete",
             "depends_on": ["migrate_002", "migrate_004"],
             "deliverables": [
                 "AccountService.java",

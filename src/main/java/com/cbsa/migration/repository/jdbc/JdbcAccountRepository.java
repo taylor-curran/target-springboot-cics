@@ -170,6 +170,16 @@ public class JdbcAccountRepository implements AccountRepository {
     }
 
     @Override
+    public int countByCustomerNumber(Long customerNumber) {
+        Integer result = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM account WHERE customer_number = ?",
+                Integer.class,
+                customerNumber
+        );
+        return result != null ? result : 0;
+    }
+
+    @Override
     public Optional<Account> findTopBySortCodeOrderByAccountNumberDesc(String sortCode) {
         try {
             Account account = jdbcTemplate.queryForObject(
