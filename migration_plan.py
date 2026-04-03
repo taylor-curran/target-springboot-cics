@@ -53,7 +53,7 @@ migration_plan = {
             "id": "migrate_001",
             "title": "Migrate Customer Read Operations",
             "content": "Port INQCUST to Spring Boot REST endpoint for customer retrieval. Map COBOL records to DTOs and implement repository with composite key support.",
-            "status": "not-complete",
+            "status": "completed",
             "depends_on": ["setup_002"],
             "deliverables": [
                 "CustomerController.java",
