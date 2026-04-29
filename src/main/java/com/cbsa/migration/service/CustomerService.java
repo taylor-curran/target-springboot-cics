@@ -98,25 +98,31 @@ public class CustomerService {
                     .creditScoreReviewDate(creditResult.getReviewDate())
                     .build();
 
-            transactionTemplate.executeWithoutResult(status -> {
-                try {
-                    customerRepository.save(customer);
-                } catch (Exception e) {
-                    logger.error("Failed to write customer record for {}-{}", request.getSortCode(), customerNumber, e);
-                    namedCounterService.rollbackCustomerNumber();
-                    throw new CustomerCreationException("1", "Failed to write customer record", e);
-                }
+            try {
+                transactionTemplate.executeWithoutResult(status -> {
+                    try {
+                        customerRepository.save(customer);
+                    } catch (Exception e) {
+                        logger.error("Failed to write customer record for {}-{}", request.getSortCode(), customerNumber, e);
+                        namedCounterService.rollbackCustomerNumber();
+                        throw new CustomerCreationException("1", "Failed to write customer record", e);
+                    }
 
-                try {
-                    writeProctranAuditRecord(customer);
-                } catch (Exception e) {
-                    logger.error("Failed to write PROCTRAN audit record for customer {}-{}",
-                            request.getSortCode(), customerNumber, e);
-                    errorLoggingService.logError("CRECUST", e);
-                    namedCounterService.rollbackCustomerNumber();
-                    throw new CustomerCreationException("4", "Failed to write PROCTRAN audit record", e);
+                    try {
+                        writeProctranAuditRecord(customer);
+                    } catch (Exception e) {
+                        logger.error("Failed to write PROCTRAN audit record for customer {}-{}",
+                                request.getSortCode(), customerNumber, e);
+                        namedCounterService.rollbackCustomerNumber();
+                        throw new CustomerCreationException("4", "Failed to write PROCTRAN audit record", e);
+                    }
+                });
+            } catch (CustomerCreationException e) {
+                if ("4".equals(e.getFailCode())) {
+                    errorLoggingService.logError("CRECUST", e.getCause() != null ? (Exception) e.getCause() : e);
                 }
-            });
+                throw e;
+            }
 
             // f) Return success — transaction is already committed at this point
             logger.info("Customer created successfully: {}-{}", request.getSortCode(), customerNumber);

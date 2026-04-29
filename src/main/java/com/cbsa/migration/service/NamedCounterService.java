@@ -23,7 +23,7 @@ public class NamedCounterService {
     private final ControlRepository controlRepository;
     private final ReentrantLock lock = new ReentrantLock();
 
-    private Long allocatedCustomerNumber;
+    private final ThreadLocal<Long> allocatedCustomerNumber = new ThreadLocal<>();
 
     public NamedCounterService(ControlRepository controlRepository) {
         this.controlRepository = controlRepository;
@@ -47,7 +47,7 @@ public class NamedCounterService {
 
         try {
             Long nextNumber = controlRepository.getNextCustomerNumber();
-            this.allocatedCustomerNumber = nextNumber;
+            this.allocatedCustomerNumber.set(nextNumber);
             logger.info("Allocated customer number {} for sort code {}", nextNumber, sortCode);
             return nextNumber;
         } catch (Exception e) {
@@ -64,7 +64,8 @@ public class NamedCounterService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void rollbackCustomerNumber() {
-        if (allocatedCustomerNumber == null) {
+        Long number = allocatedCustomerNumber.get();
+        if (number == null) {
             logger.warn("No allocated customer number to rollback");
             return;
         }
@@ -75,10 +76,10 @@ public class NamedCounterService {
             control.setLastCustomerNumber(control.getLastCustomerNumber() - 1);
             control.setCustomerCount(control.getCustomerCount() - 1);
             controlRepository.save(control);
-            logger.info("Rolled back customer number {}. Counter decremented.", allocatedCustomerNumber);
-            allocatedCustomerNumber = null;
+            logger.info("Rolled back customer number {}. Counter decremented.", number);
+            allocatedCustomerNumber.remove();
         } catch (Exception e) {
-            logger.error("Failed to rollback customer number {}", allocatedCustomerNumber, e);
+            logger.error("Failed to rollback customer number {}", number, e);
         }
     }
 
@@ -88,6 +89,7 @@ public class NamedCounterService {
      */
     public void releaseLock() {
         if (lock.isHeldByCurrentThread()) {
+            allocatedCustomerNumber.remove();
             lock.unlock();
             logger.debug("Named counter lock released");
         }
