@@ -1,7 +1,5 @@
 package com.cbsa.migration.service;
 
-import com.cbsa.migration.dto.CreditScoreRequestDto;
-import com.cbsa.migration.dto.CreditScoreResponseDto;
 import com.cbsa.migration.dto.CustomerRequestDto;
 import com.cbsa.migration.dto.CustomerResponseDto;
 import com.cbsa.migration.dto.mapper.DtoMapper;
@@ -12,6 +10,7 @@ import com.cbsa.migration.repository.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -64,6 +63,7 @@ public class CustomerService {
      * Steps: validate DOB -> async credit check -> acquire lock -> get next number
      * -> write customer -> write PROCTRAN -> release lock -> return.
      */
+    @Transactional
     public CustomerResponseDto createCustomer(CustomerRequestDto request) {
         logger.info("Creating customer for sort code {}", request.getSortCode());
 
@@ -181,19 +181,11 @@ public class CustomerService {
      * replacing CICS RUN TRANSID OCR1-OCR5. Waits up to 3 seconds.
      */
     private CreditCheckResult performAsyncCreditCheck(CustomerRequestDto request) {
-        CreditScoreRequestDto creditRequest = CreditScoreRequestDto.builder()
-                .sortCode(request.getSortCode())
-                .customerNumber(0L)
-                .name(request.getName())
-                .address(request.getAddress())
-                .dateOfBirth(request.getDateOfBirth())
-                .build();
-
-        List<CompletableFuture<CreditScoreResponseDto>> futures = new ArrayList<>();
+        List<CompletableFuture<Integer>> futures = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             futures.add(CompletableFuture.supplyAsync(() -> {
                 try {
-                    return creditAgencyService.processCredit(creditRequest);
+                    return creditAgencyService.generateCreditScore();
                 } catch (Exception e) {
                     logger.warn("Credit agency call failed: {}", e.getMessage());
                     return null;
@@ -208,7 +200,7 @@ public class CustomerService {
             logger.info("Credit check timeout or interruption (expected for partial responses): {}", e.getMessage());
         }
 
-        List<CreditScoreResponseDto> responses = futures.stream()
+        List<Integer> scores = futures.stream()
                 .filter(CompletableFuture::isDone)
                 .map(f -> {
                     try {
@@ -217,19 +209,16 @@ public class CustomerService {
                         return null;
                     }
                 })
-                .filter(r -> r != null && r.getSuccess() != null && r.getSuccess()
-                        && r.getUpdatedCreditScore() != null)
+                .filter(s -> s != null)
                 .collect(Collectors.toList());
 
-        if (responses.isEmpty()) {
-            // No agencies responded -> set score=0, review date=today
+        if (scores.isEmpty()) {
             logger.warn("No credit agencies responded for customer request");
             return new CreditCheckResult(0, LocalDate.now());
         }
 
-        // Compute average of returned scores
-        int averageScore = (int) responses.stream()
-                .mapToInt(CreditScoreResponseDto::getUpdatedCreditScore)
+        int averageScore = (int) scores.stream()
+                .mapToInt(Integer::intValue)
                 .average()
                 .orElse(0);
 
@@ -238,7 +227,7 @@ public class CustomerService {
         LocalDate reviewDate = LocalDate.now().plusDays(daysToAdd);
 
         logger.info("Credit check completed: {} agencies responded, average score={}, review in {} days",
-                responses.size(), averageScore, daysToAdd);
+                scores.size(), averageScore, daysToAdd);
         return new CreditCheckResult(averageScore, reviewDate);
     }
 

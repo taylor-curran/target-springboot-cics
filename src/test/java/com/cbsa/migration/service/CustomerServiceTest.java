@@ -1,7 +1,5 @@
 package com.cbsa.migration.service;
 
-import com.cbsa.migration.dto.CreditScoreRequestDto;
-import com.cbsa.migration.dto.CreditScoreResponseDto;
 import com.cbsa.migration.dto.CustomerRequestDto;
 import com.cbsa.migration.dto.CustomerResponseDto;
 import com.cbsa.migration.dto.ErrorResponseDto;
@@ -61,8 +59,7 @@ class CustomerServiceTest {
         CustomerRequestDto request = buildValidRequest();
 
         when(namedCounterService.getNextCustomerNumberWithLock("987654")).thenReturn(100001L);
-        when(creditAgencyService.processCredit(any(CreditScoreRequestDto.class)))
-                .thenReturn(buildSuccessfulCreditResponse(750));
+        when(creditAgencyService.generateCreditScore()).thenReturn(750);
         when(customerRepository.save(any(Customer.class))).thenAnswer(i -> i.getArgument(0));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -73,7 +70,7 @@ class CustomerServiceTest {
         assertThat(response.getSortCode()).isEqualTo("987654");
         assertThat(response.getName()).isEqualTo("John Smith");
         assertThat(response.getStatus()).isEqualTo("CREATED");
-        assertThat(response.getCreditScore()).isNotNull();
+        assertThat(response.getCreditScore()).isEqualTo(750);
 
         verify(customerRepository).save(any(Customer.class));
         verify(transactionRepository).save(any(Transaction.class));
@@ -85,8 +82,7 @@ class CustomerServiceTest {
         CustomerRequestDto request = buildValidRequest();
 
         when(namedCounterService.getNextCustomerNumberWithLock("987654")).thenReturn(200050L);
-        when(creditAgencyService.processCredit(any(CreditScoreRequestDto.class)))
-                .thenReturn(buildSuccessfulCreditResponse(600));
+        when(creditAgencyService.generateCreditScore()).thenReturn(600);
         when(customerRepository.save(any(Customer.class))).thenAnswer(i -> i.getArgument(0));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -145,8 +141,7 @@ class CustomerServiceTest {
         CustomerRequestDto request = buildValidRequest();
 
         when(namedCounterService.getNextCustomerNumberWithLock("987654")).thenReturn(100001L);
-        when(creditAgencyService.processCredit(any(CreditScoreRequestDto.class)))
-                .thenReturn(buildSuccessfulCreditResponse(700));
+        when(creditAgencyService.generateCreditScore()).thenReturn(700);
         when(customerRepository.save(any(Customer.class))).thenAnswer(i -> i.getArgument(0));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -162,11 +157,8 @@ class CustomerServiceTest {
         CustomerRequestDto request = buildValidRequest();
 
         when(namedCounterService.getNextCustomerNumberWithLock("987654")).thenReturn(100001L);
-        when(creditAgencyService.processCredit(any(CreditScoreRequestDto.class)))
-                .thenReturn(CreditScoreResponseDto.builder()
-                        .success(false)
-                        .errorMessage("Service unavailable")
-                        .build());
+        when(creditAgencyService.generateCreditScore())
+                .thenThrow(new RuntimeException("Service unavailable"));
         when(customerRepository.save(any(Customer.class))).thenAnswer(i -> i.getArgument(0));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -183,7 +175,7 @@ class CustomerServiceTest {
         CustomerRequestDto request = buildValidRequest();
 
         when(namedCounterService.getNextCustomerNumberWithLock("987654")).thenReturn(100001L);
-        when(creditAgencyService.processCredit(any(CreditScoreRequestDto.class)))
+        when(creditAgencyService.generateCreditScore())
                 .thenThrow(new RuntimeException("Connection refused"));
         when(customerRepository.save(any(Customer.class))).thenAnswer(i -> i.getArgument(0));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(i -> i.getArgument(0));
@@ -202,8 +194,7 @@ class CustomerServiceTest {
         CustomerRequestDto request = buildValidRequest();
 
         when(namedCounterService.getNextCustomerNumberWithLock("987654")).thenReturn(100001L);
-        when(creditAgencyService.processCredit(any(CreditScoreRequestDto.class)))
-                .thenReturn(buildSuccessfulCreditResponse(500));
+        when(creditAgencyService.generateCreditScore()).thenReturn(500);
         when(customerRepository.save(any(Customer.class)))
                 .thenThrow(new RuntimeException("VSAM write error"));
 
@@ -222,8 +213,7 @@ class CustomerServiceTest {
         CustomerRequestDto request = buildValidRequest();
 
         when(namedCounterService.getNextCustomerNumberWithLock("987654")).thenReturn(100001L);
-        when(creditAgencyService.processCredit(any(CreditScoreRequestDto.class)))
-                .thenReturn(buildSuccessfulCreditResponse(500));
+        when(creditAgencyService.generateCreditScore()).thenReturn(500);
         when(customerRepository.save(any(Customer.class))).thenAnswer(i -> i.getArgument(0));
         when(transactionRepository.save(any(Transaction.class)))
                 .thenThrow(new RuntimeException("DB2 write error"));
@@ -291,15 +281,6 @@ class CustomerServiceTest {
                 .address("123 Main St, London")
                 .dateOfBirth(LocalDate.of(1985, 6, 15))
                 .sortCode("987654")
-                .build();
-    }
-
-    private CreditScoreResponseDto buildSuccessfulCreditResponse(int score) {
-        return CreditScoreResponseDto.builder()
-                .success(true)
-                .updatedCreditScore(score)
-                .scoreReviewDate(LocalDate.now().plusDays(14))
-                .processingTimeMs(100L)
                 .build();
     }
 
