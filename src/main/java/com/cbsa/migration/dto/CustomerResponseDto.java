@@ -57,4 +57,24 @@ public class CustomerResponseDto {
      * Customer status (derived field)
      */
     private String status;
+    
+    /**
+     * Customer's credit score (from credit agency check)
+     */
+    private Integer creditScore;
+    
+    /**
+     * Date when the credit score should be reviewed
+     */
+    private LocalDate creditScoreReviewDate;
+    
+    /**
+     * COBOL fail code (null on success, e.g. O, Y, Z, 1, 3, G on failure)
+     */
+    private String failCode;
+    
+    /**
+     * Whether the operation was successful
+     */
+    private Boolean success;
 }
