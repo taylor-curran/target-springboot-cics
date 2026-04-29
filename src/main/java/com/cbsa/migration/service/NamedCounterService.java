@@ -5,6 +5,7 @@ import com.cbsa.migration.repository.ControlRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.locks.ReentrantLock;
@@ -61,7 +62,7 @@ public class NamedCounterService {
      * Called when a subsequent VSAM/PROCTRAN write fails. In COBOL this is
      * done by subtracting 1 from the named counter.
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void rollbackCustomerNumber() {
         if (allocatedCustomerNumber == null) {
             logger.warn("No allocated customer number to rollback");

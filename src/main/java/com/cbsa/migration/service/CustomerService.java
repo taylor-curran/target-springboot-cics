@@ -10,7 +10,7 @@ import com.cbsa.migration.repository.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -41,6 +41,7 @@ public class CustomerService {
     private final ErrorLoggingService errorLoggingService;
     private final SortCodeService sortCodeService;
     private final DtoMapper dtoMapper;
+    private final TransactionTemplate transactionTemplate;
 
     public CustomerService(CustomerRepository customerRepository,
                            CreditAgencyService creditAgencyService,
@@ -48,7 +49,8 @@ public class CustomerService {
                            TransactionRepository transactionRepository,
                            ErrorLoggingService errorLoggingService,
                            SortCodeService sortCodeService,
-                           DtoMapper dtoMapper) {
+                           DtoMapper dtoMapper,
+                           TransactionTemplate transactionTemplate) {
         this.customerRepository = customerRepository;
         this.creditAgencyService = creditAgencyService;
         this.namedCounterService = namedCounterService;
@@ -56,6 +58,7 @@ public class CustomerService {
         this.errorLoggingService = errorLoggingService;
         this.sortCodeService = sortCodeService;
         this.dtoMapper = dtoMapper;
+        this.transactionTemplate = transactionTemplate;
     }
 
     /**
@@ -63,7 +66,6 @@ public class CustomerService {
      * Steps: validate DOB -> async credit check -> acquire lock -> get next number
      * -> write customer -> write PROCTRAN -> release lock -> return.
      */
-    @Transactional
     public CustomerResponseDto createCustomer(CustomerRequestDto request) {
         logger.info("Creating customer for sort code {}", request.getSortCode());
 
@@ -82,7 +84,9 @@ public class CustomerService {
         }
 
         try {
-            // d) Write Customer Record (COBOL WRITE-CUSTOMER-VSAM SECTION, lines 1011-1088)
+            // d+e) Write customer + PROCTRAN inside a programmatic transaction.
+            // The transaction commits BEFORE the lock is released (in finally),
+            // preventing the race where a concurrent thread reads stale counter values.
             Customer customer = Customer.builder()
                     .eyeCatcher(Customer.VALID_EYECATCHER)
                     .sortCode(request.getSortCode())
@@ -94,26 +98,27 @@ public class CustomerService {
                     .creditScoreReviewDate(creditResult.getReviewDate())
                     .build();
 
-            try {
-                customerRepository.save(customer);
-            } catch (Exception e) {
-                logger.error("Failed to write customer record for {}-{}", request.getSortCode(), customerNumber, e);
-                namedCounterService.rollbackCustomerNumber();
-                throw new CustomerCreationException("1", "Failed to write customer record", e);
-            }
+            transactionTemplate.executeWithoutResult(status -> {
+                try {
+                    customerRepository.save(customer);
+                } catch (Exception e) {
+                    logger.error("Failed to write customer record for {}-{}", request.getSortCode(), customerNumber, e);
+                    namedCounterService.rollbackCustomerNumber();
+                    throw new CustomerCreationException("1", "Failed to write customer record", e);
+                }
 
-            // e) Write PROCTRAN Audit Record (COBOL WRITE-PROCTRAN-DB2 SECTION, lines 1129-1193)
-            try {
-                writeProctranAuditRecord(customer);
-            } catch (Exception e) {
-                logger.error("Failed to write PROCTRAN audit record for customer {}-{}",
-                        request.getSortCode(), customerNumber, e);
-                errorLoggingService.logError("CRECUST", e);
-                namedCounterService.rollbackCustomerNumber();
-                throw new CustomerCreationException("4", "Failed to write PROCTRAN audit record", e);
-            }
+                try {
+                    writeProctranAuditRecord(customer);
+                } catch (Exception e) {
+                    logger.error("Failed to write PROCTRAN audit record for customer {}-{}",
+                            request.getSortCode(), customerNumber, e);
+                    errorLoggingService.logError("CRECUST", e);
+                    namedCounterService.rollbackCustomerNumber();
+                    throw new CustomerCreationException("4", "Failed to write PROCTRAN audit record", e);
+                }
+            });
 
-            // f) Return success
+            // f) Return success — transaction is already committed at this point
             logger.info("Customer created successfully: {}-{}", request.getSortCode(), customerNumber);
             return CustomerResponseDto.builder()
                     .sortCode(customer.getSortCode())

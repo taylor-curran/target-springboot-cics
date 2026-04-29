@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -35,12 +36,20 @@ class CustomerServiceTest {
     @Mock private ErrorLoggingService errorLoggingService;
     @Mock private SortCodeService sortCodeService;
 
+    @Mock private TransactionTemplate transactionTemplate;
+
     private DtoMapper dtoMapper;
     private CustomerService customerService;
 
     @BeforeEach
     void setUp() {
         dtoMapper = new DtoMapper();
+        // Make TransactionTemplate.executeWithoutResult run the callback immediately.
+        // Lenient because read-only tests don't invoke this.
+        lenient().doAnswer(invocation -> {
+            invocation.getArgument(0, java.util.function.Consumer.class).accept(null);
+            return null;
+        }).when(transactionTemplate).executeWithoutResult(any());
         customerService = new CustomerService(
                 customerRepository,
                 creditAgencyService,
@@ -48,7 +57,8 @@ class CustomerServiceTest {
                 transactionRepository,
                 errorLoggingService,
                 sortCodeService,
-                dtoMapper
+                dtoMapper,
+                transactionTemplate
         );
     }
 
